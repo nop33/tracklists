@@ -54,6 +54,7 @@ export default {
     this.reader.addEventListener('load', (event) => {
       const file = event.target.result
       this.processITunesLibraryFile(file)
+      this.$store.dispatch('initializeITunesTracks', this.tracks)
     })
   }
 }
