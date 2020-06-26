@@ -1,8 +1,13 @@
 <template>
   <div class="compare">
     <v-container>
-      <v-row>
+      <v-row v-if="iTunestracks.length && spotifyTracks.length">
         <v-col>
+          <v-btn>Compare</v-btn>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="6">
           <v-file-input
             label="Upload iTunes playlist file"
             @change="fileChanged"
@@ -10,7 +15,8 @@
           <v-card
             tile
           >
-            <v-list-item two-line v-for="(track, index) in tracks" :key="`${track['Name']}-${index}`">
+            <v-card-title>iTunes tracks</v-card-title>
+            <v-list-item two-line v-for="(track, index) in iTunestracks" :key="`${track['Name']}-${index}`">
               <v-list-item-content>
                 <v-list-item-title>{{ track['Name'] }}</v-list-item-title>
                 <v-list-item-subtitle>{{ track['Artist'] }}</v-list-item-subtitle>
@@ -18,7 +24,19 @@
             </v-list-item>
           </v-card>
         </v-col>
-        <v-col>
+        <v-col cols="6">
+          <v-btn @click="getSpotifyTracks">Get Spotify tracks</v-btn>
+          <v-card
+            tile
+          >
+            <v-card-title>Spotify tracks</v-card-title>
+            <v-list-item two-line v-for="(track, index) in spotifyTracks" :key="`${track.name}-${index}`">
+              <v-list-item-content>
+                <v-list-item-title>{{ track.name }}</v-list-item-title>
+                <v-list-item-subtitle>{{ track.artists }}</v-list-item-subtitle>
+              </v-list-item-content>
+            </v-list-item>
+          </v-card>
         </v-col>
       </v-row>
     </v-container>
@@ -26,10 +44,17 @@
 </template>
 
 <script>
+import TracksService from '@/services/TracksService'
+
 export default {
   data: () => ({
     reader: new FileReader(),
-    tracks: []
+    iTunestracks: [],
+    spotifyTracks: [],
+    totalSpotifyTracks: 0,
+    spotifyOffset: 0,
+    spotifyLimit: 50,
+    spotifyReceivedTracksCounter: 0
   }),
   methods: {
     fileChanged (file) {
@@ -46,7 +71,34 @@ export default {
         trackData.forEach((trackPropertyValue, index) => {
           track[trackProperties[index]] = trackPropertyValue
         })
-        this.tracks.push(track)
+        this.iTunestracks.push(track)
+      })
+    },
+    getSpotifyTracks () {
+      TracksService.get({
+        limit: this.spotifyLimit,
+        offset: this.spotifyOffset
+      }).then(response => {
+        console.log(response.data)
+        const items = response.data.items
+        if (this.totalSpotifyTracks === 0) {
+          this.totalSpotifyTracks = response.data.total
+        }
+        this.spotifyOffset += this.spotifyLimit
+        this.spotifyTracks.push(
+          ...items.map(item => {
+            return {
+              name: item.track.name,
+              artists: item.track.artists.map(artist => artist.name)
+            }
+          })
+        )
+        this.spotifyReceivedTracksCounter += items.length
+
+        if (this.spotifyReceivedTracksCounter < this.totalSpotifyTracks) {
+          console.log('received: ', this.spotifyReceivedTracksCounter)
+          this.getSpotifyTracks()
+        }
       })
     }
   },
@@ -54,7 +106,7 @@ export default {
     this.reader.addEventListener('load', (event) => {
       const file = event.target.result
       this.processITunesLibraryFile(file)
-      this.$store.dispatch('initializeITunesTracks', this.tracks)
+      this.$store.dispatch('initializeITunesTracks', this.iTunestracks)
     })
   }
 }
