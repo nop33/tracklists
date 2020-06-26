@@ -1,7 +1,7 @@
 <template>
   <div class="compare">
     <v-container>
-      <v-row v-if="iTunestracks.length && spotifyTracks.length">
+      <v-row v-if="iTunesTracks.length && spotifyTracks.length">
         <v-col>
           <v-btn>Compare</v-btn>
         </v-col>
@@ -16,10 +16,10 @@
             tile
           >
             <v-card-title>iTunes tracks</v-card-title>
-            <v-list-item two-line v-for="(track, index) in iTunestracks" :key="`${track['Name']}-${index}`">
+            <v-list-item two-line v-for="(track, index) in iTunesTracks" :key="`${track.name}-${index}`">
               <v-list-item-content>
-                <v-list-item-title>{{ track['Name'] }}</v-list-item-title>
-                <v-list-item-subtitle>{{ track['Artist'] }}</v-list-item-subtitle>
+                <v-list-item-title>{{ track.name }}</v-list-item-title>
+                <v-list-item-subtitle>{{ track.artist }}</v-list-item-subtitle>
               </v-list-item-content>
             </v-list-item>
           </v-card>
@@ -49,7 +49,7 @@ import TracksService from '@/services/TracksService'
 export default {
   data: () => ({
     reader: new FileReader(),
-    iTunestracks: [],
+    iTunesTracks: [],
     spotifyTracks: [],
     totalSpotifyTracks: 0,
     spotifyOffset: 0,
@@ -58,6 +58,7 @@ export default {
   }),
   methods: {
     fileChanged (file) {
+      localStorage.removeItem('iTunesTracks')
       this.reader.readAsText(file)
     },
     processITunesLibraryFile (file) {
@@ -71,10 +72,15 @@ export default {
         trackData.forEach((trackPropertyValue, index) => {
           track[trackProperties[index]] = trackPropertyValue
         })
-        this.iTunestracks.push(track)
+        this.iTunesTracks.push({
+          name: track.Name,
+          artist: track.Artist
+        })
       })
+      localStorage.setItem('iTunesTracks', JSON.stringify(this.iTunesTracks))
     },
     getSpotifyTracks () {
+      localStorage.removeItem('spotifyTracks')
       TracksService.get({
         limit: this.spotifyLimit,
         offset: this.spotifyOffset
@@ -98,6 +104,8 @@ export default {
         if (this.spotifyReceivedTracksCounter < this.totalSpotifyTracks) {
           console.log('received: ', this.spotifyReceivedTracksCounter)
           this.getSpotifyTracks()
+        } else {
+          localStorage.setItem('spotifyTracks', JSON.stringify(this.spotifyTracks))
         }
       })
     }
@@ -106,8 +114,16 @@ export default {
     this.reader.addEventListener('load', (event) => {
       const file = event.target.result
       this.processITunesLibraryFile(file)
-      this.$store.dispatch('initializeITunesTracks', this.iTunestracks)
+      this.$store.dispatch('initializeITunesTracks', this.iTunesTracks)
     })
+
+    if (localStorage.spotifyTracks) {
+      this.spotifyTracks = JSON.parse(localStorage.getItem('spotifyTracks'))
+    }
+
+    if (localStorage.iTunesTracks) {
+      this.iTunesTracks = JSON.parse(localStorage.getItem('iTunesTracks'))
+    }
   }
 }
 </script>
