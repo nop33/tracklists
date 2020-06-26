@@ -3,7 +3,32 @@
     <v-container>
       <v-row v-if="iTunesTracks.length && spotifyTracks.length">
         <v-col>
-          <v-btn>Compare</v-btn>
+          <v-btn @click="compare">Compare</v-btn>
+          <!-- <v-data-table
+            :headers="headers"
+            :items="identicals"
+            :items-per-page="5"
+            class="elevation-1"
+          ></v-data-table> -->
+          <v-data-table
+            :headers="headers"
+            :items="similaritiesArray"
+            :items-per-page="5"
+            class="elevation-1"
+          >
+          <template v-slot:item.spotifyTrack.name="{ item }">
+            <div>
+              <div v-html="displayMatches(item.itunesTrack.name, item.spotifyTrack.name)"></div>
+              <div v-html="displayMatches(item.spotifyTrack.name, item.itunesTrack.name)"></div>
+            </div>
+          </template>
+          <template v-slot:item.spotifyTrack.artists="{ item }">
+            <div>
+              <div>{{ item.spotifyTrack.artists.join(', ') }}</div>
+              <div>{{ item.itunesTrack.artist }}</div>
+            </div>
+          </template>
+          </v-data-table>
         </v-col>
       </v-row>
       <v-row>
@@ -54,7 +79,12 @@ export default {
     totalSpotifyTracks: 0,
     spotifyOffset: 0,
     spotifyLimit: 50,
-    spotifyReceivedTracksCounter: 0
+    spotifyReceivedTracksCounter: 0,
+    similaritiesArray: [],
+    headers: [
+      { text: 'Track name', value: 'spotifyTrack.name' },
+      { text: 'Track artists', value: 'spotifyTrack.artists' }
+    ]
   }),
   methods: {
     fileChanged (file) {
@@ -85,7 +115,6 @@ export default {
         limit: this.spotifyLimit,
         offset: this.spotifyOffset
       }).then(response => {
-        console.log(response.data)
         const items = response.data.items
         if (this.totalSpotifyTracks === 0) {
           this.totalSpotifyTracks = response.data.total
@@ -102,12 +131,41 @@ export default {
         this.spotifyReceivedTracksCounter += items.length
 
         if (this.spotifyReceivedTracksCounter < this.totalSpotifyTracks) {
-          console.log('received: ', this.spotifyReceivedTracksCounter)
           this.getSpotifyTracks()
         } else {
           localStorage.setItem('spotifyTracks', JSON.stringify(this.spotifyTracks))
         }
       })
+    },
+    compare () {
+      this.spotifyTracks.forEach(spotifyTrack => {
+        this.iTunesTracks.forEach(itunesTrack => {
+          if (spotifyTrack.name.includes(itunesTrack.name) || itunesTrack.name.includes(spotifyTrack.name)) {
+            spotifyTrack.artists.some(spotifyArtist => {
+              if (itunesTrack.artist.includes(spotifyArtist)) {
+                this.similaritiesArray.push({
+                  itunesTrack,
+                  spotifyTrack
+                })
+                return true
+              }
+            })
+          }
+        })
+      })
+    },
+    displayMatches (text1, text2) {
+      let regex = null
+      let response = ''
+      if (text2.includes(text1)) {
+        regex = new RegExp(text1, 'gi')
+        response = text2.replace(regex, str => {
+          return "<span style='background-color: yellow;'>" + str + '</span>'
+        })
+      } else if (text1.includes(text2)) {
+        response = "<span style='background-color: yellow;'>" + text2 + '</span>'
+      }
+      return response
     }
   },
   created () {
