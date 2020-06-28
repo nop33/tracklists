@@ -37,7 +37,7 @@ export default {
           clearInterval(checkForAccessToken)
           const receivedState = localStorage.spotifyReceivedState
           if (receivedState === null || receivedState !== this.state) {
-            alert('There was an error during the authentication: The received state does not match the sent state')
+            alert('Spotify says "Computer says no". Refresh the page and try to login again =)')
           } else {
             this.$router.push('/compare')
           }

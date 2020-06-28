@@ -3,32 +3,20 @@
     <v-container>
       <v-row v-if="iTunesTracks.length && spotifyTracks.length">
         <v-col>
-          <v-btn @click="compare">Compare</v-btn>
-          <!-- <v-data-table
-            :headers="headers"
-            :items="identicals"
-            :items-per-page="5"
-            class="elevation-1"
-          ></v-data-table> -->
-          <v-data-table
-            :headers="headers"
+          <ComparisonTable
+            :buttonActionFunc="findTracksWithExactName"
+            buttonText="Find tracks with exact same name"
+            :items="tracksWithExactNames"
+          />
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col>
+          <ComparisonTable
+            :buttonActionFunc="findTracksWithPartiallyExactName"
+            buttonText="Find tracks where one name contains the other"
             :items="similaritiesArray"
-            :items-per-page="5"
-            class="elevation-1"
-          >
-          <template v-slot:item.spotifyTrack.name="{ item }">
-            <div>
-              <div v-html="displayMatches(item.itunesTrack.name, item.spotifyTrack.name)"></div>
-              <div v-html="displayMatches(item.spotifyTrack.name, item.itunesTrack.name)"></div>
-            </div>
-          </template>
-          <template v-slot:item.spotifyTrack.artists="{ item }">
-            <div>
-              <div>{{ item.spotifyTrack.artists.join(', ') }}</div>
-              <div>{{ item.itunesTrack.artist }}</div>
-            </div>
-          </template>
-          </v-data-table>
+          />
         </v-col>
       </v-row>
       <v-row>
@@ -40,7 +28,7 @@
           <v-card
             tile
           >
-            <v-card-title>iTunes tracks</v-card-title>
+            <v-card-title>iTunes tracks ({{ iTunesTracks.length }})</v-card-title>
             <v-list-item two-line v-for="(track, index) in iTunesTracks" :key="`${track.name}-${index}`">
               <v-list-item-content>
                 <v-list-item-title>{{ track.name }}</v-list-item-title>
@@ -54,7 +42,8 @@
           <v-card
             tile
           >
-            <v-card-title>Spotify tracks</v-card-title>
+            <v-progress-linear v-model="percentageOfFetchedSpotifyTracks" :color="percentageOfFetchedSpotifyTracks >= 100 ? 'green' : 'blue'"></v-progress-linear>
+            <v-card-title>Spotify tracks ({{ spotifyTracks.length }})</v-card-title>
             <v-list-item two-line v-for="(track, index) in spotifyTracks" :key="`${track.name}-${index}`">
               <v-list-item-content>
                 <v-list-item-title>{{ track.name }}</v-list-item-title>
@@ -70,8 +59,12 @@
 
 <script>
 import TracksService from '@/services/TracksService'
+import ComparisonTable from '@/components/ComparisonTable.vue'
 
 export default {
+  components: {
+    ComparisonTable
+  },
   data: () => ({
     reader: new FileReader(),
     iTunesTracks: [],
@@ -81,14 +74,19 @@ export default {
     spotifyLimit: 50,
     spotifyReceivedTracksCounter: 0,
     similaritiesArray: [],
-    headers: [
-      { text: 'Track name', value: 'spotifyTrack.name' },
-      { text: 'Track artists', value: 'spotifyTrack.artists' }
-    ]
+    tracksWithExactNames: [],
+    tracksWhereOneNameContainsTheOther: [],
+    oneOfTheTrackNamesIncludesTheOther: []
   }),
+  computed: {
+    percentageOfFetchedSpotifyTracks () {
+      return (this.spotifyTracks.length / this.totalSpotifyTracks) * 100
+    }
+  },
   methods: {
     fileChanged (file) {
       localStorage.removeItem('iTunesTracks')
+      this.iTunesTracks = []
       this.reader.readAsText(file)
     },
     processITunesLibraryFile (file) {
@@ -103,14 +101,18 @@ export default {
           track[trackProperties[index]] = trackPropertyValue
         })
         this.iTunesTracks.push({
-          name: track.Name,
-          artist: track.Artist
+          name: track.Name.trim(),
+          artist: track.Artist.trim()
         })
       })
       localStorage.setItem('iTunesTracks', JSON.stringify(this.iTunesTracks))
     },
     getSpotifyTracks () {
       localStorage.removeItem('spotifyTracks')
+      this.spotifyTracks = []
+      this.fetchPartOfTracks()
+    },
+    fetchPartOfTracks () {
       TracksService.get({
         limit: this.spotifyLimit,
         offset: this.spotifyOffset
@@ -123,49 +125,51 @@ export default {
         this.spotifyTracks.push(
           ...items.map(item => {
             return {
-              name: item.track.name,
-              artists: item.track.artists.map(artist => artist.name)
+              name: item.track.name.trim(),
+              artists: item.track.artists.map(artist => artist.name.trim())
             }
           })
         )
         this.spotifyReceivedTracksCounter += items.length
 
         if (this.spotifyReceivedTracksCounter < this.totalSpotifyTracks) {
-          this.getSpotifyTracks()
+          this.fetchPartOfTracks()
         } else {
           localStorage.setItem('spotifyTracks', JSON.stringify(this.spotifyTracks))
         }
       })
     },
-    compare () {
+    findTracksWithExactName () {
       this.spotifyTracks.forEach(spotifyTrack => {
-        this.iTunesTracks.forEach(itunesTrack => {
-          if (spotifyTrack.name.includes(itunesTrack.name) || itunesTrack.name.includes(spotifyTrack.name)) {
-            spotifyTrack.artists.some(spotifyArtist => {
-              if (itunesTrack.artist.includes(spotifyArtist)) {
-                this.similaritiesArray.push({
-                  itunesTrack,
-                  spotifyTrack
-                })
-                return true
-              }
+        this.iTunesTracks.forEach(iTunesTrack => {
+          if (spotifyTrack.name === iTunesTrack.name) {
+            this.tracksWithExactNames.push({
+              iTunesTrack,
+              spotifyTrack
+            })
+          } else {
+            this.tracksWhereOneNameContainsTheOther.push({
+              iTunesTrack,
+              spotifyTrack
             })
           }
         })
       })
     },
-    displayMatches (text1, text2) {
-      let regex = null
-      let response = ''
-      if (text2.includes(text1)) {
-        regex = new RegExp(text1, 'gi')
-        response = text2.replace(regex, str => {
-          return "<span style='background-color: yellow;'>" + str + '</span>'
-        })
-      } else if (text1.includes(text2)) {
-        response = "<span style='background-color: yellow;'>" + text2 + '</span>'
-      }
-      return response
+    findTracksWithPartiallyExactName () {
+      this.tracksWhereOneNameContainsTheOther.forEach(({ spotifyTrack, iTunesTrack }) => {
+        if (spotifyTrack.name.includes(iTunesTrack.name) || iTunesTrack.name.includes(spotifyTrack.name)) {
+          spotifyTrack.artists.some(spotifyArtist => {
+            if (iTunesTrack.artist.includes(spotifyArtist)) {
+              this.similaritiesArray.push({
+                iTunesTrack,
+                spotifyTrack
+              })
+              return true
+            }
+          })
+        }
+      })
     }
   },
   created () {
