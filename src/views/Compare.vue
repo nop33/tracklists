@@ -76,7 +76,17 @@ export default {
     similaritiesArray: [],
     tracksWithExactNames: [],
     tracksWhereOneNameContainsTheOther: [],
-    oneOfTheTrackNamesIncludesTheOther: []
+    oneOfTheTrackNamesIncludesTheOther: [],
+    substringsToRemove: [
+      ' - Original Mix',
+      ' (Original Mix)',
+      ' (original mix)',
+      ' (Original mix)',
+      ' - Original',
+      ' (Original)',
+      ' - Original Version',
+      ' (Original Version)'
+    ]
   }),
   computed: {
     percentageOfFetchedSpotifyTracks () {
@@ -98,6 +108,11 @@ export default {
         const trackData = line.split('\t')
         const track = {}
         trackData.forEach((trackPropertyValue, index) => {
+          if (index === 0) {
+            this.substringsToRemove.forEach(substringToRemove => {
+              trackPropertyValue = trackPropertyValue.replace(substringToRemove, '')
+            })
+          }
           track[trackProperties[index]] = trackPropertyValue
         })
         this.iTunesTracks.push({
@@ -124,8 +139,12 @@ export default {
         this.spotifyOffset += this.spotifyLimit
         this.spotifyTracks.push(
           ...items.map(item => {
+            let name = item.track.name.trim()
+            this.substringsToRemove.forEach(substringToRemove => {
+              name = name.replace(substringToRemove, '')
+            })
             return {
-              name: item.track.name.trim(),
+              name,
               artists: item.track.artists.map(artist => artist.name.trim())
             }
           })
