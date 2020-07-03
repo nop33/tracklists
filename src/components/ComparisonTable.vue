@@ -15,7 +15,7 @@
       <template v-slot:item.spotifyTrack.artists="{ item }">
         <div>
           <div>{{ item.spotifyTrack.artists.join(', ') }}</div>
-          <div>{{ item.iTunesTrack.artist }}</div>
+          <div>{{ item.iTunesTrack.artists.join(', ') }}</div>
         </div>
       </template>
     </v-data-table>

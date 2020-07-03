@@ -30,7 +30,7 @@
             <v-list-item two-line v-for="(track, index) in iTunesTracks.filter(track => !track.match)" :key="`${track.name}-${index}`">
               <v-list-item-content>
                 <v-list-item-title>{{ track.name }}</v-list-item-title>
-                <v-list-item-subtitle>{{ track.artist }}</v-list-item-subtitle>
+                <v-list-item-subtitle>{{ track.artists }}</v-list-item-subtitle>
               </v-list-item-content>
             </v-list-item>
           </v-card>
@@ -94,13 +94,14 @@ export default {
       lines.forEach(line => {
         const trackData = line.split('\t')
         const track = {
-          name: cleanTrackName(trackData[0]).trim().toLowerCase(),
-          artist: trackData[1].trim().toLowerCase()
+          name: cleanTrackName(trackData[0]),
+          artists: trackData[1].split(', ').map(artist => artist.trim().toLowerCase())
         }
+        track.name = removeFeaturedArtistFromName(track)
         this.iTunesTracks.push({
-          id: `${track.name} - ${track.artist}`,
+          id: `${track.name} - ${track.artists}`,
           name: track.name,
-          artist: track.artist
+          artists: track.artists
         })
       })
       localStorage.setItem('iTunesTracks', JSON.stringify(this.iTunesTracks))
@@ -122,10 +123,15 @@ export default {
         this.spotifyOffset += this.spotifyLimit
         this.spotifyTracks.push(
           ...items.map(item => {
+            const track = {
+              name: cleanTrackName(item.track.name),
+              artists: item.track.artists.map(artist => artist.name.trim().toLowerCase())
+            }
+            track.name = removeFeaturedArtistFromName(track)
             return {
               id: item.track.id,
-              name: cleanTrackName(item.track.name).trim().toLowerCase(),
-              artists: item.track.artists.map(artist => artist.name.trim().toLowerCase())
+              name: track.name,
+              artists: track.artists
             }
           })
         )
@@ -158,7 +164,7 @@ export default {
           while (!spotifyTrack.match && i < this.iTunesTracks.length) {
             const iTunesTrack = this.iTunesTracks[i]
 
-            if (oneTrackNameContainsTheOther(spotifyTrack, iTunesTrack) && everySpotifyArtistExistsEitherInITunesTrackArtistOrName(spotifyTrack, iTunesTrack)) {
+            if (oneTrackNameContainsTheOther(spotifyTrack, iTunesTrack) && haveSameArtists(spotifyTrack, iTunesTrack)) {
               console.log('found match with second try! ', spotifyTrack)
 
               markMatch(spotifyTrack, iTunesTrack)
@@ -178,17 +184,15 @@ export default {
       }
 
       function atLeastOneSpotifyArtistIsIncludedInITunesArtistString (spotifyTrack, iTunesTrack) {
-        return spotifyTrack.artists.some(spotifyArtist => iTunesTrack.artist.includes(spotifyArtist))
+        return spotifyTrack.artists.some(spotifyArtist => iTunesTrack.artists.includes(spotifyArtist))
       }
 
       function oneTrackNameContainsTheOther (spotifyTrack, iTunesTrack) {
         return spotifyTrack.name.includes(iTunesTrack.name) || iTunesTrack.name.includes(spotifyTrack.name)
       }
 
-      function everySpotifyArtistExistsEitherInITunesTrackArtistOrName (spotifyTrack, iTunesTrack) {
-        return spotifyTrack.artists.every(spotifyArtist => {
-          iTunesTrack.artist.includes(spotifyArtist) || iTunesTrack.name.includes(spotifyArtist)
-        })
+      function haveSameArtists (spotifyTrack, iTunesTrack) {
+        return spotifyTrack.artists.every(spotifyArtist => iTunesTrack.artists.includes(spotifyArtist)) && iTunesTrack.artists.every(iTunesArtist => spotifyTrack.artists.includes(iTunesArtist))
       }
 
       this.percentageOfMatchingTracks = this.calculatePercentageOfMatchingTracks()
@@ -217,20 +221,49 @@ export default {
   }
 }
 
+function removeFeaturedArtistFromName (track) {
+  const substringsToRemove = [
+    ' - feat. ',
+    ' feat. ',
+    ' feat.',
+    ' feat ',
+    ' ft '
+  ]
+  substringsToRemove.some(substring => {
+    const trackNameParts = track.name.split(substring)
+    let afterFeatSubstrings = []
+    let featuredArtist = ''
+
+    if (trackNameParts.length > 1) {
+      afterFeatSubstrings = trackNameParts[1].split(' - ')
+      featuredArtist = afterFeatSubstrings[0]
+    }
+
+    if (trackNameParts.length > 1 && track.artists.includes(featuredArtist)) {
+      track.name = afterFeatSubstrings.length === 1 ? trackNameParts[0] : `${trackNameParts[0]} - ${afterFeatSubstrings[1]}`
+      return true
+    }
+  })
+  return track.name
+}
+
 function cleanTrackName (trackName) {
   const substringsToRemove = [
-    ' - Original Mix',
-    ' (Original Mix)',
+    ' - original mix',
     ' (original mix)',
-    ' (Original mix)',
-    ' - Original',
-    ' (Original)',
-    ' - Original Version',
-    ' (Original Version)'
+    ' - original version',
+    ' (original version)',
+    ' - original',
+    ' (original)',
+    ' (radio edit)',
+    ' - radio edit',
+    ' [radio edit]'
   ]
+  trackName = trackName.trim().toLowerCase()
   substringsToRemove.forEach(substringToRemove => {
     trackName = trackName.replace(substringToRemove, '')
   })
+  trackName = trackName.replace(' (', ' - ').replace(')', '')
   return trackName
 }
 </script>
