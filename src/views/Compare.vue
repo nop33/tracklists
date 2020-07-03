@@ -23,7 +23,7 @@
         <v-col cols="6">
           <v-file-input
             label="Upload iTunes playlist file"
-            @change="fileChanged"
+            @change="getITunesTracks"
           ></v-file-input>
           <v-card
             tile
@@ -77,16 +77,6 @@ export default {
     tracksWithExactNames: [],
     tracksWhereOneNameContainsTheOther: [],
     oneOfTheTrackNamesIncludesTheOther: [],
-    substringsToRemove: [
-      ' - Original Mix',
-      ' (Original Mix)',
-      ' (original mix)',
-      ' (Original mix)',
-      ' - Original',
-      ' (Original)',
-      ' - Original Version',
-      ' (Original Version)'
-    ]
   }),
   computed: {
     percentageOfFetchedSpotifyTracks () {
@@ -94,30 +84,26 @@ export default {
     }
   },
   methods: {
-    fileChanged (file) {
+    getITunesTracks (file) {
       localStorage.removeItem('iTunesTracks')
       this.iTunesTracks = []
       this.reader.readAsText(file)
     },
     processITunesLibraryFile (file) {
       const lines = file.split(/[\r\n]+/)
-      const trackProperties = lines.shift().split('\t')
+      lines.shift() // remove first line with headers
       lines.pop() // remove empty last line
 
       lines.forEach(line => {
         const trackData = line.split('\t')
-        const track = {}
-        trackData.forEach((trackPropertyValue, index) => {
-          if (index === 0) {
-            this.substringsToRemove.forEach(substringToRemove => {
-              trackPropertyValue = trackPropertyValue.replace(substringToRemove, '')
-            })
-          }
-          track[trackProperties[index]] = trackPropertyValue
-        })
+        const track = {
+          name: cleanTrackName(trackData[0]).trim(),
+          artist: trackData[1].trim()
+        }
         this.iTunesTracks.push({
-          name: track.Name.trim(),
-          artist: track.Artist.trim()
+          id: `${track.name} - ${track.artist}`,
+          name: track.name,
+          artist: track.artist
         })
       })
       localStorage.setItem('iTunesTracks', JSON.stringify(this.iTunesTracks))
@@ -125,9 +111,9 @@ export default {
     getSpotifyTracks () {
       localStorage.removeItem('spotifyTracks')
       this.spotifyTracks = []
-      this.fetchPartOfTracks()
+      this.callSpotifyAPI()
     },
-    fetchPartOfTracks () {
+    callSpotifyAPI () {
       TracksService.get({
         limit: this.spotifyLimit,
         offset: this.spotifyOffset
@@ -139,12 +125,9 @@ export default {
         this.spotifyOffset += this.spotifyLimit
         this.spotifyTracks.push(
           ...items.map(item => {
-            let name = item.track.name.trim()
-            this.substringsToRemove.forEach(substringToRemove => {
-              name = name.replace(substringToRemove, '')
-            })
             return {
-              name,
+              id: item.track.id,
+              name: cleanTrackName(item.track.name).trim(),
               artists: item.track.artists.map(artist => artist.name.trim())
             }
           })
@@ -152,7 +135,7 @@ export default {
         this.spotifyReceivedTracksCounter += items.length
 
         if (this.spotifyReceivedTracksCounter < this.totalSpotifyTracks) {
-          this.fetchPartOfTracks()
+          this.callSpotifyAPI()
         } else {
           localStorage.setItem('spotifyTracks', JSON.stringify(this.spotifyTracks))
         }
@@ -206,5 +189,22 @@ export default {
       this.iTunesTracks = JSON.parse(localStorage.getItem('iTunesTracks'))
     }
   }
+}
+
+function cleanTrackName (trackName) {
+  const substringsToRemove = [
+    ' - Original Mix',
+    ' (Original Mix)',
+    ' (original mix)',
+    ' (Original mix)',
+    ' - Original',
+    ' (Original)',
+    ' - Original Version',
+    ' (Original Version)'
+  ]
+  substringsToRemove.forEach(substringToRemove => {
+    trackName = trackName.replace(substringToRemove, '')
+  })
+  return trackName
 }
 </script>
