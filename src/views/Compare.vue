@@ -3,20 +3,18 @@
     <v-container>
       <v-row v-if="iTunesTracks.length && spotifyTracks.length">
         <v-col>
-          <ComparisonTable
-            :buttonActionFunc="findTracksWithExactName"
-            buttonText="Find tracks with exact same name"
-            :items="tracksWithExactNames"
-          />
+          <v-btn @click="compare">Compare libraries</v-btn>
+          Matching tracks: {{ percentageOfMatchingTracks }}
+        </v-col>
+      </v-row>
+      <v-row v-if="iTunesTracks.length && spotifyTracks.length">
+        <v-col>
+          <ComparisonTable :items="tracksWithExactNames" />
         </v-col>
       </v-row>
       <v-row>
         <v-col>
-          <ComparisonTable
-            :buttonActionFunc="findTracksWithPartiallyExactName"
-            buttonText="Find tracks where one name contains the other"
-            :items="similaritiesArray"
-          />
+          <ComparisonTable :items="similaritiesArray" />
         </v-col>
       </v-row>
       <v-row>
@@ -28,8 +26,8 @@
           <v-card
             tile
           >
-            <v-card-title>iTunes tracks ({{ iTunesTracks.length }})</v-card-title>
-            <v-list-item two-line v-for="(track, index) in iTunesTracks" :key="`${track.name}-${index}`">
+            <v-card-title>iTunes tracks ({{ iTunesTracks.filter(track => !track.match).length }})</v-card-title>
+            <v-list-item two-line v-for="(track, index) in iTunesTracks.filter(track => !track.match)" :key="`${track.name}-${index}`">
               <v-list-item-content>
                 <v-list-item-title>{{ track.name }}</v-list-item-title>
                 <v-list-item-subtitle>{{ track.artist }}</v-list-item-subtitle>
@@ -43,8 +41,8 @@
             tile
           >
             <v-progress-linear v-model="percentageOfFetchedSpotifyTracks" :color="percentageOfFetchedSpotifyTracks >= 100 ? 'green' : 'blue'"></v-progress-linear>
-            <v-card-title>Spotify tracks ({{ spotifyTracks.length }})</v-card-title>
-            <v-list-item two-line v-for="(track, index) in spotifyTracks" :key="`${track.name}-${index}`">
+            <v-card-title>Spotify tracks ({{ spotifyTracks.filter(track => !track.match).length }})</v-card-title>
+            <v-list-item two-line v-for="(track, index) in spotifyTracks.filter(track => !track.match)" :key="`${track.name}-${index}`">
               <v-list-item-content>
                 <v-list-item-title>{{ track.name }}</v-list-item-title>
                 <v-list-item-subtitle>{{ track.artists }}</v-list-item-subtitle>
@@ -69,14 +67,13 @@ export default {
     reader: new FileReader(),
     iTunesTracks: [],
     spotifyTracks: [],
+    percentageOfMatchingTracks: '',
     totalSpotifyTracks: 0,
     spotifyOffset: 0,
     spotifyLimit: 50,
     spotifyReceivedTracksCounter: 0,
     similaritiesArray: [],
-    tracksWithExactNames: [],
-    tracksWhereOneNameContainsTheOther: [],
-    oneOfTheTrackNamesIncludesTheOther: [],
+    tracksWithExactNames: []
   }),
   computed: {
     percentageOfFetchedSpotifyTracks () {
@@ -97,8 +94,8 @@ export default {
       lines.forEach(line => {
         const trackData = line.split('\t')
         const track = {
-          name: cleanTrackName(trackData[0]).trim(),
-          artist: trackData[1].trim()
+          name: cleanTrackName(trackData[0]).trim().toLowerCase(),
+          artist: trackData[1].trim().toLowerCase()
         }
         this.iTunesTracks.push({
           id: `${track.name} - ${track.artist}`,
@@ -127,8 +124,8 @@ export default {
           ...items.map(item => {
             return {
               id: item.track.id,
-              name: cleanTrackName(item.track.name).trim(),
-              artists: item.track.artists.map(artist => artist.name.trim())
+              name: cleanTrackName(item.track.name).trim().toLowerCase(),
+              artists: item.track.artists.map(artist => artist.name.trim().toLowerCase())
             }
           })
         )
@@ -141,37 +138,66 @@ export default {
         }
       })
     },
-    findTracksWithExactName () {
+
+    compare () {
       this.spotifyTracks.forEach(spotifyTrack => {
-        this.iTunesTracks.forEach(iTunesTrack => {
-          if (spotifyTrack.name === iTunesTrack.name) {
+        let i = 0
+        while (!spotifyTrack.match && i < this.iTunesTracks.length) {
+          const iTunesTrack = this.iTunesTracks[i]
+          if (spotifyTrack.name === iTunesTrack.name && atLeastOneSpotifyArtistIsIncludedInITunesArtistString(spotifyTrack, iTunesTrack)) {
+            markMatch(spotifyTrack, iTunesTrack)
             this.tracksWithExactNames.push({
               iTunesTrack,
               spotifyTrack
             })
-          } else {
-            this.tracksWhereOneNameContainsTheOther.push({
-              iTunesTrack,
-              spotifyTrack
-            })
           }
-        })
-      })
-    },
-    findTracksWithPartiallyExactName () {
-      this.tracksWhereOneNameContainsTheOther.forEach(({ spotifyTrack, iTunesTrack }) => {
-        if (spotifyTrack.name.includes(iTunesTrack.name) || iTunesTrack.name.includes(spotifyTrack.name)) {
-          spotifyTrack.artists.some(spotifyArtist => {
-            if (iTunesTrack.artist.includes(spotifyArtist)) {
+          i++
+        }
+        if (!spotifyTrack.match) {
+          i = 0
+          while (!spotifyTrack.match && i < this.iTunesTracks.length) {
+            const iTunesTrack = this.iTunesTracks[i]
+
+            if (oneTrackNameContainsTheOther(spotifyTrack, iTunesTrack) && everySpotifyArtistExistsEitherInITunesTrackArtistOrName(spotifyTrack, iTunesTrack)) {
+              console.log('found match with second try! ', spotifyTrack)
+
+              markMatch(spotifyTrack, iTunesTrack)
               this.similaritiesArray.push({
                 iTunesTrack,
                 spotifyTrack
               })
-              return true
             }
-          })
+            i++
+          }
         }
       })
+
+      function markMatch (spotifyTrack, iTunesTrack) {
+        spotifyTrack.match = iTunesTrack.id
+        iTunesTrack.match = spotifyTrack.id
+      }
+
+      function atLeastOneSpotifyArtistIsIncludedInITunesArtistString (spotifyTrack, iTunesTrack) {
+        return spotifyTrack.artists.some(spotifyArtist => iTunesTrack.artist.includes(spotifyArtist))
+      }
+
+      function oneTrackNameContainsTheOther (spotifyTrack, iTunesTrack) {
+        return spotifyTrack.name.includes(iTunesTrack.name) || iTunesTrack.name.includes(spotifyTrack.name)
+      }
+
+      function everySpotifyArtistExistsEitherInITunesTrackArtistOrName (spotifyTrack, iTunesTrack) {
+        return spotifyTrack.artists.every(spotifyArtist => {
+          iTunesTrack.artist.includes(spotifyArtist) || iTunesTrack.name.includes(spotifyArtist)
+        })
+      }
+
+      this.percentageOfMatchingTracks = this.calculatePercentageOfMatchingTracks()
+    },
+
+    calculatePercentageOfMatchingTracks () {
+      return this.spotifyTracks.length > this.iTunesTracks.length
+        ? `${this.spotifyTracks.filter(track => track.match).length} / ${this.spotifyTracks.length}`
+        : `${this.iTunesTracks.filter(track => track.match).length} / ${this.iTunesTracks.length}`
     }
   },
   created () {

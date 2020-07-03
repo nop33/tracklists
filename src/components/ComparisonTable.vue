@@ -1,12 +1,11 @@
 <template>
   <div>
-    <v-btn @click="buttonActionFunc">{{ buttonText }}</v-btn>
-      <v-data-table
-        :headers="headers"
-        :items="items"
-        :items-per-page="20"
-        class="elevation-1"
-      >
+    <v-data-table
+      :headers="headers"
+      :items="items"
+      :items-per-page="20"
+      class="elevation-1"
+    >
       <template v-slot:item.spotifyTrack.name="{ item }">
         <div>
           <div v-html="displayMatches(item.iTunesTrack.name, item.spotifyTrack.name)"></div>
@@ -26,7 +25,7 @@
 <script>
 export default {
   name: 'ComparisonTable',
-  props: ['buttonActionFunc', 'buttonText', 'items'],
+  props: ['items'],
   data: () => ({
     headers: [
       { text: 'Track name', value: 'spotifyTrack.name' },
