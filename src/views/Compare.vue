@@ -7,48 +7,34 @@
           Matching tracks: {{ percentageOfMatchingTracks }}
         </v-col>
       </v-row>
-      <v-row v-if="iTunesTracks.length && spotifyTracks.length">
+      <v-row>
         <v-col>
-          <ComparisonTable :items="tracksWithExactNames" />
+          <h2>Spotify tracks missing from iTunes</h2>
+          <TrackListTable :items="spotifyTracks.filter(track => !track.match)" />
         </v-col>
       </v-row>
       <v-row>
         <v-col>
-          <ComparisonTable :items="similaritiesArray" />
+          <h2>iTunes tracks missing from Spotify</h2>
+          <TrackListTable :items="iTunesTracks.filter(track => !track.match)" />
         </v-col>
       </v-row>
       <v-row>
-        <v-col cols="6">
+        <v-col>
+          <v-btn @click="getSpotifyTracks">Get Spotify tracks</v-btn>
+          <h2>Spotify tracks</h2>
+          <v-progress-linear v-model="percentageOfFetchedSpotifyTracks" :color="percentageOfFetchedSpotifyTracks >= 100 ? 'green' : 'blue'"></v-progress-linear>
+          <TrackListTable :items="spotifyTracks" />
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col>
           <v-file-input
             label="Upload iTunes playlist file"
             @change="getITunesTracks"
           ></v-file-input>
-          <v-card
-            tile
-          >
-            <v-card-title>iTunes tracks ({{ iTunesTracks.filter(track => !track.match).length }})</v-card-title>
-            <v-list-item two-line v-for="(track, index) in iTunesTracks.filter(track => !track.match)" :key="`${track.name}-${index}`">
-              <v-list-item-content>
-                <v-list-item-title>{{ track.name }}</v-list-item-title>
-                <v-list-item-subtitle>{{ track.artists }}</v-list-item-subtitle>
-              </v-list-item-content>
-            </v-list-item>
-          </v-card>
-        </v-col>
-        <v-col cols="6">
-          <v-btn @click="getSpotifyTracks">Get Spotify tracks</v-btn>
-          <v-card
-            tile
-          >
-            <v-progress-linear v-model="percentageOfFetchedSpotifyTracks" :color="percentageOfFetchedSpotifyTracks >= 100 ? 'green' : 'blue'"></v-progress-linear>
-            <v-card-title>Spotify tracks ({{ spotifyTracks.filter(track => !track.match).length }})</v-card-title>
-            <v-list-item two-line v-for="(track, index) in spotifyTracks.filter(track => !track.match)" :key="`${track.name}-${index}`">
-              <v-list-item-content>
-                <v-list-item-title>{{ track.name }}</v-list-item-title>
-                <v-list-item-subtitle>{{ track.artists }}</v-list-item-subtitle>
-              </v-list-item-content>
-            </v-list-item>
-          </v-card>
+          <h2>iTunes tracks</h2>
+          <TrackListTable :items="iTunesTracks" />
         </v-col>
       </v-row>
     </v-container>
@@ -57,11 +43,11 @@
 
 <script>
 import TracksService from '@/services/TracksService'
-import ComparisonTable from '@/components/ComparisonTable.vue'
+import TrackListTable from '@/components/TrackListTable.vue'
 
 export default {
   components: {
-    ComparisonTable
+    TrackListTable
   },
   data: () => ({
     reader: new FileReader(),
@@ -147,44 +133,40 @@ export default {
 
     compare () {
       this.spotifyTracks.forEach(spotifyTrack => {
-        let i = 0
-        while (!spotifyTrack.match && i < this.iTunesTracks.length) {
-          const iTunesTrack = this.iTunesTracks[i]
-          if (spotifyTrack.name === iTunesTrack.name && atLeastOneSpotifyArtistIsIncludedInITunesArtistString(spotifyTrack, iTunesTrack)) {
-            markMatch(spotifyTrack, iTunesTrack)
-            this.tracksWithExactNames.push({
-              iTunesTrack,
-              spotifyTrack
-            })
-          }
-          i++
-        }
+        this.findMatchingITunesTrack(spotifyTrack)
         if (!spotifyTrack.match) {
-          i = 0
-          while (!spotifyTrack.match && i < this.iTunesTracks.length) {
-            const iTunesTrack = this.iTunesTracks[i]
-
-            if (oneTrackNameContainsTheOther(spotifyTrack, iTunesTrack) && haveSameArtists(spotifyTrack, iTunesTrack)) {
-              console.log('found match with second try! ', spotifyTrack)
-
-              markMatch(spotifyTrack, iTunesTrack)
-              this.similaritiesArray.push({
-                iTunesTrack,
-                spotifyTrack
-              })
-            }
-            i++
-          }
+          this.findSimilarITunesTrack(spotifyTrack)
         }
       })
 
-      function markMatch (spotifyTrack, iTunesTrack) {
-        spotifyTrack.match = iTunesTrack.id
-        iTunesTrack.match = spotifyTrack.id
+      this.percentageOfMatchingTracks = this.calculatePercentageOfMatchingTracks()
+    },
+    findMatchingITunesTrack (spotifyTrack) {
+      let i = 0
+      while (!spotifyTrack.match && i < this.iTunesTracks.length) {
+        const iTunesTrack = this.iTunesTracks[i]
+        if (spotifyTrack.name === iTunesTrack.name &&
+              atLeastOneSpotifyArtistIsIncludedInITunesArtistString(spotifyTrack, iTunesTrack)) {
+          spotifyTrack.match = iTunesTrack.id
+          iTunesTrack.match = spotifyTrack.id
+        }
+        i++
       }
 
       function atLeastOneSpotifyArtistIsIncludedInITunesArtistString (spotifyTrack, iTunesTrack) {
         return spotifyTrack.artists.some(spotifyArtist => iTunesTrack.artists.includes(spotifyArtist))
+      }
+    },
+    findSimilarITunesTrack (spotifyTrack) {
+      let i = 0
+      while (!spotifyTrack.similar && i < this.iTunesTracks.length) {
+        const iTunesTrack = this.iTunesTracks[i]
+
+        if (oneTrackNameContainsTheOther(spotifyTrack, iTunesTrack) && haveSameArtists(spotifyTrack, iTunesTrack)) {
+          spotifyTrack.similar = iTunesTrack.id
+          iTunesTrack.similar = spotifyTrack.id
+        }
+        i++
       }
 
       function oneTrackNameContainsTheOther (spotifyTrack, iTunesTrack) {
@@ -192,12 +174,10 @@ export default {
       }
 
       function haveSameArtists (spotifyTrack, iTunesTrack) {
-        return spotifyTrack.artists.every(spotifyArtist => iTunesTrack.artists.includes(spotifyArtist)) && iTunesTrack.artists.every(iTunesArtist => spotifyTrack.artists.includes(iTunesArtist))
+        return (spotifyTrack.artists.every(spotifyArtist => iTunesTrack.artists.includes(spotifyArtist)) &&
+                iTunesTrack.artists.every(iTunesArtist => spotifyTrack.artists.includes(iTunesArtist)))
       }
-
-      this.percentageOfMatchingTracks = this.calculatePercentageOfMatchingTracks()
     },
-
     calculatePercentageOfMatchingTracks () {
       return this.spotifyTracks.length > this.iTunesTracks.length
         ? `${this.spotifyTracks.filter(track => track.match).length} / ${this.spotifyTracks.length}`
