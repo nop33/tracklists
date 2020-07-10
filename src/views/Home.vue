@@ -26,13 +26,31 @@
         <v-col v-if="!canAccessSpotifyAPI" sm="auto" class="text-center">
           <v-btn @click="loginToSpotify" dark color="green">Login to Spotify</v-btn>
         </v-col>
-        <v-col v-else sm="auto" class="text-center">
-          Spotify Playlists:
-          <v-list dense>
-            <v-list-item v-for="playlist in spotifyPlaylists" :key="playlist.id">
-              <v-list-item-content>{{ playlist.name }}</v-list-item-content>
-            </v-list-item>
-          </v-list>
+        <v-col v-else sm="6" class="text-center">
+          <v-card
+            class="mx-auto text-left"
+            max-width="500"
+          >
+            <v-sheet class="pa-4 primary lighten-2">
+              <v-text-field
+                v-model="spotifyPlaylistSearch"
+                label="Search Spotify playlist"
+                dark
+                flat
+                solo-inverted
+                hide-details
+                clearable
+                clear-icon="mdi-close-circle-outline"
+              ></v-text-field>
+            </v-sheet>
+            <v-card-text class="spotify-playlist-list">
+              <v-treeview
+                :items="spotifyPlaylists"
+                :search="spotifyPlaylistSearch"
+              >
+              </v-treeview>
+            </v-card-text>
+          </v-card>
         </v-col>
       </v-row>
       <v-row v-if="importMethodSelected == 1" justify="center">
@@ -120,6 +138,7 @@ export default {
     canAccessSpotifyAPI: false,
     snackbar: false,
     snackbarText: '',
+    spotifyPlaylistSearch: null
   }),
   computed: {
     spotifyAuthUrl () {
@@ -134,7 +153,7 @@ export default {
   },
   watch: {
     importMethodSelected: function (method) {
-      if (method === 0 && this.canAccessSpotifyAPI) {
+      if (method === 0 && this.canAccessSpotifyAPI && this.spotifyPlaylists.length === 0) {
         this.getSpotifyPlaylists()
       }
     }
@@ -309,3 +328,10 @@ export default {
   }
 }
 </script>
+
+<style lang="scss">
+.spotify-playlist-list {
+  max-height: 500px;
+  overflow-x: auto;
+}
+</style>
