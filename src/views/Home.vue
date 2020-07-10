@@ -27,7 +27,12 @@
           <v-btn @click="loginToSpotify" dark color="green">Login to Spotify</v-btn>
         </v-col>
         <v-col v-else sm="auto" class="text-center">
-          ...Display playlists here
+          Spotify Playlists:
+          <v-list dense>
+            <v-list-item v-for="playlist in spotifyPlaylists" :key="playlist.id">
+              <v-list-item-content>{{ playlist.name }}</v-list-item-content>
+            </v-list-item>
+          </v-list>
         </v-col>
       </v-row>
       <v-row v-if="importMethodSelected == 1" justify="center">
@@ -87,7 +92,7 @@
 
 <script>
 import { generateRandomString, cleanTrackName, removeFeaturedArtistFromName } from '@/utils/utils'
-import TracksService from '@/services/TracksService'
+import SpotifyService from '@/services/SpotifyService'
 
 export default {
   data: () => ({
@@ -104,7 +109,9 @@ export default {
     },
     currentlyProcessingTextFileName: '',
     spotifyOffset: 0,
-    spotifyLimit: 50
+    spotifyLimit: 50,
+    spotifyPlaylists: [],
+    canAccessSpotifyAPI: false
   }),
   computed: {
     spotifyAuthUrl () {
@@ -115,9 +122,13 @@ export default {
       const redirectUri = encodeURIComponent(this.redirectUri)
       const state = encodeURIComponent(this.state)
       return `${baseUrl}?response_type=${responseType}&client_id=${clientId}&scope=${scope}&redirect_uri=${redirectUri}&state=${state}`
-    },
-    canAccessSpotifyAPI () {
-      return localStorage && localStorage.accessToken
+    }
+  },
+  watch: {
+    importMethodSelected: function (method) {
+      if (method === 0 && this.canAccessSpotifyAPI) {
+        this.getSpotifyPlaylists()
+      }
     }
   },
   created () {
@@ -129,6 +140,7 @@ export default {
       const file = event.target.result
       this.processRekordboxPlaylistFile(file)
     })
+    this.canAccessSpotifyAPI = localStorage && localStorage.accessToken
   },
   methods: {
     loginToSpotify () {
@@ -140,6 +152,7 @@ export default {
           if (receivedState === null || receivedState !== this.state) {
             alert('Spotify says "Computer says no". Refresh the page and try to login again =)')
           } else {
+            this.canAccessSpotifyAPI = true
             this.getSpotifyTracks()
           }
         }
@@ -212,20 +225,16 @@ export default {
         type: 'spotify',
         tracks: []
       })
-      this.callSpotifyAPI(0, 0)
+      this.getSpotifyTracksFromAPI(this.limit, this.offset, 0, 0)
     },
-    callSpotifyAPI (totalSpotifyTracks, spotifyReceivedTracksCounter) {
-      TracksService.get({
-        limit: this.spotifyLimit,
-        offset: this.spotifyOffset
-      }).then(response => {
+    getSpotifyTracksFromAPI (limit, offset, totalSpotifyTracks, spotifyReceivedTracksCounter) {
+      SpotifyService.getLikedTracks({ limit, offset }).then(response => {
         const tracklist = this.tracklists.level1.find(tracklist => tracklist.name === this.currentlyProcessingTextFileName)
         const items = response.data.items
         if (totalSpotifyTracks === 0) {
           totalSpotifyTracks = response.data.total
         }
-        this.spotifyOffset += this.spotifyLimit
-
+        offset += limit
         tracklist.tracks.push(
           ...items.map(item => {
             const track = {
@@ -242,7 +251,28 @@ export default {
         spotifyReceivedTracksCounter += items.length
 
         if (spotifyReceivedTracksCounter < totalSpotifyTracks) {
-          this.callSpotifyAPI(totalSpotifyTracks, spotifyReceivedTracksCounter)
+          this.getSpotifyTracksFromAPI(limit, offset, totalSpotifyTracks, spotifyReceivedTracksCounter)
+        } else {
+          this.currentlyProcessingTextFileName = ''
+        }
+      })
+    },
+    getSpotifyPlaylists () {
+      this.getSpotifyPlaylistsFromAPI(this.spotifyLimit, this.spotifyOffset, 0, 0)
+    },
+    getSpotifyPlaylistsFromAPI (limit, offset, totalSpotifyPlaylists, spotifyReceivedPlaylistsCounter) {
+      SpotifyService.getPlaylists({ limit, offset }).then(response => {
+        const playlists = response.data.items
+        if (totalSpotifyPlaylists === 0) {
+          totalSpotifyPlaylists = response.data.total
+        }
+        offset += limit
+
+        this.spotifyPlaylists.push(...playlists)
+
+        spotifyReceivedPlaylistsCounter += playlists.length
+        if (spotifyReceivedPlaylistsCounter < totalSpotifyPlaylists) {
+          this.getSpotifyPlaylistsFromAPI(limit, offset, totalSpotifyPlaylists, spotifyReceivedPlaylistsCounter)
         } else {
           this.currentlyProcessingTextFileName = ''
         }
