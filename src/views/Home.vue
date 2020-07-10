@@ -151,6 +151,15 @@ export default {
       })
       this.iTunesFileReader.readAsText(file)
     },
+    readRekordboxFile (file) {
+      this.currentlyProcessingTextFileName = file.name.split('.')[0]
+      this.tracklists.level1.push({
+        name: this.currentlyProcessingTextFileName,
+        type: 'rekordbox',
+        tracks: []
+      })
+      this.rekordboxFileReader.readAsText(file)
+    },
     processITunesPlaylistFile (file) {
       const tracklist = this.tracklists.level1.find(tracklist => tracklist.name === this.currentlyProcessingTextFileName)
       this.currentlyProcessingTextFileName = ''
@@ -172,9 +181,31 @@ export default {
         })
       })
     },
+    processRekordboxPlaylistFile (file) {
+      const tracklist = this.tracklists.level1.find(tracklist => tracklist.name === this.currentlyProcessingTextFileName)
+      this.currentlyProcessingTextFileName = ''
+      const lines = file.split(/[\r\n]+/)
+      lines.shift() // remove first line with headers
+      lines.pop() // remove empty last line
+
+      lines.forEach(line => {
+        const trackData = line.split('\t')
+        const track = {
+          name: cleanTrackName(trackData[1]),
+          artists: trackData[2].split(', ').map(artist => artist.trim().toLowerCase())
+        }
+        track.name = removeFeaturedArtistFromName(track)
+        tracklist.tracks.push({
+          id: `${track.name} - ${track.artists}`,
+          name: track.name,
+          artists: track.artists
+        })
+      })
+    },
     getColorBasedOnType (type) {
       const colorMap = {
         iTunes: 'blue',
+        rekordbox: 'black',
         spotify: 'green'
       }
       return colorMap[type]
