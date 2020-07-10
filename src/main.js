@@ -10,5 +10,8 @@ new Vue({
   router,
   store,
   vuetify,
+  icons: {
+    iconfont: 'fa'
+  },
   render: h => h(App)
 }).$mount('#app')
