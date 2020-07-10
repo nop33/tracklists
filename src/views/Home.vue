@@ -87,6 +87,7 @@
 
 <script>
 import { generateRandomString, cleanTrackName, removeFeaturedArtistFromName } from '@/utils/utils'
+import TracksService from '@/services/TracksService'
 
 export default {
   data: () => ({
@@ -101,7 +102,9 @@ export default {
     tracklists: {
       level1: []
     },
-    currentlyProcessingTextFileName: ''
+    currentlyProcessingTextFileName: '',
+    spotifyOffset: 0,
+    spotifyLimit: 50
   }),
   computed: {
     spotifyAuthUrl () {
@@ -137,7 +140,7 @@ export default {
           if (receivedState === null || receivedState !== this.state) {
             alert('Spotify says "Computer says no". Refresh the page and try to login again =)')
           } else {
-            this.$router.push('/compare')
+            this.getSpotifyTracks()
           }
         }
       }, 2000)
@@ -200,6 +203,49 @@ export default {
           name: track.name,
           artists: track.artists
         })
+      })
+    },
+    getSpotifyTracks () {
+      this.currentlyProcessingTextFileName = 'Liked'
+      this.tracklists.level1.push({
+        name: this.currentlyProcessingTextFileName,
+        type: 'spotify',
+        tracks: []
+      })
+      this.callSpotifyAPI(0, 0)
+    },
+    callSpotifyAPI (totalSpotifyTracks, spotifyReceivedTracksCounter) {
+      TracksService.get({
+        limit: this.spotifyLimit,
+        offset: this.spotifyOffset
+      }).then(response => {
+        const tracklist = this.tracklists.level1.find(tracklist => tracklist.name === this.currentlyProcessingTextFileName)
+        const items = response.data.items
+        if (totalSpotifyTracks === 0) {
+          totalSpotifyTracks = response.data.total
+        }
+        this.spotifyOffset += this.spotifyLimit
+
+        tracklist.tracks.push(
+          ...items.map(item => {
+            const track = {
+              name: cleanTrackName(item.track.name),
+              artists: item.track.artists.map(artist => artist.name.trim().toLowerCase())
+            }
+            track.name = removeFeaturedArtistFromName(track)
+            return {
+              id: item.track.id,
+              name: track.name,
+              artists: track.artists
+            }
+          }))
+        spotifyReceivedTracksCounter += items.length
+
+        if (spotifyReceivedTracksCounter < totalSpotifyTracks) {
+          this.callSpotifyAPI(totalSpotifyTracks, spotifyReceivedTracksCounter)
+        } else {
+          this.currentlyProcessingTextFileName = ''
+        }
       })
     },
     getColorBasedOnType (type) {
