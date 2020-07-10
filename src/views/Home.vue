@@ -6,17 +6,17 @@
           <h2 class="text-h4 mb-5">Import playlist from</h2>
           <v-btn-toggle v-model="importMethodSelected">
             <v-btn x-large class="pa-10">
-              <v-icon left>fab fa-spotify</v-icon>
+              <v-icon left color="green">fab fa-spotify</v-icon>
               Spotify
             </v-btn>
 
             <v-btn x-large class="pa-10">
-              <v-icon left>fab fa-itunes</v-icon>
+              <v-icon left color="blue">fab fa-itunes</v-icon>
               iTunes
             </v-btn>
 
             <v-btn x-large class="pa-10">
-              <v-icon left>fas fa-headphones</v-icon>
+              <v-icon left color="black">fas fa-headphones</v-icon>
               Rekordbox
             </v-btn>
           </v-btn-toggle>
