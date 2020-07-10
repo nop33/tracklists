@@ -87,6 +87,12 @@
         </v-col>
       </v-row>
     </v-container>
+    <v-snackbar v-model="snackbar">
+      {{ snackbarText }}
+      <template v-slot:action="{ attrs }">
+        <v-btn text v-bind="attrs" @click="snackbar = false">Close</v-btn>
+      </template>
+    </v-snackbar>
   </div>
 </template>
 
@@ -111,7 +117,9 @@ export default {
     spotifyOffset: 0,
     spotifyLimit: 50,
     spotifyPlaylists: [],
-    canAccessSpotifyAPI: false
+    canAccessSpotifyAPI: false,
+    snackbar: false,
+    snackbarText: '',
   }),
   computed: {
     spotifyAuthUrl () {
@@ -140,14 +148,14 @@ export default {
       const file = event.target.result
       this.processRekordboxPlaylistFile(file)
     })
-    this.canAccessSpotifyAPI = localStorage && localStorage.accessToken
+    this.canAccessSpotifyAPI = localStorage && localStorage.spotifyAccessToken
   },
   methods: {
     loginToSpotify () {
       window.open(this.spotifyAuthUrl, '_blank', 'height=570,width=520')
-      const checkForAccessToken = setInterval(() => {
-        if (localStorage.accessToken) {
-          clearInterval(checkForAccessToken)
+      const checkForspotifyAccessToken = setInterval(() => {
+        if (localStorage.spotifyAccessToken) {
+          clearInterval(checkForspotifyAccessToken)
           const receivedState = localStorage.spotifyReceivedState
           if (receivedState === null || receivedState !== this.state) {
             alert('Spotify says "Computer says no". Refresh the page and try to login again =)')
@@ -255,6 +263,8 @@ export default {
         } else {
           this.currentlyProcessingTextFileName = ''
         }
+      }).catch(err => {
+        this.handleAPIError(err)
       })
     },
     getSpotifyPlaylists () {
@@ -276,7 +286,17 @@ export default {
         } else {
           this.currentlyProcessingTextFileName = ''
         }
+      }).catch(err => {
+        this.handleAPIError(err)
       })
+    },
+    handleAPIError (err) {
+      if (err.response.status === 401) {
+        this.snackbarText = 'I lost the Spotify connection, care logging in again please? Thanks!'
+        this.snackbar = true
+        localStorage.removeItem('spotifyAccessToken')
+        this.canAccessSpotifyAPI = false
+      }
     },
     getColorBasedOnType (type) {
       const colorMap = {
