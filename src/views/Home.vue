@@ -178,6 +178,7 @@ export default {
     selectedSpotifyPlaylistToImport: function (index) {
       if (index >= 0) {
         const playlist = this.spotifyPlaylists[index]
+        this.spotifyPlaylists.splice(index, 1)
         this.getSpotifyPlaylistTracks(playlist.name, playlist.id)
       }
     }
