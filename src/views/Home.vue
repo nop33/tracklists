@@ -55,6 +55,9 @@
                     <v-list-item-content>
                       <v-list-item-title v-text="playlist.name"></v-list-item-title>
                     </v-list-item-content>
+                    <v-list-item-icon>
+                      <v-chip>{{ playlist.tracks.total }}</v-chip>
+                    </v-list-item-icon>
                   </v-list-item>
                 </v-list-item-group>
               </v-list>
