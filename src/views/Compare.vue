@@ -191,11 +191,11 @@ export default {
       this.$store.dispatch('initializeITunesTracks', this.iTunesTracks)
     })
 
-    if (localStorage.spotifyTracks) {
+    if (localStorage.getItem('spotifyTracks')) {
       this.spotifyTracks = JSON.parse(localStorage.getItem('spotifyTracks'))
     }
 
-    if (localStorage.iTunesTracks) {
+    if (localStorage.getItem('iTunesTracks')) {
       this.iTunesTracks = JSON.parse(localStorage.getItem('iTunesTracks'))
     }
   }

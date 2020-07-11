@@ -167,15 +167,15 @@ export default {
       const file = event.target.result
       this.processRekordboxPlaylistFile(file)
     })
-    this.canAccessSpotifyAPI = localStorage && localStorage.spotifyAccessToken
+    this.canAccessSpotifyAPI = localStorage && localStorage.getItem('spotifyAccessToken')
   },
   methods: {
     loginToSpotify () {
       window.open(this.spotifyAuthUrl, '_blank', 'height=570,width=520')
       const checkForspotifyAccessToken = setInterval(() => {
-        if (localStorage.spotifyAccessToken) {
+        if (localStorage.getItem('spotifyAccessToken')) {
           clearInterval(checkForspotifyAccessToken)
-          const receivedState = localStorage.spotifyReceivedState
+          const receivedState = localStorage.getItem('spotifyReceivedState')
           if (receivedState === null || receivedState !== this.state) {
             alert('Spotify says "Computer says no". Refresh the page and try to login again =)')
           } else {

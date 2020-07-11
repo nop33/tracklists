@@ -13,8 +13,8 @@
 export default {
   props: ['access_token', 'state'],
   created () {
-    localStorage.spotifyAccessToken = this.$props.access_token
-    localStorage.spotifyReceivedState = this.$props.state
+    localStorage.setItem('spotifyAccessToken', this.$props.access_token)
+    localStorage.setItem('spotifyReceivedState', this.$props.state)
     window.close()
   }
 }
