@@ -174,6 +174,12 @@ export default {
       if (method === 0 && this.canAccessSpotifyAPI && this.spotifyPlaylists.length === 0) {
         this.getSpotifyPlaylists()
       }
+    },
+    selectedSpotifyPlaylistToImport: function (index) {
+      if (index >= 0) {
+        const playlist = this.spotifyPlaylists[index]
+        this.getSpotifyPlaylistTracks(playlist.name, playlist.id)
+      }
     }
   },
   created () {
@@ -261,6 +267,47 @@ export default {
           name: track.name,
           artists: track.artists
         })
+      })
+    },
+    getSpotifyPlaylistTracks (playlistName, playlistId) {
+      const offset = 0
+      const limit = 100
+
+      this.tracklists.level1.push({
+        name: playlistName,
+        type: 'spotify',
+        tracks: []
+      })
+      this.getSpotifyPlaylistTracksFromAPI(playlistName, playlistId, limit, offset, 0, 0)
+    },
+    getSpotifyPlaylistTracksFromAPI (playlistName, playlistId, limit, offset, totalSpotifyTracks, spotifyReceivedTracksCounter) {
+      SpotifyService.getPlaylistTracks(playlistId, { limit, offset }).then(response => {
+        const tracklist = this.tracklists.level1.find(tracklist => tracklist.name === playlistName)
+        const items = response.data.items
+        if (totalSpotifyTracks === 0) {
+          totalSpotifyTracks = response.data.total
+        }
+        offset += limit
+        tracklist.tracks.push(
+          ...items.map(item => {
+            const track = {
+              name: cleanTrackName(item.track.name),
+              artists: item.track.artists.map(artist => artist.name.trim().toLowerCase())
+            }
+            track.name = removeFeaturedArtistFromName(track)
+            return {
+              id: item.track.id,
+              name: track.name,
+              artists: track.artists
+            }
+          }))
+        spotifyReceivedTracksCounter += items.length
+
+        if (spotifyReceivedTracksCounter < totalSpotifyTracks) {
+          this.getSpotifyPlaylistTracksFromAPI(playlistName, playlistId, limit, offset, totalSpotifyTracks, spotifyReceivedTracksCounter)
+        }
+      }).catch(err => {
+        this.handleAPIError(err)
       })
     },
     getSpotifyTracks () {
