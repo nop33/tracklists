@@ -46,9 +46,17 @@
             <v-card-text class="spotify-playlist-list">
 
               <v-list dense>
-                <v-list-item two-line v-for="playlist in filteredSpotifyPlaylists" :key="playlist.id">
-                  {{ playlist.name }}
-                </v-list-item>
+                <v-list-item-group v-model="selectedSpotifyPlaylistToImport" color="green">
+                  <v-list-item v-for="playlist in filteredSpotifyPlaylists" :key="playlist.id">
+                    <v-list-item-avatar>
+                      <v-img v-if="playlist.images.length" :src="playlist.images[0].url"></v-img>
+                      <v-icon v-else color="green">fab fa-spotify</v-icon>
+                    </v-list-item-avatar>
+                    <v-list-item-content>
+                      <v-list-item-title v-text="playlist.name"></v-list-item-title>
+                    </v-list-item-content>
+                  </v-list-item>
+                </v-list-item-group>
               </v-list>
             </v-card-text>
           </v-card>
@@ -139,7 +147,8 @@ export default {
     canAccessSpotifyAPI: false,
     snackbar: false,
     snackbarText: '',
-    spotifyPlaylistSearch: null
+    spotifyPlaylistSearch: null,
+    selectedSpotifyPlaylistToImport: null
   }),
   computed: {
     spotifyAuthUrl () {
