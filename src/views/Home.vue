@@ -31,7 +31,7 @@
             class="mx-auto text-left"
             max-width="500"
           >
-            <v-sheet class="pa-4 primary lighten-2">
+            <v-sheet class="pa-4 green lighten-2">
               <v-text-field
                 v-model="spotifyPlaylistSearch"
                 label="Search Spotify playlist"
@@ -44,11 +44,12 @@
               ></v-text-field>
             </v-sheet>
             <v-card-text class="spotify-playlist-list">
-              <v-treeview
-                :items="spotifyPlaylists"
-                :search="spotifyPlaylistSearch"
-              >
-              </v-treeview>
+
+              <v-list dense>
+                <v-list-item two-line v-for="playlist in filteredSpotifyPlaylists" :key="playlist.id">
+                  {{ playlist.name }}
+                </v-list-item>
+              </v-list>
             </v-card-text>
           </v-card>
         </v-col>
@@ -149,6 +150,11 @@ export default {
       const redirectUri = encodeURIComponent(this.redirectUri)
       const state = encodeURIComponent(this.state)
       return `${baseUrl}?response_type=${responseType}&client_id=${clientId}&scope=${scope}&redirect_uri=${redirectUri}&state=${state}`
+    },
+    filteredSpotifyPlaylists () {
+      return this.spotifyPlaylistSearch
+        ? this.spotifyPlaylists.filter(playlist => playlist.name.toLowerCase().includes(this.spotifyPlaylistSearch.toLowerCase()))
+        : this.spotifyPlaylists
     }
   },
   watch: {
@@ -180,7 +186,7 @@ export default {
             alert('Spotify says "Computer says no". Refresh the page and try to login again =)')
           } else {
             this.canAccessSpotifyAPI = true
-            this.getSpotifyTracks()
+            this.getSpotifyPlaylists()
           }
         }
       }, 2000)
