@@ -498,8 +498,6 @@ export default {
           onlyRightSideTracks.push(rightSideTrack)
         }
       })
-
-      this.percentageOfMatchingTracks = this.calculatePercentageOfMatchingTracks()
     },
     findMatchingRightSideTrack (leftSideTrack) {
       let i = 0
@@ -516,11 +514,6 @@ export default {
       function atLeastOneSpotifyArtistIsIncludedInITunesArtistString (leftSideTrack, rightSideTrack) {
         return leftSideTrack.artists.some(leftSideTrackArtist => rightSideTrack.artists.includes(leftSideTrackArtist))
       }
-    },
-    calculatePercentageOfMatchingTracks () {
-      return this.selectedTracklistToCompareLeft.length > this.selectedTracklistToCompareRight.length
-        ? `${this.selectedTracklistToCompareLeft.filter(track => track.match).length} / ${this.selectedTracklistToCompareLeft.length}`
-        : `${this.selectedTracklistToCompareRight.filter(track => track.match).length} / ${this.selectedTracklistToCompareRight.length}`
     },
     loginToSpotify () {
       window.open(this.spotifyAuthUrl, '_blank', 'height=570,width=520')
