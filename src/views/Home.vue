@@ -134,22 +134,53 @@
             </v-card-text>
           </v-card>
         </v-col>
+        <v-col sm="6" md="4" lg="3">
+          <v-card outlined>
+            <v-card-text>
+              <div
+                v-if="tracklists.level2.length == 0"
+                class="font-weight-thin font-italic"
+              >
+                Your generated tracklists will appear here
+              </div>
+              <v-list dense v-else>
+              </v-list>
+            </v-card-text>
+          </v-card>
+        </v-col>
       </v-row>
       <v-row>
         <v-col sm="6">
           <v-dialog v-model="dialog" transition="dialog-bottom-transition">
-            <v-btn dark @click="dialog = false">
-              <v-icon left>mdi-close</v-icon>
-              Close
-            </v-btn>
-            <v-list dense v-if="selectedTracklist">
-              <v-list-item two-line v-for="track in selectedTracklist.tracks" :key="track.id">
-                <v-list-item-content>
-                  <v-list-item-title>{{ track.name }}</v-list-item-title>
-                  <v-list-item-subtitle>{{ track.artists.join(', ') }}</v-list-item-subtitle>
-                </v-list-item-content>
-              </v-list-item>
-            </v-list>
+            <v-card>
+              <v-sheet class="pa-4">
+                <div class="d-flex align-center">
+                  <v-text-field
+                    v-model="spotifyPlaylistSearch"
+                    label="Search track"
+                    flat
+                    solo-inverted
+                    hide-details
+                    clearable
+                    clear-icon="mdi-close-circle-outline"
+                  ></v-text-field>
+                  <v-btn dark @click="dialog = false" class="ml-4">
+                    <v-icon left>mdi-close</v-icon>
+                    Close
+                  </v-btn>
+                </div>
+              </v-sheet>
+              <v-card-text>
+                <v-list dense v-if="selectedTracklist">
+                  <v-list-item two-line v-for="track in selectedTracklist.tracks" :key="track.id">
+                    <v-list-item-content>
+                      <v-list-item-title>{{ track.name }}</v-list-item-title>
+                      <v-list-item-subtitle>{{ track.artists.join(', ') }}</v-list-item-subtitle>
+                    </v-list-item-content>
+                  </v-list-item>
+                </v-list>
+              </v-card-text>
+            </v-card>
           </v-dialog>
         </v-col>
       </v-row>
@@ -178,7 +209,8 @@ export default {
     rekordboxFileReader: new FileReader(),
     importMethodSelected: null,
     tracklists: {
-      level1: []
+      level1: [],
+      level2: []
     },
     currentlyProcessingTextFileName: '',
     spotifyOffset: 0,
