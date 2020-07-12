@@ -86,34 +86,71 @@
         </v-col>
       </v-row>
       <v-row>
-        <v-col>
-          <v-expansion-panels>
-            <v-expansion-panel
-              v-for="(item,i) in tracklists.level1"
-              :key="i"
-            >
-              <v-expansion-panel-header>
-                {{ item.name }}
-                <v-chip
-                  class="ma-2 flex-grow-0"
-                  :color="getColorBasedOnType(item.type)"
-                  text-color="white"
+        <v-col sm="6" md="4" lg="3">
+          <v-card outlined>
+            <v-card-text>
+              <div
+                v-if="tracklists.level1.length == 0"
+                class="font-weight-thin font-italic"
+              >
+                Your imported playlists will appear here
+              </div>
+              <v-list dense v-else>
+                <v-list-item-group color="primary">
+                <v-list-item
+                  v-for="(item, i) in tracklists.level1"
+                  :key="i"
                 >
-                  {{ item.tracks.length }}
-                </v-chip>
-              </v-expansion-panel-header>
-              <v-expansion-panel-content>
-                <v-list dense>
-                  <v-list-item two-line v-for="track in item.tracks" :key="track.id">
-                    <v-list-item-content>
-                      <v-list-item-title>{{ track.name }}</v-list-item-title>
-                      <v-list-item-subtitle>{{ track.artists }}</v-list-item-subtitle>
-                    </v-list-item-content>
-                  </v-list-item>
-                </v-list>
-              </v-expansion-panel-content>
-            </v-expansion-panel>
-          </v-expansion-panels>
+                  <v-list-item-content>
+                    <v-list-item-title>
+                      {{ item.name }}
+                    <v-chip
+                      class="ma-2 flex-grow-0"
+                      :color="getColorBasedOnType(item.type)"
+                      text-color="white"
+                    >
+                      {{ item.tracks.length }}
+                    </v-chip>
+                    </v-list-item-title>
+                  </v-list-item-content>
+                  <v-list-item-action>
+                    <v-tooltip bottom v-if="item.tracks.length">
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn
+                          icon
+                          v-bind="attrs"
+                          v-on="on"
+                          @click="openDialog(item)"
+                          >
+                            <v-icon>mdi-format-list-bulleted</v-icon>
+                          </v-btn>
+                      </template>
+                      <span>View tracks</span>
+                    </v-tooltip>
+                  </v-list-item-action>
+                </v-list-item>
+                </v-list-item-group>
+              </v-list>
+            </v-card-text>
+          </v-card>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col sm="6">
+          <v-dialog v-model="dialog" transition="dialog-bottom-transition">
+            <v-btn dark @click="dialog = false">
+              <v-icon left>mdi-close</v-icon>
+              Close
+            </v-btn>
+            <v-list dense v-if="selectedTracklist">
+              <v-list-item two-line v-for="track in selectedTracklist.tracks" :key="track.id">
+                <v-list-item-content>
+                  <v-list-item-title>{{ track.name }}</v-list-item-title>
+                  <v-list-item-subtitle>{{ track.artists.join(', ') }}</v-list-item-subtitle>
+                </v-list-item-content>
+              </v-list-item>
+            </v-list>
+          </v-dialog>
         </v-col>
       </v-row>
     </v-container>
@@ -151,7 +188,9 @@ export default {
     snackbar: false,
     snackbarText: '',
     spotifyPlaylistSearch: null,
-    selectedSpotifyPlaylistToImport: null
+    selectedSpotifyPlaylistToImport: null,
+    selectedTracklist: null,
+    dialog: false
   }),
   computed: {
     spotifyAuthUrl () {
@@ -195,6 +234,10 @@ export default {
     this.canAccessSpotifyAPI = localStorage && localStorage.getItem('spotifyAccessToken')
   },
   methods: {
+    openDialog (tracklist) {
+      this.dialog = true
+      this.selectedTracklist = tracklist
+    },
     loginToSpotify () {
       window.open(this.spotifyAuthUrl, '_blank', 'height=570,width=520')
       const checkForspotifyAccessToken = setInterval(() => {
