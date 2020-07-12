@@ -47,7 +47,7 @@
 
               <v-list dense>
                 <v-list-item-group v-model="selectedSpotifyPlaylistToImport" color="green">
-                  <v-list-item v-for="playlist in filteredSpotifyPlaylists" :key="playlist.id">
+                  <v-list-item v-for="playlist in filteredSpotifyPlaylists" :key="playlist.id" :value="playlist">
                     <v-list-item-avatar>
                       <v-img v-if="playlist.images.length" :src="playlist.images[0].url"></v-img>
                       <v-icon v-else color="green">fab fa-spotify</v-icon>
@@ -425,11 +425,11 @@ export default {
         this.getSpotifyPlaylists()
       }
     },
-    selectedSpotifyPlaylistToImport: function (index) {
-      if (index >= 0) {
-        const playlist = this.spotifyPlaylists[index]
+    selectedSpotifyPlaylistToImport: function (spotifyPlaylist) {
+      if (spotifyPlaylist) {
+        const index = this.spotifyPlaylists.indexOf(spotifyPlaylist)
         this.spotifyPlaylists.splice(index, 1)
-        this.getSpotifyPlaylistTracks(playlist.name, playlist.id)
+        this.getSpotifyPlaylistTracks(spotifyPlaylist.name, spotifyPlaylist.id)
       }
     }
   },
