@@ -100,16 +100,16 @@
                       <v-list-item-content>
                         <v-list-item-title>
                           {{ selectedTracklistToCompareLeft.name }}
-                          <v-chip
-                            class="ma-2 flex-grow-0"
-                            :color="getColorBasedOnType(selectedTracklistToCompareLeft.type)"
-                            text-color="white"
-                          >
-                            {{ selectedTracklistToCompareLeft.tracks.length }}
-                          </v-chip>
                         </v-list-item-title>
                       </v-list-item-content>
-                      <v-list-item-action class="flex-row">
+                      <v-list-item-action class="flex-row align-center">
+                        <v-chip
+                          class="ma-2 flex-grow-0"
+                          :color="getColorBasedOnType(selectedTracklistToCompareLeft.type)"
+                          text-color="white"
+                        >
+                          {{ selectedTracklistToCompareLeft.tracks.length }}
+                        </v-chip>
                         <v-tooltip bottom v-if="selectedTracklistToCompareLeft.tracks.length">
                           <template v-slot:activator="{ on, attrs }">
                             <v-btn
@@ -158,16 +158,16 @@
                       <v-list-item-content>
                         <v-list-item-title>
                           {{ selectedTracklistToCompareRight.name }}
-                          <v-chip
-                            class="ma-2 flex-grow-0"
-                            :color="getColorBasedOnType(selectedTracklistToCompareRight.type)"
-                            text-color="white"
-                          >
-                            {{ selectedTracklistToCompareRight.tracks.length }}
-                          </v-chip>
                         </v-list-item-title>
                       </v-list-item-content>
-                      <v-list-item-action class="flex-row">
+                      <v-list-item-action class="flex-row align-center">
+                        <v-chip
+                          class="ma-2 flex-grow-0"
+                          :color="getColorBasedOnType(selectedTracklistToCompareRight.type)"
+                          text-color="white"
+                        >
+                          {{ selectedTracklistToCompareRight.tracks.length }}
+                        </v-chip>
                         <v-tooltip bottom v-if="selectedTracklistToCompareRight.tracks.length">
                           <template v-slot:activator="{ on, attrs }">
                             <v-btn
@@ -221,6 +221,9 @@
                   <v-list-item-content>
                     <v-list-item-title>
                       {{ item.name }}
+                    </v-list-item-title>
+                  </v-list-item-content>
+                  <v-list-item-action class="flex-row align-center">
                     <v-chip
                       class="ma-2 flex-grow-0"
                       :color="getColorBasedOnType(item.type)"
@@ -228,9 +231,6 @@
                     >
                       {{ item.tracks.length }}
                     </v-chip>
-                    </v-list-item-title>
-                  </v-list-item-content>
-                  <v-list-item-action class="flex-row">
                     <v-tooltip bottom v-if="item.tracks.length">
                       <template v-slot:activator="{ on, attrs }">
                         <v-btn
@@ -274,6 +274,53 @@
                 Your generated tracklists will appear here
               </div>
               <v-list dense v-else>
+                <v-list-item-group color="primary">
+                <v-list-item
+                  v-for="(item, i) in tracklists.level2"
+                  :key="i"
+                >
+                  <v-list-item-content>
+                    <v-list-item-title>
+                      {{ item.name }}
+                    </v-list-item-title>
+                  </v-list-item-content>
+                  <v-list-item-action class="flex-row align-center">
+                    <v-chip
+                      class="ma-2 flex-grow-0"
+                      :color="getColorBasedOnType(item.type)"
+                      text-color="white"
+                    >
+                      {{ item.tracks.length }}
+                    </v-chip>
+                    <v-tooltip bottom v-if="item.tracks.length">
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn
+                          icon
+                          v-bind="attrs"
+                          v-on="on"
+                          @click="openDialog(item)"
+                          >
+                            <v-icon>mdi-format-list-bulleted</v-icon>
+                          </v-btn>
+                      </template>
+                      <span>View tracks</span>
+                    </v-tooltip>
+                    <v-tooltip bottom>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn
+                          icon
+                          v-bind="attrs"
+                          v-on="on"
+                          @click="selectTracklist(item)"
+                          >
+                            <v-icon>mdi-selection-ellipse-arrow-inside</v-icon>
+                          </v-btn>
+                      </template>
+                      <span>Select tracklist</span>
+                    </v-tooltip>
+                  </v-list-item-action>
+                </v-list-item>
+                </v-list-item-group>
               </v-list>
             </v-card-text>
           </v-card>
@@ -415,6 +462,65 @@ export default {
       } else if (side === 'right') {
         this.selectedTracklistToCompareRight = null
       }
+    },
+    compare () {
+      const sameTracks = []
+      const onlyLeftSideTracks = []
+      const onlyRightSideTracks = []
+
+      this.tracklists.level2.push({
+        name: `Both in ${this.selectedTracklistToCompareLeft.name} and ${this.selectedTracklistToCompareRight.name}`,
+        type: 'generated',
+        tracks: sameTracks
+      })
+      this.tracklists.level2.push({
+        name: `Only in ${this.selectedTracklistToCompareLeft.name}`,
+        type: this.selectedTracklistToCompareLeft.type,
+        tracks: onlyLeftSideTracks
+      })
+      this.tracklists.level2.push({
+        name: `Only in ${this.selectedTracklistToCompareRight.name}`,
+        type: this.selectedTracklistToCompareRight.type,
+        tracks: onlyRightSideTracks
+      })
+
+      this.selectedTracklistToCompareLeft.tracks.forEach(leftSideTrack => {
+        this.findMatchingRightSideTrack(leftSideTrack)
+        if (leftSideTrack.match) {
+          sameTracks.push(leftSideTrack)
+        } else {
+          onlyLeftSideTracks.push(leftSideTrack)
+        }
+      })
+
+      this.selectedTracklistToCompareRight.tracks.forEach(rightSideTrack => {
+        if (!rightSideTrack.match) {
+          onlyRightSideTracks.push(rightSideTrack)
+        }
+      })
+
+      this.percentageOfMatchingTracks = this.calculatePercentageOfMatchingTracks()
+    },
+    findMatchingRightSideTrack (leftSideTrack) {
+      let i = 0
+      while (!leftSideTrack.match && i < this.selectedTracklistToCompareRight.tracks.length) {
+        const rightSideTrack = this.selectedTracklistToCompareRight.tracks[i]
+        if (leftSideTrack.name === rightSideTrack.name &&
+              atLeastOneSpotifyArtistIsIncludedInITunesArtistString(leftSideTrack, rightSideTrack)) {
+          leftSideTrack.match = rightSideTrack.id
+          rightSideTrack.match = leftSideTrack.id
+        }
+        i++
+      }
+
+      function atLeastOneSpotifyArtistIsIncludedInITunesArtistString (leftSideTrack, rightSideTrack) {
+        return leftSideTrack.artists.some(leftSideTrackArtist => rightSideTrack.artists.includes(leftSideTrackArtist))
+      }
+    },
+    calculatePercentageOfMatchingTracks () {
+      return this.selectedTracklistToCompareLeft.length > this.selectedTracklistToCompareRight.length
+        ? `${this.selectedTracklistToCompareLeft.filter(track => track.match).length} / ${this.selectedTracklistToCompareLeft.length}`
+        : `${this.selectedTracklistToCompareRight.filter(track => track.match).length} / ${this.selectedTracklistToCompareRight.length}`
     },
     loginToSpotify () {
       window.open(this.spotifyAuthUrl, '_blank', 'height=570,width=520')
