@@ -85,6 +85,123 @@
           </v-file-input>
         </v-col>
       </v-row>
+      <v-row justify="center">
+        <v-col md="9">
+          <v-row>
+            <v-col>
+              <v-card outlined>
+                <v-card-text v-if="!selectedTracklistToCompareLeft">
+                  <div class="font-weight-thin font-italic">
+                    Select a tracklist to compare
+                  </div>
+                  </v-card-text>
+                  <v-list dense v-else>
+                    <v-list-item>
+                      <v-list-item-content>
+                        <v-list-item-title>
+                          {{ selectedTracklistToCompareLeft.name }}
+                          <v-chip
+                            class="ma-2 flex-grow-0"
+                            :color="getColorBasedOnType(selectedTracklistToCompareLeft.type)"
+                            text-color="white"
+                          >
+                            {{ selectedTracklistToCompareLeft.tracks.length }}
+                          </v-chip>
+                        </v-list-item-title>
+                      </v-list-item-content>
+                      <v-list-item-action class="flex-row">
+                        <v-tooltip bottom v-if="selectedTracklistToCompareLeft.tracks.length">
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-btn
+                              icon
+                              v-bind="attrs"
+                              v-on="on"
+                              @click="openDialog(selectedTracklistToCompareLeft)"
+                              >
+                                <v-icon>mdi-format-list-bulleted</v-icon>
+                              </v-btn>
+                          </template>
+                          <span>View tracks</span>
+                        </v-tooltip>
+                        <v-tooltip bottom>
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-btn
+                              icon
+                              v-bind="attrs"
+                              v-on="on"
+                              @click="deselectTracklist(selectedTracklistToCompareLeft, 'left')"
+                              >
+                                <v-icon>mdi-delete</v-icon>
+                              </v-btn>
+                          </template>
+                          <span>Deselect tracklist</span>
+                        </v-tooltip>
+                      </v-list-item-action>
+                    </v-list-item>
+                  </v-list>
+              </v-card>
+            </v-col>
+            <v-col class="d-flex align-center justify-space-around">
+              <v-icon>mdi-arrow-right</v-icon>
+              <v-btn @click="compare">Compare</v-btn>
+              <v-icon>mdi-arrow-left</v-icon>
+            </v-col>
+            <v-col>
+              <v-card outlined>
+                <v-card-text v-if="!selectedTracklistToCompareRight">
+                  <div class="font-weight-thin font-italic">
+                    Select a tracklist to compare
+                  </div>
+                  </v-card-text>
+                  <v-list dense v-else>
+                    <v-list-item>
+                      <v-list-item-content>
+                        <v-list-item-title>
+                          {{ selectedTracklistToCompareRight.name }}
+                          <v-chip
+                            class="ma-2 flex-grow-0"
+                            :color="getColorBasedOnType(selectedTracklistToCompareRight.type)"
+                            text-color="white"
+                          >
+                            {{ selectedTracklistToCompareRight.tracks.length }}
+                          </v-chip>
+                        </v-list-item-title>
+                      </v-list-item-content>
+                      <v-list-item-action class="flex-row">
+                        <v-tooltip bottom v-if="selectedTracklistToCompareRight.tracks.length">
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-btn
+                              icon
+                              v-bind="attrs"
+                              v-on="on"
+                              @click="openDialog(selectedTracklistToCompareRight)"
+                              >
+                                <v-icon>mdi-format-list-bulleted</v-icon>
+                              </v-btn>
+                          </template>
+                          <span>View tracks</span>
+                        </v-tooltip>
+                        <v-tooltip bottom>
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-btn
+                              icon
+                              v-bind="attrs"
+                              v-on="on"
+                              @click="deselectTracklist(selectedTracklistToCompareRight, 'right')"
+                              >
+                                <v-icon>mdi-delete</v-icon>
+                              </v-btn>
+                          </template>
+                          <span>Deselect tracklist</span>
+                        </v-tooltip>
+                      </v-list-item-action>
+                    </v-list-item>
+                  </v-list>
+              </v-card>
+            </v-col>
+          </v-row>
+        </v-col>
+      </v-row>
       <v-row>
         <v-col sm="6" md="4" lg="3">
           <v-card outlined>
@@ -113,7 +230,7 @@
                     </v-chip>
                     </v-list-item-title>
                   </v-list-item-content>
-                  <v-list-item-action>
+                  <v-list-item-action class="flex-row">
                     <v-tooltip bottom v-if="item.tracks.length">
                       <template v-slot:activator="{ on, attrs }">
                         <v-btn
@@ -126,6 +243,19 @@
                           </v-btn>
                       </template>
                       <span>View tracks</span>
+                    </v-tooltip>
+                    <v-tooltip bottom>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn
+                          icon
+                          v-bind="attrs"
+                          v-on="on"
+                          @click="selectTracklist(item)"
+                          >
+                            <v-icon>mdi-selection-ellipse-arrow-inside</v-icon>
+                          </v-btn>
+                      </template>
+                      <span>Select tracklist</span>
                     </v-tooltip>
                   </v-list-item-action>
                 </v-list-item>
@@ -154,7 +284,7 @@
           <v-dialog v-model="dialog" transition="dialog-bottom-transition">
             <v-card>
               <v-sheet class="pa-4">
-                <div class="d-flex align-center">
+                <div class="d-flex">
                   <v-text-field
                     v-model="spotifyPlaylistSearch"
                     label="Search track"
@@ -222,7 +352,9 @@ export default {
     spotifyPlaylistSearch: null,
     selectedSpotifyPlaylistToImport: null,
     selectedTracklist: null,
-    dialog: false
+    dialog: false,
+    selectedTracklistToCompareLeft: null,
+    selectedTracklistToCompareRight: null
   }),
   computed: {
     spotifyAuthUrl () {
@@ -269,6 +401,20 @@ export default {
     openDialog (tracklist) {
       this.dialog = true
       this.selectedTracklist = tracklist
+    },
+    selectTracklist (tracklist) {
+      if (!this.selectedTracklistToCompareLeft) {
+        this.selectedTracklistToCompareLeft = tracklist
+      } else {
+        this.selectedTracklistToCompareRight = tracklist
+      }
+    },
+    deselectTracklist (tracklist, side) {
+      if (side === 'left') {
+        this.selectedTracklistToCompareLeft = null
+      } else if (side === 'right') {
+        this.selectedTracklistToCompareRight = null
+      }
     },
     loginToSpotify () {
       window.open(this.spotifyAuthUrl, '_blank', 'height=570,width=520')
