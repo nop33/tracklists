@@ -47,6 +47,17 @@
 
               <v-list dense>
                 <v-list-item-group v-model="selectedSpotifyPlaylistToImport" color="green">
+                  <v-list-item v-if="!hideSpotifyLikedPlaylist" @click="importSpotifyLikedTracks">
+                    <v-list-item-avatar>
+                      <v-icon color="red">mdi-heart</v-icon>
+                    </v-list-item-avatar>
+                    <v-list-item-content>
+                      <v-list-item-title>Liked</v-list-item-title>
+                    </v-list-item-content>
+                    <v-list-item-icon>
+                      <v-chip>{{ totalSpotifyLikedTracksNumber }}</v-chip>
+                    </v-list-item-icon>
+                  </v-list-item>
                   <v-list-item v-for="playlist in filteredSpotifyPlaylists" :key="playlist.id" :value="playlist">
                     <v-list-item-avatar>
                       <v-img v-if="playlist.images.length" :src="playlist.images[0].url"></v-img>
@@ -401,7 +412,9 @@ export default {
     selectedTracklist: null,
     dialog: false,
     selectedTracklistToCompareLeft: null,
-    selectedTracklistToCompareRight: null
+    selectedTracklistToCompareRight: null,
+    totalSpotifyLikedTracksNumber: 0,
+    hideSpotifyLikedPlaylist: false
   }),
   computed: {
     spotifyAuthUrl () {
@@ -423,6 +436,7 @@ export default {
     importMethodSelected: function (method) {
       if (method === 0 && this.canAccessSpotifyAPI && this.spotifyPlaylists.length === 0) {
         this.getSpotifyPlaylists()
+        this.getSpotifyTotalLikedTracksNumber()
       }
     },
     selectedSpotifyPlaylistToImport: function (spotifyPlaylist) {
@@ -445,6 +459,13 @@ export default {
     this.canAccessSpotifyAPI = localStorage && localStorage.getItem('spotifyAccessToken')
   },
   methods: {
+    getSpotifyTotalLikedTracksNumber () {
+      SpotifyService.getLikedTracks({ limit: this.limit, offset: this.offset }).then(response => {
+        this.totalSpotifyLikedTracksNumber = response.data.total
+      }).catch(err => {
+        this.handleAPIError(err)
+      })
+    },
     openDialog (tracklist) {
       this.dialog = true
       this.selectedTracklist = tracklist
@@ -631,43 +652,45 @@ export default {
         this.handleAPIError(err)
       })
     },
-    getSpotifyTracks () {
-      this.currentlyProcessingTextFileName = 'Liked'
-      this.tracklists.level1.push({
-        name: this.currentlyProcessingTextFileName,
+    importSpotifyLikedTracks () {
+      this.hideSpotifyLikedPlaylist = true
+      this.getSpotifyLikedTracks()
+    },
+    getSpotifyLikedTracks () {
+      const tracklistName = 'Liked'
+      const tracklist = {
+        name: tracklistName,
         type: 'spotify',
         tracks: []
-      })
-      this.getSpotifyTracksFromAPI(this.limit, this.offset, 0, 0)
-    },
-    getSpotifyTracksFromAPI (limit, offset, totalSpotifyTracks, spotifyReceivedTracksCounter) {
-      SpotifyService.getLikedTracks({ limit, offset }).then(response => {
-        const tracklist = this.tracklists.level1.find(tracklist => tracklist.name === this.currentlyProcessingTextFileName)
-        const items = response.data.items
-        if (totalSpotifyTracks === 0) {
-          totalSpotifyTracks = response.data.total
-        }
-        offset += limit
-        tracklist.tracks.push(
-          ...items.map(item => {
-            const track = {
-              name: cleanTrackName(item.track.name),
-              artists: item.track.artists.map(artist => artist.name.trim().toLowerCase())
-            }
-            track.name = removeFeaturedArtistFromName(track)
-            return {
-              id: item.track.id,
-              name: track.name,
-              artists: track.artists
-            }
-          }))
-        spotifyReceivedTracksCounter += items.length
+      }
+      const promisesArray = []
+      const limit = 50
+      let offset = 0
 
-        if (spotifyReceivedTracksCounter < totalSpotifyTracks) {
-          this.getSpotifyTracksFromAPI(limit, offset, totalSpotifyTracks, spotifyReceivedTracksCounter)
-        } else {
-          this.currentlyProcessingTextFileName = ''
-        }
+      this.tracklists.level1.push(tracklist)
+
+      while (offset < this.totalSpotifyLikedTracksNumber) {
+        promisesArray.push(SpotifyService.getLikedTracks({ limit, offset }))
+        offset += limit
+      }
+
+      Promise.all(promisesArray).then(responses => {
+        responses.forEach(response => {
+          tracklist.tracks.push(
+            ...response.data.items.map(item => {
+              const track = {
+                name: cleanTrackName(item.track.name),
+                artists: item.track.artists.map(artist => artist.name.trim().toLowerCase())
+              }
+              track.name = removeFeaturedArtistFromName(track)
+              return {
+                id: item.track.id,
+                name: track.name,
+                artists: track.artists
+              }
+            })
+          )
+        })
       }).catch(err => {
         this.handleAPIError(err)
       })
@@ -696,7 +719,7 @@ export default {
       })
     },
     handleAPIError (err) {
-      if (err.response.status === 401) {
+      if (err.response && err.response.status === 401) {
         this.snackbarText = 'I lost the Spotify connection, care logging in again please? Thanks!'
         this.snackbar = true
         localStorage.removeItem('spotifyAccessToken')
