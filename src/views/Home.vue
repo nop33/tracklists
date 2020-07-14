@@ -719,6 +719,7 @@ export default {
       })
     },
     handleAPIError (err) {
+      console.log(err)
       if (err.response && err.response.status === 401) {
         this.snackbarText = 'I lost the Spotify connection, care logging in again please? Thanks!'
         this.snackbar = true
