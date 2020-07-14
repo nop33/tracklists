@@ -444,7 +444,7 @@ export default {
         const index = this.spotifyPlaylists.indexOf(spotifyPlaylist)
         this.spotifyPlaylists.splice(index, 1)
         this.importMethodSelected = null
-        this.getSpotifyPlaylistTracks(spotifyPlaylist.name, spotifyPlaylist.id)
+        this.getSpotifyPlaylistTracks(spotifyPlaylist.name, spotifyPlaylist.id, spotifyPlaylist.tracks.total)
       }
     }
   },
@@ -461,7 +461,7 @@ export default {
   },
   methods: {
     getSpotifyTotalLikedTracksNumber () {
-      SpotifyService.getLikedTracks({ limit: this.limit, offset: this.offset }).then(response => {
+      SpotifyService.getPlaylistTracks('liked', { limit: 1, offset: 0 }).then(response => {
         this.totalSpotifyLikedTracksNumber = response.data.total
       }).catch(err => {
         this.handleAPIError(err)
@@ -614,67 +614,20 @@ export default {
         })
       })
     },
-    getSpotifyPlaylistTracks (playlistName, playlistId) {
-      const offset = 0
-      const limit = 100
-
-      this.tracklists.level1.push({
-        name: playlistName,
-        type: 'spotify',
-        tracks: []
-      })
-      this.getSpotifyPlaylistTracksFromAPI(playlistName, playlistId, limit, offset, 0, 0)
-    },
-    getSpotifyPlaylistTracksFromAPI (playlistName, playlistId, limit, offset, totalSpotifyTracks, spotifyReceivedTracksCounter) {
-      SpotifyService.getPlaylistTracks(playlistId, { limit, offset }).then(response => {
-        const tracklist = this.tracklists.level1.find(tracklist => tracklist.name === playlistName)
-        const items = response.data.items
-        if (totalSpotifyTracks === 0) {
-          totalSpotifyTracks = response.data.total
-        }
-        offset += limit
-        tracklist.tracks.push(
-          ...items.map(item => {
-            const track = {
-              name: cleanTrackName(item.track.name),
-              artists: item.track.artists.map(artist => artist.name.trim().toLowerCase())
-            }
-            track.name = removeFeaturedArtistFromName(track)
-            return {
-              id: item.track.id,
-              name: track.name,
-              artists: track.artists
-            }
-          }))
-        spotifyReceivedTracksCounter += items.length
-
-        if (spotifyReceivedTracksCounter < totalSpotifyTracks) {
-          this.getSpotifyPlaylistTracksFromAPI(playlistName, playlistId, limit, offset, totalSpotifyTracks, spotifyReceivedTracksCounter)
-        }
-      }).catch(err => {
-        this.handleAPIError(err)
-      })
-    },
-    importSpotifyLikedTracks () {
-      this.hideSpotifyLikedPlaylist = true
-      this.importMethodSelected = null
-      this.getSpotifyLikedTracks()
-    },
-    getSpotifyLikedTracks () {
-      const tracklistName = 'Liked'
+    getSpotifyPlaylistTracks (playlistName, playlistId, totalTracks) {
       const tracklist = {
-        name: tracklistName,
+        name: playlistName,
         type: 'spotify',
         tracks: []
       }
       const promisesArray = []
-      const limit = 50
+      const limit = playlistId === 'liked' ? 50 : 100
       let offset = 0
 
       this.tracklists.level1.push(tracklist)
 
-      while (offset < this.totalSpotifyLikedTracksNumber) {
-        promisesArray.push(SpotifyService.getLikedTracks({ limit, offset }))
+      while (offset < totalTracks) {
+        promisesArray.push(SpotifyService.getPlaylistTracks(playlistId, { limit, offset }))
         offset += limit
       }
 
@@ -698,6 +651,11 @@ export default {
       }).catch(err => {
         this.handleAPIError(err)
       })
+    },
+    importSpotifyLikedTracks () {
+      this.hideSpotifyLikedPlaylist = true
+      this.importMethodSelected = null
+      this.getSpotifyPlaylistTracks('Liked', 'liked', this.totalSpotifyLikedTracksNumber)
     },
     getSpotifyPlaylists () {
       this.getSpotifyPlaylistsFromAPI(this.spotifyLimit, this.spotifyOffset, 0, 0)
