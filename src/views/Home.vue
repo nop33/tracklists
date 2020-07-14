@@ -443,6 +443,7 @@ export default {
       if (spotifyPlaylist) {
         const index = this.spotifyPlaylists.indexOf(spotifyPlaylist)
         this.spotifyPlaylists.splice(index, 1)
+        this.importMethodSelected = null
         this.getSpotifyPlaylistTracks(spotifyPlaylist.name, spotifyPlaylist.id)
       }
     }
@@ -552,6 +553,7 @@ export default {
       }, 2000)
     },
     readITunesFile (file) {
+      this.importMethodSelected = null
       this.currentlyProcessingTextFileName = file.name.split('.')[0]
       this.tracklists.level1.push({
         name: this.currentlyProcessingTextFileName,
@@ -561,6 +563,7 @@ export default {
       this.iTunesFileReader.readAsText(file)
     },
     readRekordboxFile (file) {
+      this.importMethodSelected = null
       this.currentlyProcessingTextFileName = file.name.split('.')[0]
       this.tracklists.level1.push({
         name: this.currentlyProcessingTextFileName,
@@ -654,6 +657,7 @@ export default {
     },
     importSpotifyLikedTracks () {
       this.hideSpotifyLikedPlaylist = true
+      this.importMethodSelected = null
       this.getSpotifyLikedTracks()
     },
     getSpotifyLikedTracks () {
