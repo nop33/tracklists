@@ -291,7 +291,7 @@
                   :key="i"
                 >
                   <v-list-item-content>
-                    <v-list-item-title>
+                    <v-list-item-title class="tracklist__title">
                       {{ item.name }}
                     </v-list-item-title>
                   </v-list-item-content>
@@ -491,17 +491,17 @@ export default {
       const onlyRightSideTracks = []
 
       this.tracklists.level2.push({
-        name: `Both in ${this.selectedTracklistToCompareLeft.name} and ${this.selectedTracklistToCompareRight.name}`,
+        name: `Both in "${this.selectedTracklistToCompareLeft.name}" and "${this.selectedTracklistToCompareRight.name}"`,
         type: 'generated',
         tracks: sameTracks
       })
       this.tracklists.level2.push({
-        name: `Only in ${this.selectedTracklistToCompareLeft.name}`,
+        name: `Only in "${this.selectedTracklistToCompareLeft.name}"`,
         type: this.selectedTracklistToCompareLeft.type,
         tracks: onlyLeftSideTracks
       })
       this.tracklists.level2.push({
-        name: `Only in ${this.selectedTracklistToCompareRight.name}`,
+        name: `Only in "${this.selectedTracklistToCompareRight.name}"`,
         type: this.selectedTracklistToCompareRight.type,
         tracks: onlyRightSideTracks
       })
@@ -705,5 +705,9 @@ export default {
 .spotify-playlist-list {
   max-height: 500px;
   overflow-x: auto;
+}
+
+.v-list-item__title.tracklist__title {
+  white-space: normal;
 }
 </style>
