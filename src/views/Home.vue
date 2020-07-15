@@ -107,48 +107,14 @@
                   </div>
                   </v-card-text>
                   <v-list dense v-else>
-                    <v-list-item>
-                      <v-list-item-content>
-                        <v-list-item-title>
-                          {{ selectedTracklistToCompareLeft.name }}
-                        </v-list-item-title>
-                      </v-list-item-content>
-                      <v-list-item-action class="flex-row align-center">
-                        <v-chip
-                          class="ma-2 flex-grow-0"
-                          :color="getColorBasedOnType(selectedTracklistToCompareLeft.type)"
-                          text-color="white"
-                        >
-                          {{ selectedTracklistToCompareLeft.tracks.length }}
-                        </v-chip>
-                        <v-tooltip bottom v-if="selectedTracklistToCompareLeft.tracks.length">
-                          <template v-slot:activator="{ on, attrs }">
-                            <v-btn
-                              icon
-                              v-bind="attrs"
-                              v-on="on"
-                              @click="openDialog(selectedTracklistToCompareLeft)"
-                              >
-                                <v-icon>mdi-format-list-bulleted</v-icon>
-                              </v-btn>
-                          </template>
-                          <span>View tracks</span>
-                        </v-tooltip>
-                        <v-tooltip bottom>
-                          <template v-slot:activator="{ on, attrs }">
-                            <v-btn
-                              icon
-                              v-bind="attrs"
-                              v-on="on"
-                              @click="deselectTracklist(selectedTracklistToCompareLeft, 'left')"
-                              >
-                                <v-icon>mdi-delete</v-icon>
-                              </v-btn>
-                          </template>
-                          <span>Deselect tracklist</span>
-                        </v-tooltip>
-                      </v-list-item-action>
-                    </v-list-item>
+                    <TracklistCard
+                      :key="selectedTracklistToCompareLeft.id"
+                      :name="selectedTracklistToCompareLeft.name"
+                      :id="selectedTracklistToCompareLeft.id"
+                      :tracks="selectedTracklistToCompareLeft.tracks"
+                      :type="selectedTracklistToCompareLeft.type"
+                      isSelectedForComparison="true"
+                    />
                   </v-list>
               </v-card>
             </v-col>
@@ -165,48 +131,14 @@
                   </div>
                   </v-card-text>
                   <v-list dense v-else>
-                    <v-list-item>
-                      <v-list-item-content>
-                        <v-list-item-title>
-                          {{ selectedTracklistToCompareRight.name }}
-                        </v-list-item-title>
-                      </v-list-item-content>
-                      <v-list-item-action class="flex-row align-center">
-                        <v-chip
-                          class="ma-2 flex-grow-0"
-                          :color="getColorBasedOnType(selectedTracklistToCompareRight.type)"
-                          text-color="white"
-                        >
-                          {{ selectedTracklistToCompareRight.tracks.length }}
-                        </v-chip>
-                        <v-tooltip bottom v-if="selectedTracklistToCompareRight.tracks.length">
-                          <template v-slot:activator="{ on, attrs }">
-                            <v-btn
-                              icon
-                              v-bind="attrs"
-                              v-on="on"
-                              @click="openDialog(selectedTracklistToCompareRight)"
-                              >
-                                <v-icon>mdi-format-list-bulleted</v-icon>
-                              </v-btn>
-                          </template>
-                          <span>View tracks</span>
-                        </v-tooltip>
-                        <v-tooltip bottom>
-                          <template v-slot:activator="{ on, attrs }">
-                            <v-btn
-                              icon
-                              v-bind="attrs"
-                              v-on="on"
-                              @click="deselectTracklist(selectedTracklistToCompareRight, 'right')"
-                              >
-                                <v-icon>mdi-delete</v-icon>
-                              </v-btn>
-                          </template>
-                          <span>Deselect tracklist</span>
-                        </v-tooltip>
-                      </v-list-item-action>
-                    </v-list-item>
+                    <TracklistCard
+                      :key="selectedTracklistToCompareRight.id"
+                      :name="selectedTracklistToCompareRight.name"
+                      :id="selectedTracklistToCompareRight.id"
+                      :tracks="selectedTracklistToCompareRight.tracks"
+                      :type="selectedTracklistToCompareRight.type"
+                      isSelectedForComparison="true"
+                    />
                   </v-list>
               </v-card>
             </v-col>
@@ -225,77 +157,14 @@
               </div>
               <v-list dense v-else>
                 <v-list-item-group color="primary">
-                <v-list-item
-                  v-for="(tracklist, i) in tracklists.level1"
-                  :key="i"
-                >
-                  <v-list-item-content>
-                    <v-list-item-title>
-                      {{ tracklist.name }}
-                    </v-list-item-title>
-                  </v-list-item-content>
-                  <v-list-item-action class="flex-row align-center">
-                    <v-chip
-                      class="ma-2 flex-grow-0"
-                      :color="getColorBasedOnType(tracklist.type)"
-                      text-color="white"
-                    >
-                      {{ tracklist.tracks.length }}
-                    </v-chip>
-                    <v-tooltip bottom v-if="tracklist.tracks.length">
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-btn
-                          icon
-                          v-bind="attrs"
-                          v-on="on"
-                          @click="openDialog(tracklist)"
-                          >
-                            <v-icon>mdi-format-list-bulleted</v-icon>
-                          </v-btn>
-                      </template>
-                      <span>View tracks</span>
-                    </v-tooltip>
-                    <v-tooltip bottom>
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-btn
-                          icon
-                          v-bind="attrs"
-                          v-on="on"
-                          @click="selectTracklist(tracklist)"
-                          >
-                            <v-icon>mdi-selection-ellipse-arrow-inside</v-icon>
-                          </v-btn>
-                      </template>
-                      <span>Select tracklist to compare</span>
-                    </v-tooltip>
-                    <v-tooltip bottom>
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-btn
-                          icon
-                          v-bind="attrs"
-                          v-on="on"
-                          @click="setAsTracksToDownload(tracklist)"
-                          >
-                            <v-icon :color="spotifyPlaylistToDownload && tracklist.name === spotifyPlaylistToDownload.name ? 'green' : ''">mdi-download</v-icon>
-                          </v-btn>
-                      </template>
-                      <span>Select as tracks to download</span>
-                    </v-tooltip>
-                    <v-tooltip bottom>
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-btn
-                          icon
-                          v-bind="attrs"
-                          v-on="on"
-                          @click="setAsTracksToBuy(tracklist)"
-                          >
-                            <v-icon :color="spotifyPlaylistToBuy && tracklist.name === spotifyPlaylistToBuy.name ? 'green' : ''">mdi-currency-usd</v-icon>
-                          </v-btn>
-                      </template>
-                      <span>Select as tracks to buy</span>
-                    </v-tooltip>
-                  </v-list-item-action>
-                </v-list-item>
+                  <TracklistCard
+                    v-for="tracklist in tracklists.level1"
+                    :key="tracklist.id"
+                    :name="tracklist.name"
+                    :id="tracklist.id"
+                    :tracks="tracklist.tracks"
+                    :type="tracklist.type"
+                  />
                 </v-list-item-group>
               </v-list>
             </v-card-text>
@@ -312,77 +181,14 @@
               </div>
               <v-list dense v-else>
                 <v-list-item-group color="primary">
-                <v-list-item
-                  v-for="(tracklist, i) in tracklists.level2"
-                  :key="i"
-                >
-                  <v-list-item-content>
-                    <v-list-item-title class="tracklist__title">
-                      {{ tracklist.name }}
-                    </v-list-item-title>
-                  </v-list-item-content>
-                  <v-list-item-action class="flex-row align-center">
-                    <v-chip
-                      class="ma-2 flex-grow-0"
-                      :color="getColorBasedOnType(tracklist.type)"
-                      text-color="white"
-                    >
-                      {{ tracklist.tracks.length }}
-                    </v-chip>
-                    <v-tooltip bottom v-if="tracklist.tracks.length">
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-btn
-                          icon
-                          v-bind="attrs"
-                          v-on="on"
-                          @click="openDialog(tracklist)"
-                          >
-                            <v-icon>mdi-format-list-bulleted</v-icon>
-                          </v-btn>
-                      </template>
-                      <span>View tracks</span>
-                    </v-tooltip>
-                    <v-tooltip bottom>
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-btn
-                          icon
-                          v-bind="attrs"
-                          v-on="on"
-                          @click="selectTracklist(tracklist)"
-                          >
-                            <v-icon>mdi-selection-ellipse-arrow-inside</v-icon>
-                          </v-btn>
-                      </template>
-                      <span>Select tracklist to compare</span>
-                    </v-tooltip>
-                    <v-tooltip bottom>
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-btn
-                          icon
-                          v-bind="attrs"
-                          v-on="on"
-                          @click="setAsTracksToDownload(tracklist)"
-                          >
-                            <v-icon :color="spotifyPlaylistToDownload && tracklist.name === spotifyPlaylistToDownload.name ? 'green' : ''">mdi-download</v-icon>
-                          </v-btn>
-                      </template>
-                      <span>Select as tracks to download</span>
-                    </v-tooltip>
-                    <v-tooltip bottom>
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-btn
-                          icon
-                          v-bind="attrs"
-                          v-on="on"
-                          @click="setAsTracksToBuy(tracklist)"
-                          >
-                            <v-icon :color="spotifyPlaylistToBuy && tracklist.name === spotifyPlaylistToBuy.name ? 'green' : ''">mdi-currency-usd</v-icon>
-                          </v-btn>
-                      </template>
-                      <span>Select as tracks to buy</span>
-                    </v-tooltip>
-                  </v-list-item-action>
-                </v-list-item>
+                  <TracklistCard
+                    v-for="tracklist in tracklists.level2"
+                    :key="tracklist.id"
+                    :name="tracklist.name"
+                    :id="tracklist.id"
+                    :tracks="tracklist.tracks"
+                    :type="tracklist.type"
+                  />
                 </v-list-item-group>
               </v-list>
             </v-card-text>
@@ -411,8 +217,8 @@
                 </div>
               </v-sheet>
               <v-card-text>
-                <v-list dense v-if="selectedTracklist">
-                  <v-list-item two-line v-for="track in selectedTracklist.tracks" :key="track.id">
+                <v-list dense v-if="tracklistToShowTracks">
+                  <v-list-item two-line v-for="track in tracklistToShowTracks.tracks" :key="track.id">
                     <v-list-item-content>
                       <v-list-item-title>{{ track.name }}</v-list-item-title>
                       <v-list-item-subtitle>{{ track.artists.join(', ') }}</v-list-item-subtitle>
@@ -437,8 +243,13 @@
 <script>
 import { generateRandomString, cleanTrackName, removeFeaturedArtistFromName } from '@/utils/utils'
 import SpotifyService from '@/services/SpotifyService'
+import TracklistCard from '@/components/TracklistCard.vue'
+import { mapState } from 'vuex'
 
 export default {
+  components: {
+    TracklistCard
+  },
   data: () => ({
     clientId: 'e5d07ddf1fe64a6cbcd2d14ac0aac87b',
     scope: 'user-read-private user-read-email playlist-read-private user-library-read',
@@ -463,14 +274,13 @@ export default {
     selectedSpotifyPlaylistToImport: null,
     selectedTracklist: null,
     dialog: false,
-    selectedTracklistToCompareLeft: null,
-    selectedTracklistToCompareRight: null,
     totalSpotifyLikedTracksNumber: 0,
     hideSpotifyLikedPlaylist: false,
     spotifyPlaylistToDownload: null,
     spotifyPlaylistToBuy: null
   }),
   computed: {
+    ...mapState(['selectedTracklistToCompareLeft', 'selectedTracklistToCompareRight', 'showDialog', 'tracklistToShowTracks']),
     spotifyAuthUrl () {
       const baseUrl = 'https://accounts.spotify.com/authorize'
       const responseType = 'token'
@@ -499,6 +309,14 @@ export default {
         this.spotifyPlaylists.splice(index, 1)
         this.importMethodSelected = null
         this.getSpotifyPlaylistTracks(spotifyPlaylist.name, spotifyPlaylist.id, spotifyPlaylist.tracks.total)
+      }
+    },
+    showDialog: function (newValue) {
+      this.dialog = newValue
+    },
+    dialog: function (newValue, oldValue) {
+      if (!newValue) {
+        this.$store.dispatch('toggleDialog')
       }
     }
   },
@@ -551,16 +369,19 @@ export default {
       const onlyRightSideTracks = []
 
       this.tracklists.level2.push({
+        id: `Both in "${this.selectedTracklistToCompareLeft.name}" and "${this.selectedTracklistToCompareRight.name}"`,
         name: `Both in "${this.selectedTracklistToCompareLeft.name}" and "${this.selectedTracklistToCompareRight.name}"`,
         type: 'generated',
         tracks: sameTracks
       })
       this.tracklists.level2.push({
+        id: `Only in "${this.selectedTracklistToCompareLeft.name}"`,
         name: `Only in "${this.selectedTracklistToCompareLeft.name}"`,
         type: this.selectedTracklistToCompareLeft.type,
         tracks: onlyLeftSideTracks
       })
       this.tracklists.level2.push({
+        id: `Only in "${this.selectedTracklistToCompareRight.name}"`,
         name: `Only in "${this.selectedTracklistToCompareRight.name}"`,
         type: this.selectedTracklistToCompareRight.type,
         tracks: onlyRightSideTracks
@@ -616,6 +437,7 @@ export default {
       this.importMethodSelected = null
       this.currentlyProcessingTextFileName = file.name.split('.')[0]
       this.tracklists.level1.push({
+        id: this.currentlyProcessingTextFileName,
         name: this.currentlyProcessingTextFileName,
         type: 'iTunes',
         tracks: []
@@ -626,6 +448,7 @@ export default {
       this.importMethodSelected = null
       this.currentlyProcessingTextFileName = file.name.split('.')[0]
       this.tracklists.level1.push({
+        id: this.currentlyProcessingTextFileName,
         name: this.currentlyProcessingTextFileName,
         type: 'rekordbox',
         tracks: []
@@ -676,6 +499,7 @@ export default {
     },
     getSpotifyPlaylistTracks (playlistName, playlistId, totalTracks) {
       const tracklist = {
+        id: playlistId,
         name: playlistName,
         type: 'spotify',
         tracks: []
