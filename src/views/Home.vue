@@ -226,29 +226,29 @@
               <v-list dense v-else>
                 <v-list-item-group color="primary">
                 <v-list-item
-                  v-for="(item, i) in tracklists.level1"
+                  v-for="(tracklist, i) in tracklists.level1"
                   :key="i"
                 >
                   <v-list-item-content>
                     <v-list-item-title>
-                      {{ item.name }}
+                      {{ tracklist.name }}
                     </v-list-item-title>
                   </v-list-item-content>
                   <v-list-item-action class="flex-row align-center">
                     <v-chip
                       class="ma-2 flex-grow-0"
-                      :color="getColorBasedOnType(item.type)"
+                      :color="getColorBasedOnType(tracklist.type)"
                       text-color="white"
                     >
-                      {{ item.tracks.length }}
+                      {{ tracklist.tracks.length }}
                     </v-chip>
-                    <v-tooltip bottom v-if="item.tracks.length">
+                    <v-tooltip bottom v-if="tracklist.tracks.length">
                       <template v-slot:activator="{ on, attrs }">
                         <v-btn
                           icon
                           v-bind="attrs"
                           v-on="on"
-                          @click="openDialog(item)"
+                          @click="openDialog(tracklist)"
                           >
                             <v-icon>mdi-format-list-bulleted</v-icon>
                           </v-btn>
@@ -261,12 +261,38 @@
                           icon
                           v-bind="attrs"
                           v-on="on"
-                          @click="selectTracklist(item)"
+                          @click="selectTracklist(tracklist)"
                           >
                             <v-icon>mdi-selection-ellipse-arrow-inside</v-icon>
                           </v-btn>
                       </template>
-                      <span>Select tracklist</span>
+                      <span>Select tracklist to compare</span>
+                    </v-tooltip>
+                    <v-tooltip bottom>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn
+                          icon
+                          v-bind="attrs"
+                          v-on="on"
+                          @click="setAsTracksToDownload(tracklist)"
+                          >
+                            <v-icon :color="spotifyPlaylistToDownload && tracklist.name === spotifyPlaylistToDownload.name ? 'green' : ''">mdi-download</v-icon>
+                          </v-btn>
+                      </template>
+                      <span>Select as tracks to download</span>
+                    </v-tooltip>
+                    <v-tooltip bottom>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn
+                          icon
+                          v-bind="attrs"
+                          v-on="on"
+                          @click="setAsTracksToBuy(tracklist)"
+                          >
+                            <v-icon :color="spotifyPlaylistToBuy && tracklist.name === spotifyPlaylistToBuy.name ? 'green' : ''">mdi-currency-usd</v-icon>
+                          </v-btn>
+                      </template>
+                      <span>Select as tracks to buy</span>
                     </v-tooltip>
                   </v-list-item-action>
                 </v-list-item>
@@ -287,29 +313,29 @@
               <v-list dense v-else>
                 <v-list-item-group color="primary">
                 <v-list-item
-                  v-for="(item, i) in tracklists.level2"
+                  v-for="(tracklist, i) in tracklists.level2"
                   :key="i"
                 >
                   <v-list-item-content>
                     <v-list-item-title class="tracklist__title">
-                      {{ item.name }}
+                      {{ tracklist.name }}
                     </v-list-item-title>
                   </v-list-item-content>
                   <v-list-item-action class="flex-row align-center">
                     <v-chip
                       class="ma-2 flex-grow-0"
-                      :color="getColorBasedOnType(item.type)"
+                      :color="getColorBasedOnType(tracklist.type)"
                       text-color="white"
                     >
-                      {{ item.tracks.length }}
+                      {{ tracklist.tracks.length }}
                     </v-chip>
-                    <v-tooltip bottom v-if="item.tracks.length">
+                    <v-tooltip bottom v-if="tracklist.tracks.length">
                       <template v-slot:activator="{ on, attrs }">
                         <v-btn
                           icon
                           v-bind="attrs"
                           v-on="on"
-                          @click="openDialog(item)"
+                          @click="openDialog(tracklist)"
                           >
                             <v-icon>mdi-format-list-bulleted</v-icon>
                           </v-btn>
@@ -322,12 +348,38 @@
                           icon
                           v-bind="attrs"
                           v-on="on"
-                          @click="selectTracklist(item)"
+                          @click="selectTracklist(tracklist)"
                           >
                             <v-icon>mdi-selection-ellipse-arrow-inside</v-icon>
                           </v-btn>
                       </template>
-                      <span>Select tracklist</span>
+                      <span>Select tracklist to compare</span>
+                    </v-tooltip>
+                    <v-tooltip bottom>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn
+                          icon
+                          v-bind="attrs"
+                          v-on="on"
+                          @click="setAsTracksToDownload(tracklist)"
+                          >
+                            <v-icon :color="spotifyPlaylistToDownload && tracklist.name === spotifyPlaylistToDownload.name ? 'green' : ''">mdi-download</v-icon>
+                          </v-btn>
+                      </template>
+                      <span>Select as tracks to download</span>
+                    </v-tooltip>
+                    <v-tooltip bottom>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn
+                          icon
+                          v-bind="attrs"
+                          v-on="on"
+                          @click="setAsTracksToBuy(tracklist)"
+                          >
+                            <v-icon :color="spotifyPlaylistToBuy && tracklist.name === spotifyPlaylistToBuy.name ? 'green' : ''">mdi-currency-usd</v-icon>
+                          </v-btn>
+                      </template>
+                      <span>Select as tracks to buy</span>
                     </v-tooltip>
                   </v-list-item-action>
                 </v-list-item>
@@ -414,7 +466,9 @@ export default {
     selectedTracklistToCompareLeft: null,
     selectedTracklistToCompareRight: null,
     totalSpotifyLikedTracksNumber: 0,
-    hideSpotifyLikedPlaylist: false
+    hideSpotifyLikedPlaylist: false,
+    spotifyPlaylistToDownload: null,
+    spotifyPlaylistToBuy: null
   }),
   computed: {
     spotifyAuthUrl () {
@@ -460,6 +514,12 @@ export default {
     this.canAccessSpotifyAPI = localStorage && localStorage.getItem('spotifyAccessToken')
   },
   methods: {
+    setAsTracksToDownload (tracklist) {
+      this.spotifyPlaylistToDownload = tracklist
+    },
+    setAsTracksToBuy (tracklist) {
+      this.spotifyPlaylistToBuy = tracklist
+    },
     getSpotifyTotalLikedTracksNumber () {
       SpotifyService.getPlaylistTracks('liked', { limit: 1, offset: 0 }).then(response => {
         this.totalSpotifyLikedTracksNumber = response.data.total
