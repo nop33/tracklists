@@ -1,7 +1,7 @@
 <template>
   <v-list-item>
     <v-list-item-content>
-      <v-list-item-title>
+      <v-list-item-title class="tracklist__title">
         {{ name }}
       </v-list-item-title>
     </v-list-item-content>
@@ -133,3 +133,9 @@ export default {
   }
 }
 </script>
+
+<style lang="scss">
+.v-list-item__title.tracklist__title {
+  white-space: normal;
+}
+</style>

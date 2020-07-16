@@ -9,6 +9,7 @@ export default new Vuex.Store({
     spotifyPlaylistIdWithTracksToBuy: null,
     selectedTracklistToCompareLeft: null,
     selectedTracklistToCompareRight: null,
+    selectedImportMethod: null,
     showDialog: false,
     tracklistToShowTracks: null
   },
@@ -38,6 +39,9 @@ export default new Vuex.Store({
     },
     SET_TRACKLIST_TO_SHOW_TRACKS (state, tracklist) {
       state.tracklistToShowTracks = tracklist
+    },
+    SET_SELECTED_IMPORT_METHOD (state, value) {
+      state.selectedImportMethod = value
     }
   },
   actions: {
@@ -58,6 +62,12 @@ export default new Vuex.Store({
     },
     setTracklistToShowTracks ({ commit }, tracklist) {
       commit('SET_TRACKLIST_TO_SHOW_TRACKS', tracklist)
+    },
+    setSelectedImportMethod ({ commit }, value) {
+      commit('SET_SELECTED_IMPORT_METHOD', value)
+    },
+    hideImporter ({ commit }) {
+      commit('SET_SELECTED_IMPORT_METHOD', null)
     }
   },
   modules: {

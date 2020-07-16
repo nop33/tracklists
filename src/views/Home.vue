@@ -16,53 +16,7 @@
           <v-btn @click="loginToSpotify" dark color="green">Login to Spotify</v-btn>
         </v-col>
         <v-col v-else sm="6" class="text-center">
-          <v-card
-            class="mx-auto text-left"
-            max-width="500"
-          >
-            <v-sheet class="pa-4 green lighten-2">
-              <v-text-field
-                v-model="spotifyPlaylistSearch"
-                label="Search Spotify playlist"
-                dark
-                flat
-                solo-inverted
-                hide-details
-                clearable
-                clear-icon="mdi-close-circle-outline"
-              ></v-text-field>
-            </v-sheet>
-            <v-card-text class="spotify-playlist-list">
-
-              <v-list dense>
-                <v-list-item-group v-model="selectedSpotifyPlaylistToImport" color="green">
-                  <v-list-item v-if="!hideSpotifyLikedPlaylist" @click="importSpotifyLikedTracks">
-                    <v-list-item-avatar>
-                      <v-icon color="red">mdi-heart</v-icon>
-                    </v-list-item-avatar>
-                    <v-list-item-content>
-                      <v-list-item-title>Liked</v-list-item-title>
-                    </v-list-item-content>
-                    <v-list-item-icon>
-                      <v-chip>{{ totalSpotifyLikedTracksNumber }}</v-chip>
-                    </v-list-item-icon>
-                  </v-list-item>
-                  <v-list-item v-for="playlist in filteredSpotifyPlaylists" :key="playlist.id" :value="playlist">
-                    <v-list-item-avatar>
-                      <v-img v-if="playlist.images.length" :src="playlist.images[0].url"></v-img>
-                      <v-icon v-else color="green">fab fa-spotify</v-icon>
-                    </v-list-item-avatar>
-                    <v-list-item-content>
-                      <v-list-item-title v-text="playlist.name"></v-list-item-title>
-                    </v-list-item-content>
-                    <v-list-item-icon>
-                      <v-chip>{{ playlist.tracks.total }}</v-chip>
-                    </v-list-item-icon>
-                  </v-list-item>
-                </v-list-item-group>
-              </v-list>
-            </v-card-text>
-          </v-card>
+          <SpotifyPlaylistListCard :playlistImportCallback="getSpotifyPlaylistTracks"/>
         </v-col>
       </v-row>
       <v-row v-if="importMethodSelected == 1" justify="center">
@@ -235,43 +189,42 @@ import SpotifyService from '@/services/SpotifyService'
 import TracklistCard from '@/components/TracklistCard.vue'
 import { mapState } from 'vuex'
 import ImportPlaylistButton from '@/components/ImportPlaylistButton.vue'
+import SpotifyPlaylistListCard from '@/components/SpotifyPlaylistListCard.vue'
 
 export default {
   components: {
     TracklistCard,
-    ImportPlaylistButton
+    ImportPlaylistButton,
+    SpotifyPlaylistListCard
   },
   data: () => ({
     clientId: 'e5d07ddf1fe64a6cbcd2d14ac0aac87b',
     scope: 'user-read-private user-read-email playlist-read-private user-library-read',
     redirectUri: 'http://localhost:8080/spotify-auth-callback',
     state: generateRandomString(16),
-
     iTunesFileReader: new FileReader(),
     rekordboxFileReader: new FileReader(),
-    importMethodSelected: null,
     tracklists: {
       level1: [],
       level2: []
     },
     currentlyProcessingTextFileName: '',
-    spotifyOffset: 0,
-    spotifyLimit: 50,
-    spotifyPlaylists: [],
     canAccessSpotifyAPI: false,
     snackbar: false,
     snackbarText: '',
     spotifyPlaylistSearch: null,
-    selectedSpotifyPlaylistToImport: null,
-    selectedTracklist: null,
-    dialog: false,
-    totalSpotifyLikedTracksNumber: 0,
-    hideSpotifyLikedPlaylist: false,
-    spotifyPlaylistToDownload: null,
-    spotifyPlaylistToBuy: null
+    dialog: false
   }),
   computed: {
-    ...mapState(['selectedTracklistToCompareLeft', 'selectedTracklistToCompareRight', 'showDialog', 'tracklistToShowTracks']),
+    ...mapState(
+      [
+        'selectedTracklistToCompareLeft',
+        'selectedTracklistToCompareRight',
+        'showDialog',
+        'tracklistToShowTracks',
+        'selectedImportMethod'
+      ]
+    ),
     spotifyAuthUrl () {
       const baseUrl = 'https://accounts.spotify.com/authorize'
       const responseType = 'token'
@@ -281,27 +234,16 @@ export default {
       const state = encodeURIComponent(this.state)
       return `${baseUrl}?response_type=${responseType}&client_id=${clientId}&scope=${scope}&redirect_uri=${redirectUri}&state=${state}`
     },
-    filteredSpotifyPlaylists () {
-      return this.spotifyPlaylistSearch
-        ? this.spotifyPlaylists.filter(playlist => playlist.name.toLowerCase().includes(this.spotifyPlaylistSearch.toLowerCase()))
-        : this.spotifyPlaylists
+    importMethodSelected: {
+      get () {
+        return this.selectedImportMethod
+      },
+      set (value) {
+        this.$store.dispatch('setSelectedImportMethod', value)
+      }
     }
   },
   watch: {
-    importMethodSelected: function (method) {
-      if (method === 0 && this.canAccessSpotifyAPI && this.spotifyPlaylists.length === 0) {
-        this.getSpotifyPlaylists()
-        this.getSpotifyTotalLikedTracksNumber()
-      }
-    },
-    selectedSpotifyPlaylistToImport: function (spotifyPlaylist) {
-      if (spotifyPlaylist) {
-        const index = this.spotifyPlaylists.indexOf(spotifyPlaylist)
-        this.spotifyPlaylists.splice(index, 1)
-        this.importMethodSelected = null
-        this.getSpotifyPlaylistTracks(spotifyPlaylist.name, spotifyPlaylist.id, spotifyPlaylist.tracks.total)
-      }
-    },
     showDialog: function (newValue) {
       this.dialog = newValue
     },
@@ -323,37 +265,6 @@ export default {
     this.canAccessSpotifyAPI = localStorage && localStorage.getItem('spotifyAccessToken')
   },
   methods: {
-    setAsTracksToDownload (tracklist) {
-      this.spotifyPlaylistToDownload = tracklist
-    },
-    setAsTracksToBuy (tracklist) {
-      this.spotifyPlaylistToBuy = tracklist
-    },
-    getSpotifyTotalLikedTracksNumber () {
-      SpotifyService.getPlaylistTracks('liked', { limit: 1, offset: 0 }).then(response => {
-        this.totalSpotifyLikedTracksNumber = response.data.total
-      }).catch(err => {
-        this.handleAPIError(err)
-      })
-    },
-    openDialog (tracklist) {
-      this.dialog = true
-      this.selectedTracklist = tracklist
-    },
-    selectTracklist (tracklist) {
-      if (!this.selectedTracklistToCompareLeft) {
-        this.selectedTracklistToCompareLeft = tracklist
-      } else {
-        this.selectedTracklistToCompareRight = tracklist
-      }
-    },
-    deselectTracklist (tracklist, side) {
-      if (side === 'left') {
-        this.selectedTracklistToCompareLeft = null
-      } else if (side === 'right') {
-        this.selectedTracklistToCompareRight = null
-      }
-    },
     compare () {
       const sameTracks = []
       const onlyLeftSideTracks = []
@@ -425,7 +336,7 @@ export default {
       }, 2000)
     },
     readITunesFile (file) {
-      this.importMethodSelected = null
+      this.$store.dispatch('hideImporter')
       this.currentlyProcessingTextFileName = file.name.split('.')[0]
       this.tracklists.level1.push({
         id: this.currentlyProcessingTextFileName,
@@ -436,7 +347,7 @@ export default {
       this.iTunesFileReader.readAsText(file)
     },
     readRekordboxFile (file) {
-      this.importMethodSelected = null
+      this.$store.dispatch('hideImporter')
       this.currentlyProcessingTextFileName = file.name.split('.')[0]
       this.tracklists.level1.push({
         id: this.currentlyProcessingTextFileName,
@@ -527,34 +438,7 @@ export default {
         this.handleAPIError(err)
       })
     },
-    importSpotifyLikedTracks () {
-      this.hideSpotifyLikedPlaylist = true
-      this.importMethodSelected = null
-      this.getSpotifyPlaylistTracks('Liked', 'liked', this.totalSpotifyLikedTracksNumber)
-    },
-    getSpotifyPlaylists () {
-      this.getSpotifyPlaylistsFromAPI(this.spotifyLimit, this.spotifyOffset, 0, 0)
-    },
-    getSpotifyPlaylistsFromAPI (limit, offset, totalSpotifyPlaylists, spotifyReceivedPlaylistsCounter) {
-      SpotifyService.getPlaylists({ limit, offset }).then(response => {
-        const playlists = response.data.items
-        if (totalSpotifyPlaylists === 0) {
-          totalSpotifyPlaylists = response.data.total
-        }
-        offset += limit
 
-        this.spotifyPlaylists.push(...playlists)
-
-        spotifyReceivedPlaylistsCounter += playlists.length
-        if (spotifyReceivedPlaylistsCounter < totalSpotifyPlaylists) {
-          this.getSpotifyPlaylistsFromAPI(limit, offset, totalSpotifyPlaylists, spotifyReceivedPlaylistsCounter)
-        } else {
-          this.currentlyProcessingTextFileName = ''
-        }
-      }).catch(err => {
-        this.handleAPIError(err)
-      })
-    },
     handleAPIError (err) {
       console.log(err)
       if (err.response && err.response.status === 401) {
@@ -575,14 +459,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss">
-.spotify-playlist-list {
-  max-height: 500px;
-  overflow-x: auto;
-}
-
-.v-list-item__title.tracklist__title {
-  white-space: normal;
-}
-</style>
