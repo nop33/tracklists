@@ -5,20 +5,9 @@
         <v-col class="d-flex align-center flex-column">
           <h2 class="text-h4 mb-5">Import playlist from</h2>
           <v-btn-toggle v-model="importMethodSelected">
-            <v-btn x-large class="pa-10">
-              <v-icon left color="green">fab fa-spotify</v-icon>
-              Spotify
-            </v-btn>
-
-            <v-btn x-large class="pa-10">
-              <v-icon left color="blue">fab fa-itunes</v-icon>
-              iTunes
-            </v-btn>
-
-            <v-btn x-large class="pa-10">
-              <v-icon left color="black">fas fa-headphones</v-icon>
-              Rekordbox
-            </v-btn>
+            <ImportPlaylistButton text="Spotify" icon="fab fa-spotify" color="green" />
+            <ImportPlaylistButton text="iTunes" icon="fab fa-itunes" color="blue" />
+            <ImportPlaylistButton text="Rekordbox" icon="fas fa-headphones" color="black" />
           </v-btn-toggle>
         </v-col>
       </v-row>
@@ -245,10 +234,12 @@ import { generateRandomString, cleanTrackName, removeFeaturedArtistFromName } fr
 import SpotifyService from '@/services/SpotifyService'
 import TracklistCard from '@/components/TracklistCard.vue'
 import { mapState } from 'vuex'
+import ImportPlaylistButton from '@/components/ImportPlaylistButton.vue'
 
 export default {
   components: {
-    TracklistCard
+    TracklistCard,
+    ImportPlaylistButton
   },
   data: () => ({
     clientId: 'e5d07ddf1fe64a6cbcd2d14ac0aac87b',
