@@ -43,23 +43,7 @@
         <v-col md="9">
           <v-row>
             <v-col>
-              <v-card outlined>
-                <v-card-text v-if="!selectedTracklistToCompareLeft">
-                  <div class="font-weight-thin font-italic">
-                    Select a tracklist to compare
-                  </div>
-                  </v-card-text>
-                  <v-list dense v-else>
-                    <TracklistCard
-                      :key="selectedTracklistToCompareLeft.id"
-                      :name="selectedTracklistToCompareLeft.name"
-                      :id="selectedTracklistToCompareLeft.id"
-                      :tracks="selectedTracklistToCompareLeft.tracks"
-                      :type="selectedTracklistToCompareLeft.type"
-                      isSelectedForComparison="true"
-                    />
-                  </v-list>
-              </v-card>
+              <ComparisonTracklistCard :tracklist="selectedTracklistToCompareLeft" />
             </v-col>
             <v-col class="d-flex align-center justify-space-around">
               <v-icon>mdi-arrow-right</v-icon>
@@ -67,23 +51,7 @@
               <v-icon>mdi-arrow-left</v-icon>
             </v-col>
             <v-col>
-              <v-card outlined>
-                <v-card-text v-if="!selectedTracklistToCompareRight">
-                  <div class="font-weight-thin font-italic">
-                    Select a tracklist to compare
-                  </div>
-                  </v-card-text>
-                  <v-list dense v-else>
-                    <TracklistCard
-                      :key="selectedTracklistToCompareRight.id"
-                      :name="selectedTracklistToCompareRight.name"
-                      :id="selectedTracklistToCompareRight.id"
-                      :tracks="selectedTracklistToCompareRight.tracks"
-                      :type="selectedTracklistToCompareRight.type"
-                      isSelectedForComparison="true"
-                    />
-                  </v-list>
-              </v-card>
+              <ComparisonTracklistCard :tracklist="selectedTracklistToCompareRight" />
             </v-col>
           </v-row>
         </v-col>
@@ -190,12 +158,14 @@ import TracklistCard from '@/components/TracklistCard.vue'
 import { mapState } from 'vuex'
 import ImportPlaylistButton from '@/components/ImportPlaylistButton.vue'
 import SpotifyPlaylistListCard from '@/components/SpotifyPlaylistListCard.vue'
+import ComparisonTracklistCard from '@/components/ComparisonTracklistCard.vue'
 
 export default {
   components: {
     TracklistCard,
     ImportPlaylistButton,
-    SpotifyPlaylistListCard
+    SpotifyPlaylistListCard,
+    ComparisonTracklistCard
   },
   data: () => ({
     clientId: 'e5d07ddf1fe64a6cbcd2d14ac0aac87b',
