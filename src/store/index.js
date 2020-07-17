@@ -29,9 +29,9 @@ export default new Vuex.Store({
       }
     },
     UNSET_TRACKLIST_TO_COMPARE (state, tracklist) {
-      if (state.selectedTracklistToCompareLeft.id === tracklist.id) {
+      if (state.selectedTracklistToCompareLeft && state.selectedTracklistToCompareLeft.id === tracklist.id) {
         state.selectedTracklistToCompareLeft = null
-      } else if (state.selectedTracklistToCompareRight.id === tracklist.id) {
+      } else if (state.selectedTracklistToCompareRight && state.selectedTracklistToCompareRight.id === tracklist.id) {
         state.selectedTracklistToCompareRight = null
       }
     },
