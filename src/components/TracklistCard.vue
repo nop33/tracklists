@@ -2,7 +2,7 @@
   <v-list-item>
     <v-list-item-content>
       <v-list-item-title class="tracklist__title">
-        {{ name }}
+        {{ tracklist.name }}
       </v-list-item-title>
     </v-list-item-content>
     <v-list-item-action class="flex-row align-center">
@@ -11,9 +11,9 @@
         :color="chipColor"
         text-color="white"
       >
-        {{ tracks.length }}
+        {{ tracklist.tracks.length }}
       </v-chip>
-      <v-tooltip bottom v-if="tracks.length">
+      <v-tooltip bottom v-if="tracklist.tracks.length">
         <template v-slot:activator="{ on, attrs }">
           <v-btn
             icon
@@ -26,7 +26,7 @@
         </template>
         <span>View tracks</span>
       </v-tooltip>
-      <v-tooltip v-if="isSelectedForComparison" bottom>
+      <v-tooltip v-if="isComparisonTracklist" bottom>
         <template v-slot:activator="{ on, attrs }">
           <v-btn
             icon
@@ -39,7 +39,7 @@
         </template>
         <span>Deselect tracklist</span>
       </v-tooltip>
-      <v-tooltip v-if="!isSelectedForComparison" bottom>
+      <v-tooltip v-if="!isComparisonTracklist" bottom>
         <template v-slot:activator="{ on, attrs }">
           <v-btn
             icon
@@ -52,7 +52,7 @@
         </template>
         <span>Select tracklist to compare</span>
       </v-tooltip>
-      <v-tooltip v-if="!isSelectedForComparison" bottom>
+      <v-tooltip v-if="!isComparisonTracklist && isSpotifyImportedTracklist" bottom>
         <template v-slot:activator="{ on, attrs }">
           <v-btn
             icon
@@ -65,7 +65,7 @@
         </template>
         <span>Select as tracks to download</span>
       </v-tooltip>
-      <v-tooltip v-if="!isSelectedForComparison" bottom>
+      <v-tooltip v-if="!isComparisonTracklist && isSpotifyImportedTracklist" bottom>
         <template v-slot:activator="{ on, attrs }">
           <v-btn
             icon
@@ -83,42 +83,46 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
+import { contentTypes, origins } from '@/utils/constants'
+
 export default {
-  props: ['id', 'name', 'type', 'tracks', 'isSelectedForComparison'],
-  data: () => {
-    return {
-      toBuyIconColor: null,
-      toDownloadIconColor: null
-    }
-  },
+  props: [
+    'tracklist',
+    'isSelectedForComparison'
+  ],
   computed: {
+    ...mapState([
+      'spotifyPlaylistIdWithTracksToDownload',
+      'spotifyPlaylistIdWithTracksToBuy'
+    ]),
     chipColor () {
       const colorMap = {
-        iTunes: 'blue',
-        rekordbox: 'black',
-        spotify: 'green'
+        [contentTypes.ITUNES]: 'blue',
+        [contentTypes.REKORDBOX]: 'black',
+        [contentTypes.SPOTIFY]: 'green'
       }
-      return colorMap[this.$props.type]
+      return colorMap[this.tracklist.contentType]
     },
-    tracklist () {
-      return {
-        name: this.$props.name,
-        type: this.$props.type,
-        id: this.$props.id,
-        tracks: this.$props.tracks
-      }
+    isComparisonTracklist () {
+      return this.$props.isSelectedForComparison !== undefined
+    },
+    isSpotifyImportedTracklist () {
+      return this.tracklist.origin === origins.IMPORTED && this.tracklist.contentType === contentTypes.SPOTIFY
+    },
+    toDownloadIconColor () {
+      return this.spotifyPlaylistIdWithTracksToDownload === this.tracklist.id ? 'green' : ''
+    },
+    toBuyIconColor () {
+      return this.spotifyPlaylistIdWithTracksToBuy === this.tracklist.id ? 'green' : ''
     }
   },
   methods: {
     setAsTracksToDownload () {
-      this.$store.dispatch('setSpotifyToDownloadPlaylistId', this.$props.id).then(() => {
-        this.toDownloadIconColor = 'green'
-      })
+      this.$store.dispatch('setSpotifyToDownloadPlaylistId', this.tracklist.id)
     },
     setAsTracksToBuy () {
-      this.$store.dispatch('setSpotifyToBuyPlaylistId', this.$props.id).then(() => {
-        this.toBuyIconColor = 'green'
-      })
+      this.$store.dispatch('setSpotifyToBuyPlaylistId', this.tracklist.id)
     },
     selectTracklist () {
       this.$store.dispatch('setTracklistToCompare', this.tracklist)

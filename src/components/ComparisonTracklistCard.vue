@@ -6,14 +6,7 @@
       </div>
       </v-card-text>
       <v-list dense v-else>
-        <TracklistCard
-          :key="tracklist.id"
-          :name="tracklist.name"
-          :id="tracklist.id"
-          :tracks="tracklist.tracks"
-          :type="tracklist.type"
-          isSelectedForComparison="true"
-        />
+        <TracklistCard :tracklist="tracklist" isSelectedForComparison />
       </v-list>
   </v-card>
 </template>

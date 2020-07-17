@@ -16,7 +16,10 @@
           <v-btn @click="loginToSpotify" dark color="green">Login to Spotify</v-btn>
         </v-col>
         <v-col v-else sm="6" class="text-center">
-          <SpotifyPlaylistListCard :playlistImportCallback="getSpotifyPlaylistTracks" :apiErrorCallback="handleAPIError"/>
+          <SpotifyPlaylistListCard
+            :playlistImportCallback="getSpotifyPlaylistTracks"
+            :apiErrorCallback="handleAPIError"
+          />
         </v-col>
       </v-row>
       <v-row v-show="importMethodSelected == 1" justify="center">
@@ -39,23 +42,11 @@
           </v-file-input>
         </v-col>
       </v-row>
-      <v-row justify="center">
-        <v-col md="9">
-          <v-row>
-            <v-col>
-              <ComparisonTracklistCard :tracklist="selectedTracklistToCompareLeft" />
-            </v-col>
-            <v-col class="d-flex align-center justify-space-around">
-              <v-icon>mdi-arrow-right</v-icon>
-              <v-btn @click="compare">Compare</v-btn>
-              <v-icon>mdi-arrow-left</v-icon>
-            </v-col>
-            <v-col>
-              <ComparisonTracklistCard :tracklist="selectedTracklistToCompareRight" />
-            </v-col>
-          </v-row>
-        </v-col>
-      </v-row>
+      <ComparisonRow
+        :leftTracklist="selectedTracklistToCompareLeft"
+        :rightTracklist="selectedTracklistToCompareRight"
+        :compareCallback="compare"
+      />
       <v-row>
         <v-col sm="6" md="4" lg="3">
           <v-card outlined>
@@ -68,14 +59,7 @@
               </div>
               <v-list dense v-else>
                 <v-list-item-group color="primary">
-                  <TracklistCard
-                    v-for="tracklist in tracklists.level1"
-                    :key="tracklist.id"
-                    :name="tracklist.name"
-                    :id="tracklist.id"
-                    :tracks="tracklist.tracks"
-                    :type="tracklist.type"
-                  />
+                  <TracklistCard v-for="tracklist in tracklists.level1" :key="tracklist.id" :tracklist="tracklist" />
                 </v-list-item-group>
               </v-list>
             </v-card-text>
@@ -92,14 +76,7 @@
               </div>
               <v-list dense v-else>
                 <v-list-item-group color="primary">
-                  <TracklistCard
-                    v-for="tracklist in tracklists.level2"
-                    :key="tracklist.id"
-                    :name="tracklist.name"
-                    :id="tracklist.id"
-                    :tracks="tracklist.tracks"
-                    :type="tracklist.type"
-                  />
+                  <TracklistCard v-for="tracklist in tracklists.level2" :key="tracklist.id" :tracklist="tracklist" />
                 </v-list-item-group>
               </v-list>
             </v-card-text>
@@ -115,11 +92,8 @@
                   <v-text-field
                     v-model="spotifyPlaylistSearch"
                     label="Search track"
-                    flat
-                    solo-inverted
-                    hide-details
-                    clearable
                     clear-icon="mdi-close-circle-outline"
+                    flat solo-inverted hide-details clearable
                   ></v-text-field>
                   <v-btn dark @click="dialog = false" class="ml-4">
                     <v-icon left>mdi-close</v-icon>
@@ -147,22 +121,26 @@
 </template>
 
 <script>
-import { generateRandomString, cleanTrackName, removeFeaturedArtistFromName } from '@/utils/utils'
+import { mapState } from 'vuex'
+
 import SpotifyService from '@/services/SpotifyService'
 import TracklistCard from '@/components/TracklistCard.vue'
-import { mapState } from 'vuex'
 import ImportPlaylistButton from '@/components/ImportPlaylistButton.vue'
 import SpotifyPlaylistListCard from '@/components/SpotifyPlaylistListCard.vue'
-import ComparisonTracklistCard from '@/components/ComparisonTracklistCard.vue'
 import SnackBar from '@/components/SnackBar.vue'
+import ComparisonRow from '@/components/ComparisonRow.vue'
+
+import { generateRandomString, cleanTrackName, removeFeaturedArtistFromName } from '@/utils/utils'
+import { ImportedTracklist, GeneratedTracklist } from '@/utils/tracklist'
+import { contentTypes } from '@/utils/constants'
 
 export default {
   components: {
     TracklistCard,
     ImportPlaylistButton,
     SpotifyPlaylistListCard,
-    ComparisonTracklistCard,
-    SnackBar
+    SnackBar,
+    ComparisonRow
   },
   data: () => ({
     clientId: 'e5d07ddf1fe64a6cbcd2d14ac0aac87b',
@@ -237,25 +215,6 @@ export default {
       const onlyLeftSideTracks = []
       const onlyRightSideTracks = []
 
-      this.tracklists.level2.push({
-        id: `Both in "${this.selectedTracklistToCompareLeft.name}" and "${this.selectedTracklistToCompareRight.name}"`,
-        name: `Both in "${this.selectedTracklistToCompareLeft.name}" and "${this.selectedTracklistToCompareRight.name}"`,
-        type: 'generated',
-        tracks: sameTracks
-      })
-      this.tracklists.level2.push({
-        id: `Only in "${this.selectedTracklistToCompareLeft.name}"`,
-        name: `Only in "${this.selectedTracklistToCompareLeft.name}"`,
-        type: this.selectedTracklistToCompareLeft.type,
-        tracks: onlyLeftSideTracks
-      })
-      this.tracklists.level2.push({
-        id: `Only in "${this.selectedTracklistToCompareRight.name}"`,
-        name: `Only in "${this.selectedTracklistToCompareRight.name}"`,
-        type: this.selectedTracklistToCompareRight.type,
-        tracks: onlyRightSideTracks
-      })
-
       this.selectedTracklistToCompareLeft.tracks.forEach(leftSideTrack => {
         this.findMatchingRightSideTrack(leftSideTrack)
         if (leftSideTrack.match) {
@@ -270,6 +229,31 @@ export default {
           onlyRightSideTracks.push(rightSideTrack)
         }
       })
+
+      this.tracklists.level2.push(
+        new GeneratedTracklist(
+          `Both in "${this.selectedTracklistToCompareLeft.name}" and "${this.selectedTracklistToCompareRight.name}"`,
+          `Both in "${this.selectedTracklistToCompareLeft.name}" and "${this.selectedTracklistToCompareRight.name}"`,
+          'mixed',
+          sameTracks
+        )
+      )
+      this.tracklists.level2.push(
+        new GeneratedTracklist(
+          `Only in "${this.selectedTracklistToCompareLeft.name}"`,
+          `Only in "${this.selectedTracklistToCompareLeft.name}"`,
+          this.selectedTracklistToCompareLeft.contentType,
+          onlyLeftSideTracks
+        )
+      )
+      this.tracklists.level2.push(
+        new GeneratedTracklist(
+          `Only in "${this.selectedTracklistToCompareRight.name}"`,
+          `Only in "${this.selectedTracklistToCompareRight.name}"`,
+          this.selectedTracklistToCompareRight.contentType,
+          onlyRightSideTracks
+        )
+      )
     },
     findMatchingRightSideTrack (leftSideTrack) {
       let i = 0
@@ -304,28 +288,15 @@ export default {
     readITunesFile (file) {
       this.$store.dispatch('hideImporter')
       this.currentlyProcessingTextFileName = file.name.split('.')[0]
-      this.tracklists.level1.push({
-        id: this.currentlyProcessingTextFileName,
-        name: this.currentlyProcessingTextFileName,
-        type: 'iTunes',
-        tracks: []
-      })
       this.iTunesFileReader.readAsText(file)
     },
     readRekordboxFile (file) {
       this.$store.dispatch('hideImporter')
       this.currentlyProcessingTextFileName = file.name.split('.')[0]
-      this.tracklists.level1.push({
-        id: this.currentlyProcessingTextFileName,
-        name: this.currentlyProcessingTextFileName,
-        type: 'rekordbox',
-        tracks: []
-      })
       this.rekordboxFileReader.readAsText(file)
     },
     processITunesPlaylistFile (file) {
-      const tracklist = this.tracklists.level1.find(tracklist => tracklist.name === this.currentlyProcessingTextFileName)
-      this.currentlyProcessingTextFileName = ''
+      const tracks = []
       const lines = file.split(/[\r\n]+/)
       lines.shift() // remove first line with headers
       lines.pop() // remove empty last line
@@ -337,16 +308,25 @@ export default {
           artists: trackData[1].split(', ').map(artist => artist.trim().toLowerCase())
         }
         track.name = removeFeaturedArtistFromName(track)
-        tracklist.tracks.push({
+        tracks.push({
           id: `${track.name} - ${track.artists}`,
           name: track.name,
           artists: track.artists
         })
       })
+
+      this.tracklists.level1.push(
+        new ImportedTracklist(
+          this.currentlyProcessingTextFileName,
+          this.currentlyProcessingTextFileName,
+          contentTypes.ITUNES,
+          tracks
+        )
+      )
+      this.currentlyProcessingTextFileName = ''
     },
     processRekordboxPlaylistFile (file) {
-      const tracklist = this.tracklists.level1.find(tracklist => tracklist.name === this.currentlyProcessingTextFileName)
-      this.currentlyProcessingTextFileName = ''
+      const tracks = []
       const lines = file.split(/[\r\n]+/)
       lines.shift() // remove first line with headers
       lines.pop() // remove empty last line
@@ -358,25 +338,27 @@ export default {
           artists: trackData[2].split(', ').map(artist => artist.trim().toLowerCase())
         }
         track.name = removeFeaturedArtistFromName(track)
-        tracklist.tracks.push({
+        tracks.push({
           id: `${track.name} - ${track.artists}`,
           name: track.name,
           artists: track.artists
         })
       })
+      this.tracklists.level1.push(
+        new ImportedTracklist(
+          this.currentlyProcessingTextFileName,
+          this.currentlyProcessingTextFileName,
+          contentTypes.REKORDBOX,
+          tracks
+        )
+      )
+      this.currentlyProcessingTextFileName = ''
     },
     getSpotifyPlaylistTracks (playlistName, playlistId, totalTracks) {
-      const tracklist = {
-        id: playlistId,
-        name: playlistName,
-        type: 'spotify',
-        tracks: []
-      }
+      const tracks = []
       const promisesArray = []
       const limit = playlistId === 'liked' ? 50 : 100
       let offset = 0
-
-      this.tracklists.level1.push(tracklist)
 
       while (offset < totalTracks) {
         promisesArray.push(SpotifyService.getPlaylistTracks(playlistId, { limit, offset }))
@@ -385,7 +367,7 @@ export default {
 
       Promise.all(promisesArray).then(responses => {
         responses.forEach(response => {
-          tracklist.tracks.push(
+          tracks.push(
             ...response.data.items.map(item => {
               const track = {
                 name: cleanTrackName(item.track.name),
@@ -400,11 +382,19 @@ export default {
             })
           )
         })
+
+        this.tracklists.level1.push(
+          new ImportedTracklist(
+            playlistId,
+            playlistName,
+            contentTypes.SPOTIFY,
+            tracks
+          )
+        )
       }).catch(err => {
         this.handleAPIError(err)
       })
     },
-
     handleAPIError (err) {
       console.log(err)
       if (err.response && err.response.status === 401) {
@@ -413,14 +403,6 @@ export default {
         localStorage.removeItem('spotifyAccessToken')
         this.canAccessSpotifyAPI = false
       }
-    },
-    getColorBasedOnType (type) {
-      const colorMap = {
-        iTunes: 'blue',
-        rekordbox: 'black',
-        spotify: 'green'
-      }
-      return colorMap[type]
     }
   }
 }
