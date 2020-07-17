@@ -25,14 +25,6 @@
         </template>
         <span>Select as tracks to buy</span>
       </v-tooltip>
-      <v-tooltip bottom v-if="tracklist.tracks.length">
-        <template v-slot:activator="{ on, attrs }">
-          <v-btn icon v-bind="attrs" v-on="on" @click="openDialog()">
-              <v-icon>mdi-format-list-bulleted</v-icon>
-            </v-btn>
-        </template>
-        <span>View tracks</span>
-      </v-tooltip>
       <v-tooltip v-if="isComparisonTracklist || isGeneratedTracklist" bottom>
         <template v-slot:activator="{ on, attrs }">
           <v-btn icon v-bind="attrs" v-on="on" @click="deleteTracklist()">
@@ -40,6 +32,14 @@
             </v-btn>
         </template>
         <span>{{ isComparisonTracklist ? "Deselect tracklist" : "Delete tracklist"}}</span>
+      </v-tooltip>
+      <v-tooltip bottom v-if="tracklist.tracks.length">
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn icon v-bind="attrs" v-on="on" @click="openDialog()">
+              <v-icon>mdi-format-list-bulleted</v-icon>
+            </v-btn>
+        </template>
+        <span>View tracks</span>
       </v-tooltip>
       <v-tooltip v-if="!isComparisonTracklist" bottom>
         <template v-slot:activator="{ on, attrs }">
