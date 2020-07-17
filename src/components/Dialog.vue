@@ -20,7 +20,11 @@
         :headers="headers"
         :items="filteredTableContents"
         :items-per-page="10"
-      ></v-data-table>
+      >
+        <template v-slot:item.actions="{ item }">
+          <v-btn small @click="openMuzonlyTab(item)">MuzOnly</v-btn>
+        </template>
+      </v-data-table>
     </v-card>
   </v-dialog>
 </template>
@@ -35,7 +39,8 @@ export default {
       tracklistSearchInput: null,
       headers: [
         { text: 'Track name', value: 'name' },
-        { text: 'Track artists', value: 'artists' }
+        { text: 'Track artists', value: 'artists' },
+        { text: '', value: 'actions', sortable: false }
       ]
     }
   },
@@ -62,6 +67,13 @@ export default {
       if (!newValue) {
         this.$store.dispatch('toggleDialog')
       }
+    }
+  },
+  methods: {
+    openMuzonlyTab (track) {
+      const url = `https://srv.muzonly2.com/#/search?text=${track.name} ${track.artists.join(' ')}`
+      var win = window.open(encodeURI(url), '_blank')
+      win.focus()
     }
   }
 }
