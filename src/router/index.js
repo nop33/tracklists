@@ -11,11 +11,6 @@ const routes = [
     component: Home
   },
   {
-    path: '/compare',
-    name: 'Compare',
-    component: () => import(/* webpackChunkName: "comparison" */ '../views/Compare.vue')
-  },
-  {
     path: '/spotify-auth-callback',
     name: 'callback',
     props: getHashParams,
