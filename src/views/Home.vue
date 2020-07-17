@@ -183,16 +183,16 @@ export default {
       )
       this.tracklists.level2.push(
         new GeneratedTracklist(
-          `Only in "${this.selectedTracklistToCompareLeft.name}"`,
-          `Only in "${this.selectedTracklistToCompareLeft.name}"`,
+          `Only in "${this.selectedTracklistToCompareLeft.name}" and not in "${this.selectedTracklistToCompareRight.name}"`,
+          `Only in "${this.selectedTracklistToCompareLeft.name}" and not in "${this.selectedTracklistToCompareRight.name}"`,
           this.selectedTracklistToCompareLeft.contentType,
           onlyLeftSideTracks
         )
       )
       this.tracklists.level2.push(
         new GeneratedTracklist(
-          `Only in "${this.selectedTracklistToCompareRight.name}"`,
-          `Only in "${this.selectedTracklistToCompareRight.name}"`,
+          `Only in "${this.selectedTracklistToCompareRight.name}" and not in "${this.selectedTracklistToCompareLeft.name}"`,
+          `Only in "${this.selectedTracklistToCompareRight.name}" and not in "${this.selectedTracklistToCompareLeft.name}"`,
           this.selectedTracklistToCompareRight.contentType,
           onlyRightSideTracks
         )
