@@ -11,7 +11,7 @@ export default new Vuex.Store({
     selectedTracklistToCompareRight: null,
     selectedImportMethod: null,
     showDialog: false,
-    tracklistToShowTracks: null,
+    tracklistInDialog: null,
     isSnackBarVisible: false
   },
   mutations: {
@@ -39,7 +39,7 @@ export default new Vuex.Store({
       state.showDialog = !state.showDialog
     },
     SET_TRACKLIST_TO_SHOW_TRACKS (state, tracklist) {
-      state.tracklistToShowTracks = tracklist
+      state.tracklistInDialog = tracklist
     },
     SET_SELECTED_IMPORT_METHOD (state, value) {
       state.selectedImportMethod = value

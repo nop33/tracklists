@@ -66,34 +66,7 @@
       </v-row>
       <v-row>
         <v-col sm="6">
-          <v-dialog v-model="dialog" transition="dialog-bottom-transition">
-            <v-card>
-              <v-sheet class="pa-4">
-                <div class="d-flex">
-                  <v-text-field
-                    v-model="spotifyPlaylistSearch"
-                    label="Search track"
-                    clear-icon="mdi-close-circle-outline"
-                    flat solo-inverted hide-details clearable
-                  ></v-text-field>
-                  <v-btn dark @click="dialog = false" class="ml-4">
-                    <v-icon left>mdi-close</v-icon>
-                    Close
-                  </v-btn>
-                </div>
-              </v-sheet>
-              <v-card-text>
-                <v-list dense v-if="tracklistToShowTracks">
-                  <v-list-item two-line v-for="track in tracklistToShowTracks.tracks" :key="track.id">
-                    <v-list-item-content>
-                      <v-list-item-title>{{ track.name }}</v-list-item-title>
-                      <v-list-item-subtitle>{{ track.artists.join(', ') }}</v-list-item-subtitle>
-                    </v-list-item-content>
-                  </v-list-item>
-                </v-list>
-              </v-card-text>
-            </v-card>
-          </v-dialog>
+          <Dialog />
         </v-col>
       </v-row>
     </v-container>
@@ -110,6 +83,7 @@ import SpotifyPlaylistListCard from '@/components/SpotifyPlaylistListCard.vue'
 import SnackBar from '@/components/SnackBar.vue'
 import ComparisonRow from '@/components/ComparisonRow.vue'
 import TracklistListCard from '@/components/TracklistListCard.vue'
+import Dialog from '@/components/Dialog.vue'
 
 import { generateRandomString, cleanTrackName, removeFeaturedArtistFromName } from '@/utils/utils'
 import { ImportedTracklist, GeneratedTracklist } from '@/utils/tracklist'
@@ -121,7 +95,8 @@ export default {
     SpotifyPlaylistListCard,
     SnackBar,
     ComparisonRow,
-    TracklistListCard
+    TracklistListCard,
+    Dialog
   },
   data: () => ({
     clientId: 'e5d07ddf1fe64a6cbcd2d14ac0aac87b',
@@ -138,16 +113,13 @@ export default {
     canAccessSpotifyAPI: false,
     snackbar: false,
     snackBarText: '',
-    spotifyPlaylistSearch: null,
-    dialog: false
+    spotifyPlaylistSearch: null
   }),
   computed: {
     ...mapState(
       [
         'selectedTracklistToCompareLeft',
         'selectedTracklistToCompareRight',
-        'showDialog',
-        'tracklistToShowTracks',
         'selectedImportMethod'
       ]
     ),
@@ -166,16 +138,6 @@ export default {
       },
       set (value) {
         this.$store.dispatch('setSelectedImportMethod', value)
-      }
-    }
-  },
-  watch: {
-    showDialog: function (newValue) {
-      this.dialog = newValue
-    },
-    dialog: function (newValue, oldValue) {
-      if (!newValue) {
-        this.$store.dispatch('toggleDialog')
       }
     }
   },
