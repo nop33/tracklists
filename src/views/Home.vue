@@ -11,15 +11,15 @@
           </v-btn-toggle>
         </v-col>
       </v-row>
-      <v-row v-if="importMethodSelected == 0" justify="center">
+      <v-row v-show="importMethodSelected == 0" justify="center">
         <v-col v-if="!canAccessSpotifyAPI" sm="auto" class="text-center">
           <v-btn @click="loginToSpotify" dark color="green">Login to Spotify</v-btn>
         </v-col>
         <v-col v-else sm="6" class="text-center">
-          <SpotifyPlaylistListCard :playlistImportCallback="getSpotifyPlaylistTracks"/>
+          <SpotifyPlaylistListCard :playlistImportCallback="getSpotifyPlaylistTracks" :apiErrorCallback="handleAPIError"/>
         </v-col>
       </v-row>
-      <v-row v-if="importMethodSelected == 1" justify="center">
+      <v-row v-show="importMethodSelected == 1" justify="center">
         <v-col sm="6" class="text-center">
           <v-file-input
             label="Upload iTunes playlist file"
@@ -29,7 +29,7 @@
           </v-file-input>
         </v-col>
       </v-row>
-      <v-row v-if="importMethodSelected == 2" justify="center">
+      <v-row v-show="importMethodSelected == 2" justify="center">
         <v-col sm="6" class="text-center">
           <v-file-input
             label="Upload rekordbox playlist file"
@@ -142,12 +142,7 @@
         </v-col>
       </v-row>
     </v-container>
-    <v-snackbar v-model="snackbar">
-      {{ snackbarText }}
-      <template v-slot:action="{ attrs }">
-        <v-btn text v-bind="attrs" @click="snackbar = false">Close</v-btn>
-      </template>
-    </v-snackbar>
+    <SnackBar :text="snackBarText" />
   </div>
 </template>
 
@@ -159,13 +154,15 @@ import { mapState } from 'vuex'
 import ImportPlaylistButton from '@/components/ImportPlaylistButton.vue'
 import SpotifyPlaylistListCard from '@/components/SpotifyPlaylistListCard.vue'
 import ComparisonTracklistCard from '@/components/ComparisonTracklistCard.vue'
+import SnackBar from '@/components/SnackBar.vue'
 
 export default {
   components: {
     TracklistCard,
     ImportPlaylistButton,
     SpotifyPlaylistListCard,
-    ComparisonTracklistCard
+    ComparisonTracklistCard,
+    SnackBar
   },
   data: () => ({
     clientId: 'e5d07ddf1fe64a6cbcd2d14ac0aac87b',
@@ -181,7 +178,7 @@ export default {
     currentlyProcessingTextFileName: '',
     canAccessSpotifyAPI: false,
     snackbar: false,
-    snackbarText: '',
+    snackBarText: '',
     spotifyPlaylistSearch: null,
     dialog: false
   }),
@@ -232,7 +229,7 @@ export default {
       const file = event.target.result
       this.processRekordboxPlaylistFile(file)
     })
-    this.canAccessSpotifyAPI = localStorage && localStorage.getItem('spotifyAccessToken')
+    this.canAccessSpotifyAPI = !!localStorage.getItem('spotifyAccessToken')
   },
   methods: {
     compare () {
@@ -300,7 +297,6 @@ export default {
             alert('Spotify says "Computer says no". Refresh the page and try to login again =)')
           } else {
             this.canAccessSpotifyAPI = true
-            this.getSpotifyPlaylists()
           }
         }
       }, 2000)
@@ -413,7 +409,7 @@ export default {
       console.log(err)
       if (err.response && err.response.status === 401) {
         this.snackbarText = 'I lost the Spotify connection, care logging in again please? Thanks!'
-        this.snackbar = true
+        this.$store.dispatch('toggleSnackBar', true)
         localStorage.removeItem('spotifyAccessToken')
         this.canAccessSpotifyAPI = false
       }

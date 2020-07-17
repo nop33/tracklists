@@ -11,7 +11,8 @@ export default new Vuex.Store({
     selectedTracklistToCompareRight: null,
     selectedImportMethod: null,
     showDialog: false,
-    tracklistToShowTracks: null
+    tracklistToShowTracks: null,
+    isSnackBarVisible: false
   },
   mutations: {
     SET_SPOTIFY_TO_DOWNLOAD_PLAYLIST_ID (state, spotifyPlaylistId) {
@@ -42,6 +43,9 @@ export default new Vuex.Store({
     },
     SET_SELECTED_IMPORT_METHOD (state, value) {
       state.selectedImportMethod = value
+    },
+    TOGGLE_SNACKBAR (state, value) {
+      state.isSnackBarVisible = value
     }
   },
   actions: {
@@ -68,6 +72,9 @@ export default new Vuex.Store({
     },
     hideImporter ({ commit }) {
       commit('SET_SELECTED_IMPORT_METHOD', null)
+    },
+    toggleSnackBar ({ commit }, value) {
+      commit('TOGGLE_SNACKBAR', value)
     }
   },
   modules: {

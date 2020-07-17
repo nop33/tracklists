@@ -42,7 +42,10 @@ import SpotifyService from '@/services/SpotifyService'
 import SpotifyPlaylistListItem from '@/components/SpotifyPlaylistListItem.vue'
 
 export default {
-  props: ['playlistImportCallback'],
+  props: [
+    'playlistImportCallback',
+    'apiErrorCallback'
+  ],
   components: {
     SpotifyPlaylistListItem
   },
@@ -98,18 +101,16 @@ export default {
         if (spotifyReceivedPlaylistsCounter < totalSpotifyPlaylists) {
           this.getSpotifyPlaylistsFromAPI(limit, offset, totalSpotifyPlaylists, spotifyReceivedPlaylistsCounter)
         }
+      }).catch(err => {
+        this.apiErrorCallback(err)
       })
-      // .catch(err => {
-      //   this.handleAPIError(err)
-      // })
     },
     getSpotifyTotalLikedTracksNumber () {
       SpotifyService.getPlaylistTracks('liked', { limit: 1, offset: 0 }).then(response => {
         this.totalSpotifyLikedTracksNumber = response.data.total
+      }).catch(err => {
+        this.apiErrorCallback(err)
       })
-      // .catch(err => {
-      //   this.handleAPIError(err)
-      // })
     }
   }
 }
