@@ -48,44 +48,20 @@
         :compareCallback="compare"
       />
       <v-row>
-        <v-col sm="6" md="4" lg="3">
-          <v-card outlined>
-            <v-card-text>
-              <div
-                v-if="tracklists.level1.length == 0"
-                class="font-weight-thin font-italic"
-              >
-                Your imported playlists will appear here
-              </div>
-              <v-list dense v-else>
-                <v-list-item-group color="primary">
-                  <TracklistCard v-for="tracklist in tracklists.level1" :key="tracklist.id" :tracklist="tracklist" />
-                </v-list-item-group>
-              </v-list>
-            </v-card-text>
-          </v-card>
+        <v-col>
+          <TracklistListCard
+            cardTitle="Imported playlists"
+            placeholderText="Your imported playlists will appear here"
+            :tracklists="tracklists.level1"
+          />
         </v-col>
-        <v-col sm="6" md="4" lg="3">
-          <v-card outlined>
-            <v-card-text>
-              <div
-                v-if="tracklists.level2.length == 0"
-                class="font-weight-thin font-italic"
-              >
-                Your generated tracklists will appear here
-              </div>
-              <v-list dense v-else>
-                <v-list-item-group color="primary">
-                  <TracklistCard
-                    v-for="tracklist in tracklists.level2"
-                    :key="tracklist.id"
-                    :tracklist="tracklist"
-                    :deleteTracklistCallback="deleteTracklist"
-                  />
-                </v-list-item-group>
-              </v-list>
-            </v-card-text>
-          </v-card>
+        <v-col>
+          <TracklistListCard
+            cardTitle="Generated tracklists"
+            placeholderText="Your generated tracklists will appear here"
+            :tracklists="tracklists.level2"
+            :deleteTracklistCallback="deleteTracklist"
+          />
         </v-col>
       </v-row>
       <v-row>
@@ -129,11 +105,11 @@
 import { mapState } from 'vuex'
 
 import SpotifyService from '@/services/SpotifyService'
-import TracklistCard from '@/components/TracklistCard.vue'
 import ImportPlaylistButton from '@/components/ImportPlaylistButton.vue'
 import SpotifyPlaylistListCard from '@/components/SpotifyPlaylistListCard.vue'
 import SnackBar from '@/components/SnackBar.vue'
 import ComparisonRow from '@/components/ComparisonRow.vue'
+import TracklistListCard from '@/components/TracklistListCard.vue'
 
 import { generateRandomString, cleanTrackName, removeFeaturedArtistFromName } from '@/utils/utils'
 import { ImportedTracklist, GeneratedTracklist } from '@/utils/tracklist'
@@ -141,11 +117,11 @@ import { contentTypes } from '@/utils/constants'
 
 export default {
   components: {
-    TracklistCard,
     ImportPlaylistButton,
     SpotifyPlaylistListCard,
     SnackBar,
-    ComparisonRow
+    ComparisonRow,
+    TracklistListCard
   },
   data: () => ({
     clientId: 'e5d07ddf1fe64a6cbcd2d14ac0aac87b',

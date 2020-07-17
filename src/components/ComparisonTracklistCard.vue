@@ -5,7 +5,7 @@
         Select a tracklist to compare
       </div>
       </v-card-text>
-      <v-list dense v-else>
+      <v-list v-else>
         <TracklistCard :tracklist="tracklist" isSelectedForComparison />
       </v-list>
   </v-card>
