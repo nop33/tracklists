@@ -20,9 +20,18 @@
         :headers="headers"
         :items="filteredTableContents"
         :items-per-page="10"
+        :key="componentKey"
       >
         <template v-slot:item.actions="{ item }">
-          <v-btn small @click="openMuzonlyTab(item)">MuzOnly</v-btn>
+          <v-btn small @click="openMuzonlyTab(item)" class="mr-2">MuzOnly</v-btn>
+          <v-btn
+            small
+            :loading="item.loadingDownload"
+            @click="addToDownloadSpotifyPlaylist(item)"
+            :color="item.isDownloaded ? 'green' : ''"
+          >
+            Add to "Download" Spotify playlist
+          </v-btn>
         </template>
       </v-data-table>
     </v-card>
@@ -31,6 +40,8 @@
 
 <script>
 import { mapState } from 'vuex'
+
+import SpotifyService from '@/services/SpotifyService'
 
 export default {
   data: () => {
@@ -41,13 +52,15 @@ export default {
         { text: 'Track name', value: 'name' },
         { text: 'Track artists', value: 'artists' },
         { text: '', value: 'actions', sortable: false }
-      ]
+      ],
+      componentKey: 0
     }
   },
   computed: {
     ...mapState([
       'tracklistInDialog',
-      'showDialog'
+      'showDialog',
+      'spotifyPlaylistIdWithTracksToDownload'
     ]),
     filteredTableContents () {
       if (this.tracklistSearchInput) {
@@ -74,6 +87,16 @@ export default {
       const url = `https://srv.muzonly2.com/#/search?text=${track.name} ${track.artists.join(' ')}`
       var win = window.open(encodeURI(url), '_blank')
       win.focus()
+    },
+    addToDownloadSpotifyPlaylist (track) {
+      track.loadingDownload = true
+      SpotifyService.addTracksToPlaylist(this.spotifyPlaylistIdWithTracksToDownload, [track.uri]).then(response => {
+        if (response.status === 201 && response.data.snapshot_id) {
+          track.isDownloaded = true
+          this.componentKey += 1
+          track.loadingDownload = false
+        }
+      })
     }
   }
 }

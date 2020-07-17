@@ -20,6 +20,10 @@ class BaseService {
   static GET (url, params) {
     return axiosInstance.get(url, { params })
   }
+
+  static POST (url, data) {
+    return axiosInstance.post(url, data)
+  }
 }
 
 export default BaseService

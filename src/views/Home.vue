@@ -100,7 +100,7 @@ export default {
   },
   data: () => ({
     clientId: 'e5d07ddf1fe64a6cbcd2d14ac0aac87b',
-    scope: 'user-read-private user-read-email playlist-read-private user-library-read',
+    scope: 'user-read-private user-read-email playlist-read-private user-library-read playlist-modify-private',
     redirectUri: 'http://localhost:8080/spotify-auth-callback',
     state: generateRandomString(16),
     iTunesFileReader: new FileReader(),
@@ -320,7 +320,8 @@ export default {
               return {
                 id: item.track.id,
                 name: track.name,
-                artists: track.artists
+                artists: track.artists,
+                uri: item.track.uri
               }
             })
           )
