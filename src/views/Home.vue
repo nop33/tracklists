@@ -76,7 +76,12 @@
               </div>
               <v-list dense v-else>
                 <v-list-item-group color="primary">
-                  <TracklistCard v-for="tracklist in tracklists.level2" :key="tracklist.id" :tracklist="tracklist" />
+                  <TracklistCard
+                    v-for="tracklist in tracklists.level2"
+                    :key="tracklist.id"
+                    :tracklist="tracklist"
+                    :deleteTracklistCallback="deleteTracklist"
+                  />
                 </v-list-item-group>
               </v-list>
             </v-card-text>
@@ -394,6 +399,9 @@ export default {
       }).catch(err => {
         this.handleAPIError(err)
       })
+    },
+    deleteTracklist (tracklist) {
+      this.tracklists.level2.splice(this.tracklists.level2.indexOf(tracklist), 1)
     },
     handleAPIError (err) {
       console.log(err)

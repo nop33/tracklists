@@ -26,18 +26,18 @@
         </template>
         <span>View tracks</span>
       </v-tooltip>
-      <v-tooltip v-if="isComparisonTracklist" bottom>
+      <v-tooltip v-if="isComparisonTracklist || isGeneratedTracklist" bottom>
         <template v-slot:activator="{ on, attrs }">
           <v-btn
             icon
             v-bind="attrs"
             v-on="on"
-            @click="deselectTracklist()"
+            @click="deleteTracklist()"
             >
               <v-icon>mdi-delete</v-icon>
             </v-btn>
         </template>
-        <span>Deselect tracklist</span>
+        <span>{{ isComparisonTracklist ? "Deselect tracklist" : "Delete tracklist"}}</span>
       </v-tooltip>
       <v-tooltip v-if="!isComparisonTracklist" bottom>
         <template v-slot:activator="{ on, attrs }">
@@ -89,7 +89,8 @@ import { contentTypes, origins } from '@/utils/constants'
 export default {
   props: [
     'tracklist',
-    'isSelectedForComparison'
+    'isSelectedForComparison',
+    'deleteTracklistCallback'
   ],
   computed: {
     ...mapState([
@@ -110,6 +111,9 @@ export default {
     isSpotifyImportedTracklist () {
       return this.tracklist.origin === origins.IMPORTED && this.tracklist.contentType === contentTypes.SPOTIFY
     },
+    isGeneratedTracklist () {
+      return this.tracklist.origin === origins.GENERATED
+    },
     toDownloadIconColor () {
       return this.spotifyPlaylistIdWithTracksToDownload === this.tracklist.id ? 'green' : ''
     },
@@ -127,8 +131,12 @@ export default {
     selectTracklist () {
       this.$store.dispatch('setTracklistToCompare', this.tracklist)
     },
-    deselectTracklist () {
-      this.$store.dispatch('unsetTracklistToCompare', this.tracklist)
+    deleteTracklist () {
+      if (this.isComparisonTracklist) {
+        this.$store.dispatch('unsetTracklistToCompare', this.tracklist)
+      } else if (this.deleteTracklistCallback) {
+        this.deleteTracklistCallback(this.tracklist)
+      }
     },
     openDialog () {
       this.$store.dispatch('toggleDialog')
