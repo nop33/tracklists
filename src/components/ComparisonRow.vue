@@ -1,17 +1,29 @@
 <template>
-  <v-row justify="center">
-    <v-col md="9">
+  <v-row>
+    <v-col>
       <v-row>
-        <v-col>
-          <ComparisonTracklistCard :tracklist="leftTracklist" />
+        <v-col >
+          <TracklistCardWithPlaceholder
+            :tracklist="leftTracklist"
+            :placeholderText="placeholderText"
+            :type="type"
+            :icon="icon"
+          />
         </v-col>
-        <v-col class="d-flex align-center justify-space-around">
-          <v-icon>mdi-arrow-right</v-icon>
-          <v-btn @click="compareCallback">Compare</v-btn>
-          <v-icon>mdi-arrow-left</v-icon>
+        <v-col md="auto" class="d-flex align-center justify-center">
+          <v-btn @click="compareCallback">
+            <v-icon left>mdi-arrow-right</v-icon>
+            Compare
+            <v-icon right>mdi-arrow-left</v-icon>
+          </v-btn>
         </v-col>
         <v-col>
-          <ComparisonTracklistCard :tracklist="rightTracklist" />
+          <TracklistCardWithPlaceholder
+            :tracklist="rightTracklist"
+            :placeholderText="placeholderText"
+            :type="type"
+            :icon="icon"
+          />
         </v-col>
       </v-row>
     </v-col>
@@ -19,7 +31,9 @@
 </template>
 
 <script>
-import ComparisonTracklistCard from '@/components/ComparisonTracklistCard.vue'
+import TracklistCardWithPlaceholder from '@/components/TracklistCardWithPlaceholder.vue'
+
+import { tracklistTypes } from '@/utils/constants.js'
 
 export default {
   props: [
@@ -28,7 +42,18 @@ export default {
     'compareCallback'
   ],
   components: {
-    ComparisonTracklistCard
+    TracklistCardWithPlaceholder
+  },
+  data: () => {
+    return {
+      placeholderText: 'Your selected tracklist to compare will appear here',
+      icon: 'mdi-selection-ellipse-arrow-inside'
+    }
+  },
+  computed: {
+    type () {
+      return tracklistTypes.TO_COMPARE
+    }
   }
 }
 </script>

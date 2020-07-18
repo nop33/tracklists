@@ -55,12 +55,12 @@
 
 <script>
 import { mapState } from 'vuex'
-import { contentTypes, origins } from '@/utils/constants'
+import { contentTypes, origins, tracklistTypes } from '@/utils/constants'
 
 export default {
   props: [
     'tracklist',
-    'isSelectedForComparison',
+    'type',
     'deleteTracklistCallback'
   ],
   computed: {
@@ -77,7 +77,7 @@ export default {
       return colorMap[this.tracklist.contentType]
     },
     isComparisonTracklist () {
-      return this.$props.isSelectedForComparison !== undefined
+      return this.$props.type === tracklistTypes.TO_COMPARE
     },
     isSpotifyImportedTracklist () {
       return this.tracklist.origin === origins.IMPORTED && this.tracklist.contentType === contentTypes.SPOTIFY

@@ -42,11 +42,40 @@
           </v-file-input>
         </v-col>
       </v-row>
-      <ComparisonRow
-        :leftTracklist="selectedTracklistToCompareLeft"
-        :rightTracklist="selectedTracklistToCompareRight"
-        :compareCallback="compare"
-      />
+      <v-row>
+        <v-col>
+          <v-row>
+            <v-col>
+              <v-row>
+                <v-col>
+                  <TracklistCardWithPlaceholder
+                    :tracklist="selectedTracklistToCompareLeft"
+                    placeholderText="Your Spotify playlist containing tracks to download will appear here"
+                    type="spotifyPlaylistWithTracksToDownload"
+                    icon="mdi-download"
+                  />
+                </v-col>
+                <v-col>
+                  <TracklistCardWithPlaceholder
+                    :tracklist="selectedTracklistToCompareRight"
+                    placeholderText="Your Spotify playlist containing tracks to buy will appear here"
+                    type="spotifyPlaylistWithTracksToDownload"
+                    icon="mdi-currency-usd"
+                  />
+                </v-col>
+              </v-row>
+            </v-col>
+          </v-row>
+        </v-col>
+        <v-col md="1"></v-col>
+        <v-col>
+          <ComparisonRow
+            :leftTracklist="selectedTracklistToCompareLeft"
+            :rightTracklist="selectedTracklistToCompareRight"
+            :compareCallback="compare"
+          />
+        </v-col>
+      </v-row>
       <v-row>
         <v-col>
           <TracklistListCard
@@ -55,6 +84,7 @@
             :tracklists="tracklists.level1"
           />
         </v-col>
+        <v-col md="1"></v-col>
         <v-col>
           <TracklistListCard
             cardTitle="Generated tracklists"
@@ -84,6 +114,7 @@ import SnackBar from '@/components/SnackBar.vue'
 import ComparisonRow from '@/components/ComparisonRow.vue'
 import TracklistListCard from '@/components/TracklistListCard.vue'
 import Dialog from '@/components/Dialog.vue'
+import TracklistCardWithPlaceholder from '@/components/TracklistCardWithPlaceholder.vue'
 
 import { generateRandomString, cleanTrackName, removeFeaturedArtistFromName } from '@/utils/utils'
 import { ImportedTracklist, GeneratedTracklist } from '@/utils/tracklist'
@@ -96,7 +127,8 @@ export default {
     SnackBar,
     ComparisonRow,
     TracklistListCard,
-    Dialog
+    Dialog,
+    TracklistCardWithPlaceholder
   },
   data: () => ({
     clientId: 'e5d07ddf1fe64a6cbcd2d14ac0aac87b',

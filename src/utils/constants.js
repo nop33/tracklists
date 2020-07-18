@@ -9,7 +9,12 @@ const origins = {
   GENERATED: 'generated'
 }
 
+const tracklistTypes = {
+  TO_COMPARE: 'toCompare'
+}
+
 export {
   contentTypes,
-  origins
+  origins,
+  tracklistTypes
 }
