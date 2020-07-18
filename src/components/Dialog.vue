@@ -18,19 +18,38 @@
       <v-data-table
         v-if="tracklistInDialog"
         :headers="headers"
-        :items="filteredTableContents"
+        :items="tracklistInDialog.tracks"
         :items-per-page="10"
         :key="componentKey"
+        :search="tracklistSearchInput"
+        :page.sync="page"
       >
+        <template v-slot:item.artists="{ item }">
+          {{ item.artists.join(', ')}}
+        </template>
         <template v-slot:item.actions="{ item }">
-          <v-btn small @click="openMuzonlyTab(item)" class="mr-2">MuzOnly</v-btn>
+          <v-btn small @click="openMuzonlyTab(item)" class="mr-2">
+            <v-icon small left>mdi-open-in-new</v-icon>
+            MuzOnly
+          </v-btn>
           <v-btn
             small
-            :loading="item.loadingDownload"
+            :loading="item.loadingAddingToDownloadPlaylist"
             @click="addToDownloadSpotifyPlaylist(item)"
-            :color="item.isDownloaded ? 'green' : ''"
+            :color="item.hasBeenAddedToDownloadPlaylist ? 'green' : ''"
+            class="mr-2"
           >
-            Add to "Download" Spotify playlist
+            <v-icon small left>fab fa-spotify</v-icon>
+            to download
+          </v-btn>
+          <v-btn
+            small
+            :loading="item.loadingAddingToBuyPlaylist"
+            @click="addToBuySpotifyPlaylist(item)"
+            :color="item.hasBeenAddedToBuyPlaylist ? 'green' : ''"
+          >
+            <v-icon small left>fab fa-spotify</v-icon>
+            to buy
           </v-btn>
         </template>
       </v-data-table>
@@ -53,24 +72,17 @@ export default {
         { text: 'Track artists', value: 'artists' },
         { text: '', value: 'actions', sortable: false }
       ],
-      componentKey: 0
+      componentKey: 0,
+      page: 0
     }
   },
   computed: {
     ...mapState([
       'tracklistInDialog',
       'showDialog',
-      'spotifyPlaylistIdWithTracksToDownload'
-    ]),
-    filteredTableContents () {
-      if (this.tracklistSearchInput) {
-        return this.tracklistInDialog.tracks.filter(track => {
-          return (track.name.includes(this.tracklistSearchInput) ||
-            track.artists.some(artist => artist.includes(this.tracklistSearchInput)))
-        })
-      }
-      return this.tracklistInDialog.tracks
-    }
+      'spotifyPlaylistIdWithTracksToDownload',
+      'spotifyPlaylistIdWithTracksToBuy'
+    ])
   },
   watch: {
     showDialog: function (newValue) {
@@ -89,15 +101,31 @@ export default {
       win.focus()
     },
     addToDownloadSpotifyPlaylist (track) {
-      track.loadingDownload = true
+      track.loadingAddingToDownloadPlaylist = true
       SpotifyService.addTracksToPlaylist(this.spotifyPlaylistIdWithTracksToDownload, [track.uri]).then(response => {
         if (response.status === 201 && response.data.snapshot_id) {
-          track.isDownloaded = true
+          track.hasBeenAddedToDownloadPlaylist = true
+          track.loadingAddingToDownloadPlaylist = false
           this.componentKey += 1
-          track.loadingDownload = false
+        }
+      })
+    },
+    addToBuySpotifyPlaylist (track) {
+      track.loadingAddingToBuyPlaylist = true
+      SpotifyService.addTracksToPlaylist(this.spotifyPlaylistIdWithTracksToBuy, [track.uri]).then(response => {
+        if (response.status === 201 && response.data.snapshot_id) {
+          track.hasBeenAddedToBuyPlaylist = true
+          track.loadingAddingToBuyPlaylist = false
+          this.componentKey += 1
         }
       })
     }
   }
 }
 </script>
+
+<style lang="scss">
+.v-data-table tbody {
+  text-transform: capitalize;
+}
+</style>
