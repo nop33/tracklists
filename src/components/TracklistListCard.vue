@@ -1,6 +1,6 @@
 <template>
   <v-card>
-    <v-toolbar dark>
+    <v-toolbar dark dense>
       <v-toolbar-title>{{ cardTitle }}</v-toolbar-title>
     </v-toolbar>
     <v-card-text v-if="tracklists.length == 0">

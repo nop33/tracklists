@@ -53,6 +53,7 @@
                     placeholderText="Once you select a Spotify playlist with tracks to download, will appear here"
                     type="spotifyPlaylistWithTracksToDownload"
                     icon="mdi-download"
+                    cardTitle="To download"
                   />
                 </v-col>
                 <v-col>
@@ -61,6 +62,7 @@
                     placeholderText="Once you select a Spotify playlist with tracks to buy, will appear here"
                     type="spotifyPlaylistWithTracksToDownload"
                     icon="mdi-currency-usd"
+                    cardTitle="To buy"
                   />
                 </v-col>
               </v-row>
