@@ -49,16 +49,16 @@
               <v-row>
                 <v-col>
                   <TracklistCardWithPlaceholder
-                    :tracklist="selectedTracklistToCompareLeft"
-                    placeholderText="Your Spotify playlist containing tracks to download will appear here"
+                    :tracklist="spotifyPlaylistWithTracksToDownload"
+                    placeholderText="Once you select a Spotify playlist with tracks to download, will appear here"
                     type="spotifyPlaylistWithTracksToDownload"
                     icon="mdi-download"
                   />
                 </v-col>
                 <v-col>
                   <TracklistCardWithPlaceholder
-                    :tracklist="selectedTracklistToCompareRight"
-                    placeholderText="Your Spotify playlist containing tracks to buy will appear here"
+                    :tracklist="spotifyPlaylistWithTracksToBuy"
+                    placeholderText="Once you select a Spotify playlist with tracks to buy, will appear here"
                     type="spotifyPlaylistWithTracksToDownload"
                     icon="mdi-currency-usd"
                   />
@@ -152,7 +152,9 @@ export default {
       [
         'selectedTracklistToCompareLeft',
         'selectedTracklistToCompareRight',
-        'selectedImportMethod'
+        'selectedImportMethod',
+        'spotifyPlaylistWithTracksToDownload',
+        'spotifyPlaylistWithTracksToBuy'
       ]
     ),
     spotifyAuthUrl () {

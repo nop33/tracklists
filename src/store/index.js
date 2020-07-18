@@ -5,8 +5,8 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    spotifyPlaylistIdWithTracksToDownload: null,
-    spotifyPlaylistIdWithTracksToBuy: null,
+    spotifyPlaylistWithTracksToDownload: null,
+    spotifyPlaylistWithTracksToBuy: null,
     selectedTracklistToCompareLeft: null,
     selectedTracklistToCompareRight: null,
     selectedImportMethod: null,
@@ -15,11 +15,11 @@ export default new Vuex.Store({
     isSnackBarVisible: false
   },
   mutations: {
-    SET_SPOTIFY_TO_DOWNLOAD_PLAYLIST_ID (state, spotifyPlaylistId) {
-      state.spotifyPlaylistIdWithTracksToDownload = spotifyPlaylistId
+    SET_SPOTIFY_TO_DOWNLOAD_PLAYLIST (state, spotifyPlaylist) {
+      state.spotifyPlaylistWithTracksToDownload = spotifyPlaylist
     },
-    SET_SPOTIFY_TO_BUY_PLAYLIST_ID (state, spotifyPlaylistId) {
-      state.spotifyPlaylistIdWithTracksToBuy = spotifyPlaylistId
+    SET_SPOTIFY_TO_BUY_PLAYLIST (state, spotifyPlaylist) {
+      state.spotifyPlaylistWithTracksToBuy = spotifyPlaylist
     },
     SET_TRACKLIST_TO_COMPARE (state, tracklist) {
       if (!state.selectedTracklistToCompareLeft) {
@@ -49,11 +49,11 @@ export default new Vuex.Store({
     }
   },
   actions: {
-    setSpotifyToDownloadPlaylistId ({ commit }, spotifyPlaylistId) {
-      commit('SET_SPOTIFY_TO_DOWNLOAD_PLAYLIST_ID', spotifyPlaylistId)
+    setSpotifyToDownloadPlaylist ({ commit }, spotifyPlaylist) {
+      commit('SET_SPOTIFY_TO_DOWNLOAD_PLAYLIST', spotifyPlaylist)
     },
-    setSpotifyToBuyPlaylistId ({ commit }, spotifyPlaylistId) {
-      commit('SET_SPOTIFY_TO_BUY_PLAYLIST_ID', spotifyPlaylistId)
+    setSpotifyToBuyPlaylist ({ commit }, spotifyPlaylist) {
+      commit('SET_SPOTIFY_TO_BUY_PLAYLIST', spotifyPlaylist)
     },
     setTracklistToCompare ({ commit }, tracklist) {
       commit('SET_TRACKLIST_TO_COMPARE', tracklist)

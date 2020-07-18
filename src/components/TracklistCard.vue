@@ -65,8 +65,8 @@ export default {
   ],
   computed: {
     ...mapState([
-      'spotifyPlaylistIdWithTracksToDownload',
-      'spotifyPlaylistIdWithTracksToBuy'
+      'spotifyPlaylistWithTracksToDownload',
+      'spotifyPlaylistWithTracksToBuy'
     ]),
     chipColor () {
       const colorMap = {
@@ -86,18 +86,18 @@ export default {
       return this.tracklist.origin === origins.GENERATED
     },
     toDownloadIconColor () {
-      return this.spotifyPlaylistIdWithTracksToDownload === this.tracklist.id ? 'green' : ''
+      return this.spotifyPlaylistWithTracksToDownload === this.tracklist ? 'green' : ''
     },
     toBuyIconColor () {
-      return this.spotifyPlaylistIdWithTracksToBuy === this.tracklist.id ? 'green' : ''
+      return this.spotifyPlaylistWithTracksToBuy === this.tracklist ? 'green' : ''
     }
   },
   methods: {
     setAsTracksToDownload () {
-      this.$store.dispatch('setSpotifyToDownloadPlaylistId', this.tracklist.id)
+      this.$store.dispatch('setSpotifyToDownloadPlaylist', this.tracklist)
     },
     setAsTracksToBuy () {
-      this.$store.dispatch('setSpotifyToBuyPlaylistId', this.tracklist.id)
+      this.$store.dispatch('setSpotifyToBuyPlaylist', this.tracklist)
     },
     selectTracklist () {
       this.$store.dispatch('setTracklistToCompare', this.tracklist)

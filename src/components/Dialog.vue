@@ -80,7 +80,7 @@ export default {
     ...mapState([
       'tracklistInDialog',
       'showDialog',
-      'spotifyPlaylistIdWithTracksToDownload',
+      'spotifyPlaylistWithTracksToDownload',
       'spotifyPlaylistIdWithTracksToBuy'
     ])
   },
@@ -102,7 +102,7 @@ export default {
     },
     addToDownloadSpotifyPlaylist (track) {
       track.loadingAddingToDownloadPlaylist = true
-      SpotifyService.addTracksToPlaylist(this.spotifyPlaylistIdWithTracksToDownload, [track.uri]).then(response => {
+      SpotifyService.addTracksToPlaylist(this.spotifyPlaylistWithTracksToDownload, [track.uri]).then(response => {
         if (response.status === 201 && response.data.snapshot_id) {
           track.hasBeenAddedToDownloadPlaylist = true
           track.loadingAddingToDownloadPlaylist = false
