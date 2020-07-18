@@ -9,46 +9,67 @@
       <v-list-item-subtitle v-text="tracklist.contentType"></v-list-item-subtitle>
     </v-list-item-content>
     <v-list-item-action class="flex-row align-center">
-      <v-tooltip v-if="!isComparisonTracklist && isSpotifyImportedTracklist" bottom>
-        <template v-slot:activator="{ on, attrs }">
-          <v-btn icon v-bind="attrs" v-on="on" @click="setAsTracksToDownload()">
-              <v-icon :color="toDownloadIconColor">mdi-download</v-icon>
-            </v-btn>
+
+      <v-menu rounded="b-xl" offset-y>
+        <template v-slot:activator="{ attrs, on }">
+          <v-btn v-bind="attrs" v-on="on" text>
+            Actions
+            <v-icon right>mdi-chevron-down</v-icon>
+          </v-btn>
         </template>
-        <span>Select as tracks to download</span>
-      </v-tooltip>
-      <v-tooltip v-if="!isComparisonTracklist && isSpotifyImportedTracklist" bottom>
-        <template v-slot:activator="{ on, attrs }">
-          <v-btn icon v-bind="attrs" v-on="on" @click="setAsTracksToBuy()">
-              <v-icon :color="toBuyIconColor">mdi-currency-usd</v-icon>
-            </v-btn>
-        </template>
-        <span>Select as tracks to buy</span>
-      </v-tooltip>
-      <v-tooltip v-if="isComparisonTracklist || isGeneratedTracklist" bottom>
-        <template v-slot:activator="{ on, attrs }">
-          <v-btn icon v-bind="attrs" v-on="on" @click="deleteTracklist()">
-              <v-icon>mdi-delete</v-icon>
-            </v-btn>
-        </template>
-        <span>{{ isComparisonTracklist ? "Deselect tracklist" : "Delete tracklist"}}</span>
-      </v-tooltip>
-      <v-tooltip bottom v-if="tracklist.tracks.length">
-        <template v-slot:activator="{ on, attrs }">
-          <v-btn icon v-bind="attrs" v-on="on" @click="openDialog()">
-              <v-icon>mdi-format-list-bulleted</v-icon>
-            </v-btn>
-        </template>
-        <span>View tracks</span>
-      </v-tooltip>
-      <v-tooltip v-if="!isComparisonTracklist" bottom>
-        <template v-slot:activator="{ on, attrs }">
-          <v-btn icon v-bind="attrs" v-on="on" @click="selectTracklist()">
-              <v-icon>mdi-selection-ellipse-arrow-inside</v-icon>
-            </v-btn>
-        </template>
-        <span>Select tracklist to compare</span>
-      </v-tooltip>
+        <v-list>
+          <v-list-item
+            link
+            v-if="!isComparisonTracklist && isSpotifyImportedTracklist"
+            @click="setAsTracksToDownload()"
+          >
+            <v-list-item-title>
+              <v-icon left>mdi-download</v-icon>
+              Select as playlist with tracks to download
+            </v-list-item-title>
+          </v-list-item>
+          <v-list-item
+            link
+            v-if="!isComparisonTracklist && isSpotifyImportedTracklist"
+            @click="setAsTracksToBuy()"
+          >
+            <v-list-item-title>
+              <v-icon left>mdi-currency-usd</v-icon>
+              Select as playlist with tracks to buy
+            </v-list-item-title>
+          </v-list-item>
+          <v-list-item
+            link
+            v-if="isComparisonTracklist || isGeneratedTracklist"
+            @click="deleteTracklist()"
+          >
+            <v-list-item-title>
+              <v-icon left>mdi-delete</v-icon>
+              {{ isComparisonTracklist ? "Deselect tracklist" : "Delete tracklist"}}
+            </v-list-item-title>
+          </v-list-item>
+          <v-list-item
+            link
+            v-if="tracklist.tracks.length"
+            @click="openDialog()"
+          >
+            <v-list-item-title>
+              <v-icon left>mdi-format-list-bulleted</v-icon>
+              View tracks
+            </v-list-item-title>
+          </v-list-item>
+          <v-list-item
+            link
+            v-if="!isComparisonTracklist"
+            @click="selectTracklist()"
+          >
+            <v-list-item-title>
+              <v-icon left>mdi-selection-ellipse-arrow-inside</v-icon>
+              Compare this tracklist with another
+            </v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
     </v-list-item-action>
   </v-list-item>
 </template>
