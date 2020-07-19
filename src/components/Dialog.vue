@@ -87,7 +87,7 @@
 import { mapState } from 'vuex'
 
 import SpotifyService from '@/services/SpotifyService'
-import { contentTypes } from '@/utils/constants'
+import { contentTypes, origins } from '@/utils/constants'
 
 import VSnackbars from 'v-snackbars'
 
@@ -147,12 +147,20 @@ export default {
       if (playlist.id === 'liked') {
         SpotifyService.addTracksToLiked([track.id]).then(response => {
           this.messages.push(`"${track.name}" added in Liked!`)
+          debugger
+          playlist.tracks.push(track)
+          // remove from tracklistInDialog
         })
       } else {
         SpotifyService.addTracksToPlaylist(playlist, [track.uri]).then(response => {
           if (response.status === 201 && response.data.snapshot_id) {
             // this.componentKey += 1
             this.messages.push(`"${track.name}" added in "${playlist.name}"!`)
+            if (playlist.origin === origins.IMPORTED) {
+              playlist.tracks.push(track)
+            } else {
+              // remove from tracklistInDialog
+            }
           } else {
             // Add error logging
           }
