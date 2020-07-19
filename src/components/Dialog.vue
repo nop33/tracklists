@@ -1,6 +1,13 @@
 <template>
   <v-dialog v-model="dialog" transition="dialog-bottom-transition">
     <v-card>
+      <v-toolbar v-if="dialogTitle" color="grey lighten-4" flat>
+        <v-toolbar-title>{{ dialogTitle }}</v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-btn icon @click="dialog = false">
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+      </v-toolbar>
       <v-sheet class="pa-4">
         <div class="d-flex">
           <v-text-field
@@ -9,10 +16,6 @@
             clear-icon="mdi-close-circle-outline"
             flat hide-details clearable
           ></v-text-field>
-          <v-btn dark @click="dialog = false" class="ml-4">
-            <v-icon left>mdi-close</v-icon>
-            Close
-          </v-btn>
         </div>
       </v-sheet>
       <v-data-table
@@ -82,7 +85,10 @@ export default {
       'showDialog',
       'spotifyPlaylistWithTracksToDownload',
       'spotifyPlaylistIdWithTracksToBuy'
-    ])
+    ]),
+    dialogTitle () {
+      return this.tracklistInDialog ? this.tracklistInDialog.name : ''
+    }
   },
   watch: {
     showDialog: function (newValue) {
