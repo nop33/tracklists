@@ -11,89 +11,100 @@
           </v-btn-toggle>
         </v-col>
       </v-row>
-      <v-row v-show="importMethodSelected == 0" justify="center">
-        <v-col v-if="!canAccessSpotifyAPI" sm="auto" class="text-center">
-          <v-btn @click="loginToSpotify" dark color="green">Login to Spotify</v-btn>
+      <v-slide-y-transition>
+        <v-row v-show="importMethodSelected == 0" justify="center">
+          <v-col v-if="!canAccessSpotifyAPI" sm="auto" class="text-center">
+            <v-btn @click="loginToSpotify" dark color="green">Login to Spotify</v-btn>
+          </v-col>
+          <v-col v-else sm="6" class="text-center">
+            <SpotifyPlaylistListCard
+              :playlistImportCallback="getSpotifyPlaylistTracks"
+              :apiErrorCallback="handleAPIError"
+            />
+          </v-col>
+        </v-row>
+      </v-slide-y-transition>
+      <v-slide-y-transition>
+        <v-row v-show="importMethodSelected == 1" justify="center">
+          <v-col sm="6" class="text-center">
+            <v-file-input
+              label="Upload iTunes playlist file"
+              @change="readITunesFile"
+              prepend-icon="fas fa-file-alt"
+            >
+            </v-file-input>
+          </v-col>
+        </v-row>
+      </v-slide-y-transition>
+      <v-slide-y-transition>
+        <v-row v-show="importMethodSelected == 2" justify="center">
+          <v-col sm="6" class="text-center">
+            <v-file-input
+              label="Upload rekordbox playlist file"
+              @change="readRekordboxFile"
+              prepend-icon="fas fa-file-alt"
+            >
+            </v-file-input>
+          </v-col>
+        </v-row>
+      </v-slide-y-transition>
+      <v-row>
+        <v-col>
+          <v-slide-x-transition>
+            <v-row v-if="atLeastOneSpotifyPlaylistWasImported">
+              <v-col>
+                <TracklistCardWithPlaceholder
+                  :tracklist="spotifyPlaylistWithTracksToDownload"
+                  placeholderText="Once you select a Spotify playlist with tracks to download, it will appear here"
+                  type="spotifyPlaylistWithTracksToDownload"
+                  icon="mdi-download"
+                  cardTitle="To download"
+                />
+              </v-col>
+              <v-col>
+                <TracklistCardWithPlaceholder
+                  :tracklist="spotifyPlaylistWithTracksToBuy"
+                  placeholderText="Once you select a Spotify playlist with tracks to buy, it will appear here"
+                  type="spotifyPlaylistWithTracksToDownload"
+                  icon="mdi-currency-usd"
+                  cardTitle="To buy"
+                />
+              </v-col>
+            </v-row>
+          </v-slide-x-transition>
         </v-col>
-        <v-col v-else sm="6" class="text-center">
-          <SpotifyPlaylistListCard
-            :playlistImportCallback="getSpotifyPlaylistTracks"
-            :apiErrorCallback="handleAPIError"
-          />
-        </v-col>
-      </v-row>
-      <v-row v-show="importMethodSelected == 1" justify="center">
-        <v-col sm="6" class="text-center">
-          <v-file-input
-            label="Upload iTunes playlist file"
-            @change="readITunesFile"
-            prepend-icon="fas fa-file-alt"
-          >
-          </v-file-input>
-        </v-col>
-      </v-row>
-      <v-row v-show="importMethodSelected == 2" justify="center">
-        <v-col sm="6" class="text-center">
-          <v-file-input
-            label="Upload rekordbox playlist file"
-            @change="readRekordboxFile"
-            prepend-icon="fas fa-file-alt"
-          >
-          </v-file-input>
+        <v-col>
+          <v-slide-x-reverse-transition>
+            <ComparisonRow
+              v-if="atLeastTwoPlaylistsWereImported"
+              :leftTracklist="selectedTracklistToCompareLeft"
+              :rightTracklist="selectedTracklistToCompareRight"
+              :compareCallback="compare"
+            />
+          </v-slide-x-reverse-transition>
         </v-col>
       </v-row>
       <v-row>
         <v-col>
-          <v-row>
-            <v-col>
-              <v-row>
-                <v-col>
-                  <TracklistCardWithPlaceholder
-                    :tracklist="spotifyPlaylistWithTracksToDownload"
-                    placeholderText="Once you select a Spotify playlist with tracks to download, will appear here"
-                    type="spotifyPlaylistWithTracksToDownload"
-                    icon="mdi-download"
-                    cardTitle="To download"
-                  />
-                </v-col>
-                <v-col>
-                  <TracklistCardWithPlaceholder
-                    :tracklist="spotifyPlaylistWithTracksToBuy"
-                    placeholderText="Once you select a Spotify playlist with tracks to buy, will appear here"
-                    type="spotifyPlaylistWithTracksToDownload"
-                    icon="mdi-currency-usd"
-                    cardTitle="To buy"
-                  />
-                </v-col>
-              </v-row>
-            </v-col>
-          </v-row>
+          <v-slide-x-transition>
+            <TracklistListCard
+              v-if="atLeastOnePlaylistWasImported"
+              cardTitle="Imported playlists"
+              placeholderText="Your imported playlists will appear here"
+              :tracklists="importedTracklists"
+            />
+          </v-slide-x-transition>
         </v-col>
-        <v-col md="1"></v-col>
         <v-col>
-          <ComparisonRow
-            :leftTracklist="selectedTracklistToCompareLeft"
-            :rightTracklist="selectedTracklistToCompareRight"
-            :compareCallback="compare"
-          />
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col>
-          <TracklistListCard
-            cardTitle="Imported playlists"
-            placeholderText="Your imported playlists will appear here"
-            :tracklists="importedTracklists"
-          />
-        </v-col>
-        <v-col md="1"></v-col>
-        <v-col>
-          <TracklistListCard
-            cardTitle="Generated tracklists"
-            placeholderText="Your generated tracklists will appear here"
-            :tracklists="generatedTracklists"
-            :deleteTracklistCallback="deleteTracklist"
-          />
+          <v-slide-x-reverse-transition>
+            <TracklistListCard
+              v-if="atLeastTwoPlaylistsWereImported"
+              cardTitle="Generated tracklists"
+              placeholderText="Your generated tracklists will appear here"
+              :tracklists="generatedTracklists"
+              :deleteTracklistCallback="deleteTracklist"
+            />
+          </v-slide-x-reverse-transition>
         </v-col>
       </v-row>
       <v-row>
@@ -173,6 +184,15 @@ export default {
       set (value) {
         this.$store.dispatch('setSelectedImportMethod', value)
       }
+    },
+    atLeastOneSpotifyPlaylistWasImported () {
+      return this.importedTracklists.some(tracklist => tracklist.contentType === contentTypes.SPOTIFY)
+    },
+    atLeastOnePlaylistWasImported () {
+      return this.importedTracklists.length > 0
+    },
+    atLeastTwoPlaylistsWereImported () {
+      return this.importedTracklists.length > 1
     }
   },
   created () {
