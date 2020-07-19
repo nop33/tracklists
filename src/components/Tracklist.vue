@@ -13,7 +13,7 @@
 
         <v-menu rounded="b-xl" offset-y>
           <template v-slot:activator="{ attrs, on }">
-            <v-btn v-bind="attrs" v-on.stop="on" text>
+            <v-btn v-bind="attrs" v-on.stop="on" text class="grey--text">
               Actions
               <v-icon right>mdi-chevron-down</v-icon>
             </v-btn>

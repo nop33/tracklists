@@ -1,6 +1,6 @@
 import { origins } from './constants'
 
-class Tracklist {
+class TracklistBase {
   id = ''
   name = ''
   contentType = ''
@@ -15,14 +15,14 @@ class Tracklist {
   }
 }
 
-class ImportedTracklist extends Tracklist {
+class ImportedTracklist extends TracklistBase {
   constructor (id, name, contentType, tracks = []) {
     super(id, name, contentType, tracks)
     this.origin = origins.IMPORTED
   }
 }
 
-class GeneratedTracklist extends Tracklist {
+class GeneratedTracklist extends TracklistBase {
   constructor (id, name, contentType, tracks = []) {
     super(id, name, contentType, tracks)
     this.origin = origins.GENERATED
@@ -30,6 +30,7 @@ class GeneratedTracklist extends Tracklist {
 }
 
 export {
+  TracklistBase,
   ImportedTracklist,
   GeneratedTracklist
 }

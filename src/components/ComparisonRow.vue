@@ -1,11 +1,12 @@
 <template>
   <v-row>
     <v-col>
-      <TracklistCardWithPlaceholder
+      <TracklistsCard
         :tracklist="leftTracklist"
+        cardTitle="To compare"
         :placeholderText="placeholderText"
+        :placeholderIcon="icon"
         :type="type"
-        :icon="icon"
       />
     </v-col>
     <v-col md="auto" class="d-flex align-center justify-center">
@@ -16,18 +17,19 @@
       </v-btn>
     </v-col>
     <v-col>
-      <TracklistCardWithPlaceholder
+      <TracklistsCard
         :tracklist="rightTracklist"
+        cardTitle="To compare"
         :placeholderText="placeholderText"
+        :placeholderIcon="icon"
         :type="type"
-        :icon="icon"
       />
     </v-col>
   </v-row>
 </template>
 
 <script>
-import TracklistCardWithPlaceholder from '@/components/TracklistCardWithPlaceholder.vue'
+import TracklistsCard from '@/components/TracklistsCard.vue'
 
 import { tracklistTypes } from '@/utils/constants.js'
 
@@ -38,7 +40,7 @@ export default {
     'compareCallback'
   ],
   components: {
-    TracklistCardWithPlaceholder
+    TracklistsCard
   },
   data: () => {
     return {

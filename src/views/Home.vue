@@ -53,21 +53,21 @@
           <v-slide-x-transition>
             <v-row v-if="atLeastOneSpotifyPlaylistWasImported">
               <v-col>
-                <TracklistCardWithPlaceholder
+                <TracklistsCard
                   :tracklist="spotifyPlaylistWithTracksToDownload"
-                  placeholderText="Once you select a Spotify playlist with tracks to download, it will appear here"
-                  type="spotifyPlaylistWithTracksToDownload"
-                  icon="mdi-download"
                   cardTitle="To download"
+                  placeholderText="Once you select a Spotify playlist with tracks to download, it will appear here"
+                  placeholderIcon="mdi-download"
+                  type="spotifyPlaylistWithTracksToDownload"
                 />
               </v-col>
               <v-col>
-                <TracklistCardWithPlaceholder
+                <TracklistsCard
                   :tracklist="spotifyPlaylistWithTracksToBuy"
-                  placeholderText="Once you select a Spotify playlist with tracks to buy, it will appear here"
-                  type="spotifyPlaylistWithTracksToDownload"
-                  icon="mdi-currency-usd"
                   cardTitle="To buy"
+                  placeholderText="Once you select a Spotify playlist with tracks to buy, it will appear here"
+                  placeholderIcon="mdi-currency-usd"
+                  type="spotifyPlaylistWithTracksToDownload"
                 />
               </v-col>
             </v-row>
@@ -87,21 +87,21 @@
       <v-row>
         <v-col>
           <v-slide-x-transition>
-            <TracklistListCard
+            <TracklistsCard
               v-if="atLeastOnePlaylistWasImported"
+              :tracklists="importedTracklists"
               cardTitle="Imported playlists"
               placeholderText="Your imported playlists will appear here"
-              :tracklists="importedTracklists"
             />
           </v-slide-x-transition>
         </v-col>
         <v-col>
           <v-slide-x-reverse-transition>
-            <TracklistListCard
+            <TracklistsCard
               v-if="atLeastTwoPlaylistsWereImported"
+              :tracklists="generatedTracklists"
               cardTitle="Generated tracklists"
               placeholderText="Your generated tracklists will appear here"
-              :tracklists="generatedTracklists"
               :deleteTracklistCallback="deleteTracklist"
             />
           </v-slide-x-reverse-transition>
@@ -125,9 +125,8 @@ import ImportPlaylistButton from '@/components/ImportPlaylistButton.vue'
 import SpotifyPlaylistListCard from '@/components/SpotifyPlaylistListCard.vue'
 import SnackBar from '@/components/SnackBar.vue'
 import ComparisonRow from '@/components/ComparisonRow.vue'
-import TracklistListCard from '@/components/TracklistListCard.vue'
+import TracklistsCard from '@/components/TracklistsCard.vue'
 import Dialog from '@/components/Dialog.vue'
-import TracklistCardWithPlaceholder from '@/components/TracklistCardWithPlaceholder.vue'
 
 import { generateRandomString, cleanTrackName, removeFeaturedArtistFromName } from '@/utils/utils'
 import { ImportedTracklist, GeneratedTracklist } from '@/utils/tracklist'
@@ -139,9 +138,8 @@ export default {
     SpotifyPlaylistListCard,
     SnackBar,
     ComparisonRow,
-    TracklistListCard,
-    Dialog,
-    TracklistCardWithPlaceholder
+    TracklistsCard,
+    Dialog
   },
   data: () => ({
     clientId: 'e5d07ddf1fe64a6cbcd2d14ac0aac87b',
