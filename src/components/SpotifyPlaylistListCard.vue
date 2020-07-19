@@ -1,8 +1,5 @@
 <template>
-  <v-card
-    class="mx-auto text-left"
-    max-width="500"
-  >
+  <v-card class="mx-auto text-left">
     <v-sheet class="pa-4 green lighten-2">
       <v-text-field
         v-model="spotifyPlaylistSearch"
@@ -44,6 +41,7 @@ import SpotifyPlaylistListItem from '@/components/SpotifyPlaylistListItem.vue'
 export default {
   props: [
     'playlistImportCallback',
+    'playlistSelectedCallback',
     'apiErrorCallback'
   ],
   components: {
@@ -73,14 +71,14 @@ export default {
     importSpotifyLikedTracks () {
       this.hideSpotifyLikedPlaylist = true
       this.$props.playlistImportCallback('Liked', 'liked', this.totalSpotifyLikedTracksNumber)
-      this.$store.dispatch('hideImporter')
+      this.playlistSelectedCallback()
     },
     importSpotifyPlaylist (playlistId) {
       const spotifyPlaylist = this.spotifyPlaylists.find(playlist => playlist.id === playlistId)
       const index = this.spotifyPlaylists.indexOf(spotifyPlaylist)
       this.spotifyPlaylists.splice(index, 1)
       this.$props.playlistImportCallback(spotifyPlaylist.name, spotifyPlaylist.id, spotifyPlaylist.tracks.total)
-      this.$store.dispatch('hideImporter')
+      this.playlistSelectedCallback()
     },
     getSpotifyPlaylists () {
       const limit = 50

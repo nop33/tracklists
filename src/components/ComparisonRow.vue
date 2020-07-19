@@ -1,29 +1,35 @@
 <template>
   <v-row>
     <v-col>
-      <TracklistsCard
-        :tracklist="leftTracklist"
-        cardTitle="To compare"
-        :placeholderText="placeholderText"
-        :placeholderIcon="icon"
-        :type="type"
-      />
-    </v-col>
-    <v-col md="auto" class="d-flex align-center justify-center">
-      <v-btn @click="compareCallback">
-        <v-icon left>mdi-arrow-right</v-icon>
-        Compare
-        <v-icon right>mdi-arrow-left</v-icon>
-      </v-btn>
-    </v-col>
-    <v-col>
-      <TracklistsCard
-        :tracklist="rightTracklist"
-        cardTitle="To compare"
-        :placeholderText="placeholderText"
-        :placeholderIcon="icon"
-        :type="type"
-      />
+      <v-row>
+        <v-col>
+          <TracklistsCard
+            :tracklist="leftTracklist"
+            cardTitle="To compare"
+            :placeholderText="placeholderText"
+            :placeholderIcon="icon"
+            :type="type"
+          />
+        </v-col>
+        <v-col>
+          <TracklistsCard
+            :tracklist="rightTracklist"
+            cardTitle="To compare"
+            :placeholderText="placeholderText"
+            :placeholderIcon="icon"
+            :type="type"
+          />
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col class="d-flex align-center flex-column">
+          <v-btn @click="compareCallback" :disabled="!leftTracklist && !rightTracklist">
+            <v-icon left>mdi-arrow-right</v-icon>
+            Compare
+            <v-icon right>mdi-arrow-left</v-icon>
+          </v-btn>
+        </v-col>
+      </v-row>
     </v-col>
   </v-row>
 </template>

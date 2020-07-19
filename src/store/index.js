@@ -70,9 +70,6 @@ export default new Vuex.Store({
     setSelectedImportMethod ({ commit }, value) {
       commit('SET_SELECTED_IMPORT_METHOD', value)
     },
-    hideImporter ({ commit }) {
-      commit('SET_SELECTED_IMPORT_METHOD', null)
-    },
     toggleSnackBar ({ commit }, value) {
       commit('TOGGLE_SNACKBAR', value)
     }

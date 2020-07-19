@@ -10,46 +10,49 @@
             <ImportPlaylistButton text="Rekordbox" icon="fas fa-headphones" color="black" />
           </v-btn-toggle>
         </v-col>
-      </v-row>
-      <v-slide-y-transition>
-        <v-row v-show="importMethodSelected == 0" justify="center">
-          <v-col v-if="!canAccessSpotifyAPI" sm="auto" class="text-center">
-            <v-btn @click="loginToSpotify" dark color="green">Login to Spotify</v-btn>
-          </v-col>
-          <v-col v-else sm="6" class="text-center">
-            <SpotifyPlaylistListCard
-              :playlistImportCallback="getSpotifyPlaylistTracks"
-              :apiErrorCallback="handleAPIError"
+        <v-slide-x-reverse-transition>
+          <v-col v-if="atLeastTwoPlaylistsWereImported">
+            <ComparisonRow
+              :leftTracklist="selectedTracklistToCompareLeft"
+              :rightTracklist="selectedTracklistToCompareRight"
+              :compareCallback="compare"
             />
           </v-col>
-        </v-row>
-      </v-slide-y-transition>
-      <v-slide-y-transition>
-        <v-row v-show="importMethodSelected == 1" justify="center">
-          <v-col sm="6" class="text-center">
+        </v-slide-x-reverse-transition>
+      </v-row>
+      <v-dialog v-model="importerDialog" transition="dialog-bottom-transition" class="mx-auto" max-width="50vw">
+        <SpotifyPlaylistListCard
+          :playlistImportCallback="getSpotifyPlaylistTracks"
+          :playlistSelectedCallback="resetSelectedImportMethod"
+          :apiErrorCallback="handleAPIError"
+          v-show="importMethodSelected == 0 && canAccessSpotifyAPI"
+        />
+        <div v-show="importMethodSelected == 0 && !canAccessSpotifyAPI" sm="auto" class="text-center">
+          <v-btn @click="loginToSpotify" dark color="green">Login to Spotify</v-btn>
+        </div>
+        <v-card v-if="importMethodSelected == 1 || importMethodSelected == 2">
+          <v-card-title></v-card-title>
+          <v-card-text>
             <v-file-input
+              v-show="importMethodSelected == 1"
               label="Upload iTunes playlist file"
               @change="readITunesFile"
               prepend-icon="fas fa-file-alt"
             >
             </v-file-input>
-          </v-col>
-        </v-row>
-      </v-slide-y-transition>
-      <v-slide-y-transition>
-        <v-row v-show="importMethodSelected == 2" justify="center">
-          <v-col sm="6" class="text-center">
             <v-file-input
+              v-show="importMethodSelected == 2"
               label="Upload rekordbox playlist file"
               @change="readRekordboxFile"
               prepend-icon="fas fa-file-alt"
             >
             </v-file-input>
-          </v-col>
-        </v-row>
-      </v-slide-y-transition>
-      <v-row>
-        <v-col>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
+
+      <!-- <v-row>
+        <v-col> -->
           <!-- <v-slide-x-transition>
             <v-row v-if="atLeastOneSpotifyPlaylistWasImported">
               <v-col>
@@ -72,18 +75,11 @@
               </v-col>
             </v-row>
           </v-slide-x-transition> -->
-        </v-col>
+        <!-- </v-col>
         <v-col>
-          <v-slide-x-reverse-transition>
-            <ComparisonRow
-              v-if="atLeastTwoPlaylistsWereImported"
-              :leftTracklist="selectedTracklistToCompareLeft"
-              :rightTracklist="selectedTracklistToCompareRight"
-              :compareCallback="compare"
-            />
-          </v-slide-x-reverse-transition>
+
         </v-col>
-      </v-row>
+      </v-row> -->
       <v-row>
         <v-col>
           <v-slide-x-transition>
@@ -154,8 +150,21 @@ export default {
     canAccessSpotifyAPI: false,
     snackbar: false,
     snackBarText: '',
-    spotifyPlaylistSearch: null
+    spotifyPlaylistSearch: null,
+    importerDialog: false
   }),
+  watch: {
+    selectedImportMethod (newValue) {
+      if (newValue === null && this.importerDialog) {
+        this.importerDialog = false
+      }
+    },
+    importerDialog (newValue) {
+      if (!newValue && this.selectedImportMethod !== null) {
+        this.resetSelectedImportMethod() // TODO: Need to delay this until dialog transition has finished
+      }
+    }
+  },
   computed: {
     ...mapState(
       [
@@ -180,6 +189,7 @@ export default {
         return this.selectedImportMethod
       },
       set (value) {
+        this.importerDialog = value >= 0
         this.$store.dispatch('setSelectedImportMethod', value)
       }
     },
@@ -284,12 +294,12 @@ export default {
       }, 2000)
     },
     readITunesFile (file) {
-      this.$store.dispatch('hideImporter')
+      this.resetSelectedImportMethod()
       this.currentlyProcessingTextFileName = file.name.split('.')[0]
       this.iTunesFileReader.readAsText(file)
     },
     readRekordboxFile (file) {
-      this.$store.dispatch('hideImporter')
+      this.resetSelectedImportMethod()
       this.currentlyProcessingTextFileName = file.name.split('.')[0]
       this.rekordboxFileReader.readAsText(file)
     },
@@ -405,6 +415,9 @@ export default {
         localStorage.removeItem('spotifyAccessToken')
         this.canAccessSpotifyAPI = false
       }
+    },
+    resetSelectedImportMethod () {
+      this.$store.dispatch('setSelectedImportMethod', null)
     }
   }
 }
