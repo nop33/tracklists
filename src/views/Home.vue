@@ -393,14 +393,12 @@ export default {
           )
         })
 
-        this.importedTracklists.push(
-          new ImportedTracklist(
-            playlistId,
-            playlistName,
-            contentTypes.SPOTIFY,
-            tracks
-          )
-        )
+        const tracklist = new ImportedTracklist(playlistId, playlistName, contentTypes.SPOTIFY, tracks)
+        this.importedTracklists.push(tracklist)
+
+        if (this.importedTracklists.length <= 2) {
+          this.$store.dispatch('setTracklistToCompare', tracklist)
+        }
       }).catch(err => {
         this.handleAPIError(err)
       })
