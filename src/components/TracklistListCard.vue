@@ -7,16 +7,14 @@
       <div class="font-weight-thin font-italic">{{ placeholderText }}</div>
     </v-card-text>
     <v-list v-else>
-      <v-list-item-group>
-        <template v-for="(tracklist, index) in tracklists">
-          <TracklistCard
-            :tracklist="tracklist"
-            :key="tracklist.id"
-            :deleteTracklistCallback="deleteTracklistCallback"
-          />
-          <v-divider v-if="index + 1 !== tracklists.length" :key="`${tracklist.id} ${index}`"></v-divider>
-        </template>
-      </v-list-item-group>
+      <template v-for="(tracklist, index) in tracklists">
+        <TracklistCard
+          :tracklist="tracklist"
+          :key="tracklist.id"
+          :deleteTracklistCallback="deleteTracklistCallback"
+        />
+        <v-divider v-if="index + 1 !== tracklists.length" :key="`${tracklist.id} ${index}`"></v-divider>
+      </template>
     </v-list>
   </v-card>
 </template>

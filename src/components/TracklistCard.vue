@@ -1,77 +1,79 @@
 <template>
-  <v-list-item>
-    <v-list-item-content>
-      <v-list-item-title class="tracklist__title text-subtitle-1">
-        {{ tracklist.name }}
-        <v-chip class="flex-grow-0" :color="chipColor" text-color="white" x-small>{{ tracklist.tracks.length }}</v-chip>
-        <v-spacer />
-      </v-list-item-title>
-      <v-list-item-subtitle v-text="tracklist.contentType"></v-list-item-subtitle>
-    </v-list-item-content>
-    <v-list-item-action class="flex-row align-center">
+  <v-hover v-slot:default="{ hover }">
+    <v-list-item @click="openDialog()" :color="hover ? 'grey lighten-5' : ''">
+      <v-list-item-content>
+        <v-list-item-title class="tracklist__title text-subtitle-1">
+          {{ tracklist.name }}
+          <v-chip class="flex-grow-0" :color="chipColor" text-color="white" x-small>{{ tracklist.tracks.length }}</v-chip>
+          <v-spacer />
+        </v-list-item-title>
+        <v-list-item-subtitle v-text="tracklist.contentType"></v-list-item-subtitle>
+      </v-list-item-content>
+      <v-list-item-action class="flex-row align-center">
 
-      <v-menu rounded="b-xl" offset-y>
-        <template v-slot:activator="{ attrs, on }">
-          <v-btn v-bind="attrs" v-on="on" text>
-            Actions
-            <v-icon right>mdi-chevron-down</v-icon>
-          </v-btn>
-        </template>
-        <v-list>
-          <v-list-item
-            link
-            v-if="!isComparisonTracklist && isSpotifyImportedTracklist"
-            @click="setAsTracksToDownload()"
-          >
-            <v-list-item-title>
-              <v-icon left>mdi-download</v-icon>
-              Select as playlist with tracks to download
-            </v-list-item-title>
-          </v-list-item>
-          <v-list-item
-            link
-            v-if="!isComparisonTracklist && isSpotifyImportedTracklist"
-            @click="setAsTracksToBuy()"
-          >
-            <v-list-item-title>
-              <v-icon left>mdi-currency-usd</v-icon>
-              Select as playlist with tracks to buy
-            </v-list-item-title>
-          </v-list-item>
-          <v-list-item
-            link
-            v-if="isComparisonTracklist || isGeneratedTracklist"
-            @click="deleteTracklist()"
-          >
-            <v-list-item-title>
-              <v-icon left>mdi-delete</v-icon>
-              {{ isComparisonTracklist ? "Deselect tracklist" : "Delete tracklist"}}
-            </v-list-item-title>
-          </v-list-item>
-          <v-list-item
-            link
-            v-if="tracklist.tracks.length"
-            @click="openDialog()"
-          >
-            <v-list-item-title>
-              <v-icon left>mdi-format-list-bulleted</v-icon>
-              View tracks
-            </v-list-item-title>
-          </v-list-item>
-          <v-list-item
-            link
-            v-if="!isComparisonTracklist"
-            @click="selectTracklist()"
-          >
-            <v-list-item-title>
-              <v-icon left>mdi-selection-ellipse-arrow-inside</v-icon>
-              Compare this tracklist with another
-            </v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
-    </v-list-item-action>
-  </v-list-item>
+        <v-menu rounded="b-xl" offset-y>
+          <template v-slot:activator="{ attrs, on }">
+            <v-btn v-bind="attrs" v-on.stop="on" text>
+              Actions
+              <v-icon right>mdi-chevron-down</v-icon>
+            </v-btn>
+          </template>
+          <v-list>
+            <v-list-item
+              link
+              v-if="!isComparisonTracklist && isSpotifyImportedTracklist"
+              @click.stop="setAsTracksToDownload()"
+            >
+              <v-list-item-title>
+                <v-icon left>mdi-download</v-icon>
+                Select as playlist with tracks to download
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item
+              link
+              v-if="!isComparisonTracklist && isSpotifyImportedTracklist"
+              @click.stop="setAsTracksToBuy()"
+            >
+              <v-list-item-title>
+                <v-icon left>mdi-currency-usd</v-icon>
+                Select as playlist with tracks to buy
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item
+              link
+              v-if="isComparisonTracklist || isGeneratedTracklist"
+              @click.stop="deleteTracklist()"
+            >
+              <v-list-item-title>
+                <v-icon left>mdi-delete</v-icon>
+                {{ isComparisonTracklist ? "Deselect tracklist" : "Delete tracklist"}}
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item
+              link
+              v-if="tracklist.tracks.length"
+              @click.stop="openDialog()"
+            >
+              <v-list-item-title>
+                <v-icon left>mdi-format-list-bulleted</v-icon>
+                View tracks
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item
+              link
+              v-if="!isComparisonTracklist"
+              @click.stop="selectTracklist()"
+            >
+              <v-list-item-title>
+                <v-icon left>mdi-selection-ellipse-arrow-inside</v-icon>
+                Compare this tracklist with another
+              </v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+      </v-list-item-action>
+    </v-list-item>
+  </v-hover>
 </template>
 
 <script>
