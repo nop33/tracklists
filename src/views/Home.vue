@@ -50,7 +50,7 @@
       </v-slide-y-transition>
       <v-row>
         <v-col>
-          <v-slide-x-transition>
+          <!-- <v-slide-x-transition>
             <v-row v-if="atLeastOneSpotifyPlaylistWasImported">
               <v-col>
                 <TracklistsCard
@@ -71,7 +71,7 @@
                 />
               </v-col>
             </v-row>
-          </v-slide-x-transition>
+          </v-slide-x-transition> -->
         </v-col>
         <v-col>
           <v-slide-x-reverse-transition>
@@ -109,7 +109,7 @@
       </v-row>
       <v-row>
         <v-col sm="6">
-          <Dialog />
+          <Dialog :spotifyImportedPlaylists="spotifyImportedPlaylists" />
         </v-col>
       </v-row>
     </v-container>
@@ -191,6 +191,9 @@ export default {
     },
     atLeastTwoPlaylistsWereImported () {
       return this.importedTracklists.length > 1
+    },
+    spotifyImportedPlaylists () {
+      return this.importedTracklists.filter(tracklist => tracklist.contentType === contentTypes.SPOTIFY)
     }
   },
   created () {

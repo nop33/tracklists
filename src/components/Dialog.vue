@@ -35,7 +35,29 @@
             <v-icon small left>mdi-open-in-new</v-icon>
             MuzOnly
           </v-btn>
-          <v-btn
+
+          <v-menu rounded="b-xl" offset-y>
+          <template v-slot:activator="{ attrs, on }">
+            <v-btn v-bind="attrs" v-on="on" text class="grey--text">
+              Add to playlist
+              <v-icon right>mdi-chevron-down</v-icon>
+            </v-btn>
+          </template>
+          <v-list>
+            <v-list-item
+              link
+              v-for="spotifyPlaylist in spotifyImportedPlaylists"
+              :key="spotifyPlaylist.id"
+              @click="addToSpotifyPlaylist(track, spotifyPlaylist)"
+            >
+              <v-list-item-title>
+                <v-icon left>fab fa-spotify</v-icon>
+                {{ spotifyPlaylist.name }}
+              </v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+          <!-- <v-btn
             small
             :loading="item.loadingAddingToDownloadPlaylist"
             @click="addToDownloadSpotifyPlaylist(item)"
@@ -53,7 +75,7 @@
           >
             <v-icon small left>fab fa-spotify</v-icon>
             to buy
-          </v-btn>
+          </v-btn> -->
         </template>
       </v-data-table>
     </v-card>
@@ -66,6 +88,7 @@ import { mapState } from 'vuex'
 import SpotifyService from '@/services/SpotifyService'
 
 export default {
+  props: ['spotifyImportedPlaylists'],
   data: () => {
     return {
       dialog: false,
@@ -106,26 +129,33 @@ export default {
       var win = window.open(encodeURI(url), '_blank')
       win.focus()
     },
-    addToDownloadSpotifyPlaylist (track) {
-      track.loadingAddingToDownloadPlaylist = true
-      SpotifyService.addTracksToPlaylist(this.spotifyPlaylistWithTracksToDownload, [track.uri]).then(response => {
+    addToSpotifyPlaylist (track, playlist) {
+      SpotifyService.addTracksToPlaylist(playlist, [track.uri]).then(response => {
         if (response.status === 201 && response.data.snapshot_id) {
-          track.hasBeenAddedToDownloadPlaylist = true
-          track.loadingAddingToDownloadPlaylist = false
-          this.componentKey += 1
-        }
-      })
-    },
-    addToBuySpotifyPlaylist (track) {
-      track.loadingAddingToBuyPlaylist = true
-      SpotifyService.addTracksToPlaylist(this.spotifyPlaylistIdWithTracksToBuy, [track.uri]).then(response => {
-        if (response.status === 201 && response.data.snapshot_id) {
-          track.hasBeenAddedToBuyPlaylist = true
-          track.loadingAddingToBuyPlaylist = false
-          this.componentKey += 1
+          // this.componentKey += 1
         }
       })
     }
+    // addToDownloadSpotifyPlaylist (track) {
+    //   track.loadingAddingToDownloadPlaylist = true
+    //   SpotifyService.addTracksToPlaylist(this.spotifyPlaylistWithTracksToDownload, [track.uri]).then(response => {
+    //     if (response.status === 201 && response.data.snapshot_id) {
+    //       track.hasBeenAddedToDownloadPlaylist = true
+    //       track.loadingAddingToDownloadPlaylist = false
+    //       this.componentKey += 1
+    //     }
+    //   })
+    // },
+    // addToBuySpotifyPlaylist (track) {
+    //   track.loadingAddingToBuyPlaylist = true
+    //   SpotifyService.addTracksToPlaylist(this.spotifyPlaylistIdWithTracksToBuy, [track.uri]).then(response => {
+    //     if (response.status === 201 && response.data.snapshot_id) {
+    //       track.hasBeenAddedToBuyPlaylist = true
+    //       track.loadingAddingToBuyPlaylist = false
+    //       this.componentKey += 1
+    //     }
+    //   })
+    // }
   }
 }
 </script>

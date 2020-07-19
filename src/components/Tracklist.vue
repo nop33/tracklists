@@ -19,7 +19,7 @@
             </v-btn>
           </template>
           <v-list>
-            <v-list-item
+            <!-- <v-list-item
               link
               v-if="!isComparisonTracklist && isSpotifyImportedTracklist"
               @click="setAsTracksToDownload()"
@@ -38,7 +38,7 @@
                 <v-icon left>mdi-currency-usd</v-icon>
                 Select as playlist with tracks to buy
               </v-list-item-title>
-            </v-list-item>
+            </v-list-item> -->
             <v-list-item
               link
               v-if="isComparisonTracklist || isGeneratedTracklist"
