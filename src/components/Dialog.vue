@@ -36,27 +36,27 @@
             MuzOnly
           </v-btn>
 
-          <v-menu rounded="b-xl" offset-y>
-          <template v-slot:activator="{ attrs, on }">
-            <v-btn v-bind="attrs" v-on="on" text class="grey--text">
-              Add to playlist
-              <v-icon right>mdi-chevron-down</v-icon>
-            </v-btn>
-          </template>
-          <v-list>
-            <v-list-item
-              link
-              v-for="spotifyPlaylist in spotifyImportedPlaylists"
-              :key="spotifyPlaylist.id"
-              @click="addToSpotifyPlaylist(track, spotifyPlaylist)"
-            >
-              <v-list-item-title>
-                <v-icon left>fab fa-spotify</v-icon>
-                {{ spotifyPlaylist.name }}
-              </v-list-item-title>
-            </v-list-item>
-          </v-list>
-        </v-menu>
+          <v-menu rounded="b-xl" offset-y v-if="isSpotifyTrack && spotifyPlaylistsToAddTrack.length > 0">
+            <template v-slot:activator="{ attrs, on }">
+              <v-btn v-bind="attrs" v-on="on" text class="grey--text">
+                Add to playlist
+                <v-icon right>mdi-chevron-down</v-icon>
+              </v-btn>
+            </template>
+            <v-list>
+              <v-list-item
+                link
+                v-for="spotifyPlaylist in spotifyPlaylistsToAddTrack"
+                :key="spotifyPlaylist.id"
+                @click="addToSpotifyPlaylist(track, spotifyPlaylist)"
+              >
+                <v-list-item-title>
+                  <v-icon left>fab fa-spotify</v-icon>
+                  {{ spotifyPlaylist.name }}
+                </v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
           <!-- <v-btn
             small
             :loading="item.loadingAddingToDownloadPlaylist"
@@ -86,6 +86,7 @@
 import { mapState } from 'vuex'
 
 import SpotifyService from '@/services/SpotifyService'
+import { contentTypes } from '@/utils/constants'
 
 export default {
   props: ['spotifyImportedPlaylists'],
@@ -111,6 +112,12 @@ export default {
     ]),
     dialogTitle () {
       return this.tracklistInDialog ? this.tracklistInDialog.name : ''
+    },
+    isSpotifyTrack () {
+      return this.tracklistInDialog.contentType === contentTypes.SPOTIFY
+    },
+    spotifyPlaylistsToAddTrack () {
+      return this.spotifyImportedPlaylists.filter(playlist => playlist !== this.tracklistInDialog)
     }
   },
   watch: {
