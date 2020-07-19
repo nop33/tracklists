@@ -24,6 +24,10 @@ class BaseService {
   static POST (url, data) {
     return axiosInstance.post(url, data)
   }
+
+  static PUT (url, data) {
+    return axiosInstance.put(url, data)
+  }
 }
 
 export default BaseService

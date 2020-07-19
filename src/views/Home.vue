@@ -25,11 +25,12 @@
           :playlistImportCallback="getSpotifyPlaylistTracks"
           :playlistSelectedCallback="resetSelectedImportMethod"
           :apiErrorCallback="handleAPIError"
-          v-show="importMethodSelected == 0 && canAccessSpotifyAPI"
+          v-if="canAccessSpotifyAPI"
+          v-show="importMethodSelected == 0"
         />
-        <div v-show="importMethodSelected == 0 && !canAccessSpotifyAPI" sm="auto" class="text-center">
-          <v-btn @click="loginToSpotify" dark color="green">Login to Spotify</v-btn>
-        </div>
+        <v-btn v-if="importMethodSelected == 0 && !canAccessSpotifyAPI" @click="loginToSpotify" dark color="green">
+          Login to Spotify
+        </v-btn>
         <v-card v-if="importMethodSelected == 1 || importMethodSelected == 2">
           <v-card-title></v-card-title>
           <v-card-text>
@@ -139,7 +140,7 @@ export default {
   },
   data: () => ({
     clientId: 'e5d07ddf1fe64a6cbcd2d14ac0aac87b',
-    scope: 'user-read-private user-read-email playlist-read-private user-library-read playlist-modify-private',
+    scope: 'playlist-read-private playlist-modify-private user-library-read user-library-modify',
     redirectUri: 'http://localhost:8080/spotify-auth-callback',
     state: generateRandomString(16),
     iTunesFileReader: new FileReader(),
@@ -410,8 +411,8 @@ export default {
     handleAPIError (err) {
       console.log(err)
       if (err.response && err.response.status === 401) {
-        this.snackbarText = 'I lost the Spotify connection, care logging in again please? Thanks!'
-        this.$store.dispatch('toggleSnackBar', true)
+        // this.snackbarText = 'I lost the Spotify connection, care logging in again please? Thanks!'
+        // this.$store.dispatch('toggleSnackBar', true)
         localStorage.removeItem('spotifyAccessToken')
         this.canAccessSpotifyAPI = false
       }

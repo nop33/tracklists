@@ -10,8 +10,12 @@ class SpotifyService extends BaseService {
     return playlistId === 'liked' ? this.GET(api.my.tracks, params) : this.GET(api.playlistTracks(playlistId), params)
   }
 
-  static addTracksToPlaylist (playlistId, urisOfTracksToAdd) {
-    return this.POST(api.playlistTracks(playlistId), { uris: urisOfTracksToAdd })
+  static addTracksToPlaylist (playlist, urisOfTracksToAdd) {
+    return this.POST(api.playlistTracks(playlist.id), { uris: urisOfTracksToAdd })
+  }
+
+  static addTracksToLiked (idsOfTracksToAdd) {
+    return this.PUT(api.my.tracks, { ids: idsOfTracksToAdd })
   }
 }
 export default SpotifyService

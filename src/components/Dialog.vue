@@ -48,7 +48,7 @@
                 link
                 v-for="spotifyPlaylist in spotifyPlaylistsToAddTrack"
                 :key="spotifyPlaylist.id"
-                @click="addToSpotifyPlaylist(track, spotifyPlaylist)"
+                @click="addToSpotifyPlaylist(item, spotifyPlaylist)"
               >
                 <v-list-item-title>
                   <v-icon left>fab fa-spotify</v-icon>
@@ -79,6 +79,7 @@
         </template>
       </v-data-table>
     </v-card>
+    <v-snackbars :messages.sync="messages" color="green" bottom></v-snackbars>
   </v-dialog>
 </template>
 
@@ -88,8 +89,13 @@ import { mapState } from 'vuex'
 import SpotifyService from '@/services/SpotifyService'
 import { contentTypes } from '@/utils/constants'
 
+import VSnackbars from 'v-snackbars'
+
 export default {
   props: ['spotifyImportedPlaylists'],
+  components: {
+    VSnackbars
+  },
   data: () => {
     return {
       dialog: false,
@@ -100,7 +106,8 @@ export default {
         { text: '', value: 'actions', sortable: false }
       ],
       componentKey: 0,
-      page: 0
+      page: 0,
+      messages: []
     }
   },
   computed: {
@@ -137,11 +144,20 @@ export default {
       win.focus()
     },
     addToSpotifyPlaylist (track, playlist) {
-      SpotifyService.addTracksToPlaylist(playlist, [track.uri]).then(response => {
-        if (response.status === 201 && response.data.snapshot_id) {
-          // this.componentKey += 1
-        }
-      })
+      if (playlist.id === 'liked') {
+        SpotifyService.addTracksToLiked([track.id]).then(response => {
+          this.messages.push(`"${track.name}" added in Liked!`)
+        })
+      } else {
+        SpotifyService.addTracksToPlaylist(playlist, [track.uri]).then(response => {
+          if (response.status === 201 && response.data.snapshot_id) {
+            // this.componentKey += 1
+            this.messages.push(`"${track.name}" added in "${playlist.name}"!`)
+          } else {
+            // Add error logging
+          }
+        })
+      }
     }
     // addToDownloadSpotifyPlaylist (track) {
     //   track.loadingAddingToDownloadPlaylist = true
