@@ -268,8 +268,8 @@ export default {
       let i = 0
       while (!leftSideTrack.match && i < this.selectedTracklistToCompareRight.tracks.length) {
         const rightSideTrack = this.selectedTracklistToCompareRight.tracks[i]
-        if (leftSideTrack.name === rightSideTrack.name &&
-              atLeastOneSpotifyArtistIsIncludedInITunesArtistString(leftSideTrack, rightSideTrack)) {
+        if (leftSideTrack.id === rightSideTrack.id || (leftSideTrack.name === rightSideTrack.name &&
+            atLeastOneSpotifyArtistIsIncludedInITunesArtistString(leftSideTrack, rightSideTrack))) {
           leftSideTrack.match = rightSideTrack.id
           rightSideTrack.match = leftSideTrack.id
         }
