@@ -23,7 +23,7 @@
       </v-row>
       <v-row>
         <v-col class="d-flex align-center flex-column">
-          <v-btn @click="compareCallback" :disabled="!leftTracklist && !rightTracklist">
+          <v-btn @click="compareCallback" :disabled="!leftTracklist || !rightTracklist">
             <v-icon left>mdi-arrow-right</v-icon>
             Compare
             <v-icon right>mdi-arrow-left</v-icon>
