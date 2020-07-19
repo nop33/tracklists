@@ -228,7 +228,6 @@ export default {
         this.findMatchingRightSideTrack(leftSideTrack)
         if (leftSideTrack.match) {
           sameTracks.push(leftSideTrack)
-          leftSideTrack.match = undefined
         } else {
           onlyLeftSideTracks.push(leftSideTrack)
         }
@@ -237,8 +236,6 @@ export default {
       this.selectedTracklistToCompareRight.tracks.forEach(rightSideTrack => {
         if (!rightSideTrack.match) {
           onlyRightSideTracks.push(rightSideTrack)
-        } else {
-          rightSideTrack.match = undefined
         }
       })
 
@@ -266,6 +263,13 @@ export default {
           onlyRightSideTracks
         )
       )
+
+      this.selectedTracklistToCompareLeft.forEach(track => {
+        track.match = undefined
+      })
+      this.selectedTracklistToCompareRight.forEach(track => {
+        track.match = undefined
+      })
     },
     findMatchingRightSideTrack (leftSideTrack) {
       let i = 0

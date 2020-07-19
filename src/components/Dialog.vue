@@ -46,7 +46,7 @@
             <v-list>
               <v-list-item
                 link
-                v-for="spotifyPlaylist in spotifyPlaylistsToAddTrack"
+                v-for="spotifyPlaylist in spotifyPlaylistsToAddTrack(item)"
                 :key="spotifyPlaylist.id"
                 @click="addToSpotifyPlaylist(item, spotifyPlaylist)"
               >
@@ -122,9 +122,6 @@ export default {
     },
     isSpotifyTrack () {
       return this.tracklistInDialog.contentType === contentTypes.SPOTIFY
-    },
-    spotifyPlaylistsToAddTrack () {
-      return this.spotifyImportedPlaylists.filter(playlist => playlist !== this.tracklistInDialog)
     }
   },
   watch: {
@@ -149,7 +146,7 @@ export default {
           this.messages.push(`"${track.name}" added in Liked!`)
           debugger
           playlist.tracks.push(track)
-          // remove from tracklistInDialog
+          this.tracklistInDialog.splice(this.tracklistInDialog.indexOf(track), 1)
         })
       } else {
         SpotifyService.addTracksToPlaylist(playlist, [track.uri]).then(response => {
@@ -158,14 +155,19 @@ export default {
             this.messages.push(`"${track.name}" added in "${playlist.name}"!`)
             if (playlist.origin === origins.IMPORTED) {
               playlist.tracks.push(track)
-            } else {
-              // remove from tracklistInDialog
+            } else if (playlist.origin === origins.GENERATED && this.tracklistInDialog.origin === origins.GENERATED) {
+              this.tracklistInDialog.splice(this.tracklistInDialog.indexOf(track), 1)
             }
           } else {
             // Add error logging
           }
         })
       }
+    },
+    spotifyPlaylistsToAddTrack (track) {
+      return this.spotifyImportedPlaylists.filter(playlist => {
+        return playlist !== this.tracklistInDialog && !playlist.tracks.some(tr => tr.id === track.id)
+      })
     }
     // addToDownloadSpotifyPlaylist (track) {
     //   track.loadingAddingToDownloadPlaylist = true
