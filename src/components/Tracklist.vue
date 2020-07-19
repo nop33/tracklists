@@ -13,7 +13,7 @@
 
         <v-menu rounded="b-xl" offset-y>
           <template v-slot:activator="{ attrs, on }">
-            <v-btn v-bind="attrs" v-on.stop="on" text class="grey--text">
+            <v-btn v-bind="attrs" v-on="on" text class="grey--text">
               Actions
               <v-icon right>mdi-chevron-down</v-icon>
             </v-btn>
@@ -22,7 +22,7 @@
             <v-list-item
               link
               v-if="!isComparisonTracklist && isSpotifyImportedTracklist"
-              @click.stop="setAsTracksToDownload()"
+              @click="setAsTracksToDownload()"
             >
               <v-list-item-title>
                 <v-icon left>mdi-download</v-icon>
@@ -32,7 +32,7 @@
             <v-list-item
               link
               v-if="!isComparisonTracklist && isSpotifyImportedTracklist"
-              @click.stop="setAsTracksToBuy()"
+              @click="setAsTracksToBuy()"
             >
               <v-list-item-title>
                 <v-icon left>mdi-currency-usd</v-icon>
@@ -42,7 +42,7 @@
             <v-list-item
               link
               v-if="isComparisonTracklist || isGeneratedTracklist"
-              @click.stop="deleteTracklist()"
+              @click="deleteTracklist()"
             >
               <v-list-item-title>
                 <v-icon left>mdi-delete</v-icon>
@@ -51,22 +51,22 @@
             </v-list-item>
             <v-list-item
               link
-              v-if="tracklist.tracks.length"
-              @click.stop="openDialog()"
-            >
-              <v-list-item-title>
-                <v-icon left>mdi-format-list-bulleted</v-icon>
-                View tracks
-              </v-list-item-title>
-            </v-list-item>
-            <v-list-item
-              link
               v-if="!isComparisonTracklist"
-              @click.stop="selectTracklist()"
+              @click="selectTracklist()"
             >
               <v-list-item-title>
                 <v-icon left>mdi-selection-ellipse-arrow-inside</v-icon>
                 Compare this tracklist with another
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item
+              link
+              v-if="tracklist.tracks.length"
+              @click="openDialog()"
+            >
+              <v-list-item-title>
+                <v-icon left>mdi-format-list-bulleted</v-icon>
+                View tracks
               </v-list-item-title>
             </v-list-item>
           </v-list>
