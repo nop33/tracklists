@@ -83,7 +83,7 @@
           <TracklistListCard
             cardTitle="Imported playlists"
             placeholderText="Your imported playlists will appear here"
-            :tracklists="tracklists.level1"
+            :tracklists="importedTracklists"
           />
         </v-col>
         <v-col md="1"></v-col>
@@ -91,7 +91,7 @@
           <TracklistListCard
             cardTitle="Generated tracklists"
             placeholderText="Your generated tracklists will appear here"
-            :tracklists="tracklists.level2"
+            :tracklists="generatedTracklists"
             :deleteTracklistCallback="deleteTracklist"
           />
         </v-col>
@@ -139,10 +139,8 @@ export default {
     state: generateRandomString(16),
     iTunesFileReader: new FileReader(),
     rekordboxFileReader: new FileReader(),
-    tracklists: {
-      level1: [],
-      level2: []
-    },
+    importedTracklists: [],
+    generatedTracklists: [],
     currentlyProcessingTextFileName: '',
     canAccessSpotifyAPI: false,
     snackbar: false,
@@ -209,7 +207,7 @@ export default {
         }
       })
 
-      this.tracklists.level2.push(
+      this.generatedTracklists.push(
         new GeneratedTracklist(
           `Both in "${this.selectedTracklistToCompareLeft.name}" and "${this.selectedTracklistToCompareRight.name}"`,
           `Both in "${this.selectedTracklistToCompareLeft.name}" and "${this.selectedTracklistToCompareRight.name}"`,
@@ -217,7 +215,7 @@ export default {
           sameTracks
         )
       )
-      this.tracklists.level2.push(
+      this.generatedTracklists.push(
         new GeneratedTracklist(
           `Only in "${this.selectedTracklistToCompareLeft.name}" and not in "${this.selectedTracklistToCompareRight.name}"`,
           `Only in "${this.selectedTracklistToCompareLeft.name}" and not in "${this.selectedTracklistToCompareRight.name}"`,
@@ -225,7 +223,7 @@ export default {
           onlyLeftSideTracks
         )
       )
-      this.tracklists.level2.push(
+      this.generatedTracklists.push(
         new GeneratedTracklist(
           `Only in "${this.selectedTracklistToCompareRight.name}" and not in "${this.selectedTracklistToCompareLeft.name}"`,
           `Only in "${this.selectedTracklistToCompareRight.name}" and not in "${this.selectedTracklistToCompareLeft.name}"`,
@@ -294,7 +292,7 @@ export default {
         })
       })
 
-      this.tracklists.level1.push(
+      this.importedTracklists.push(
         new ImportedTracklist(
           this.currentlyProcessingTextFileName,
           this.currentlyProcessingTextFileName,
@@ -323,7 +321,7 @@ export default {
           artists: track.artists
         })
       })
-      this.tracklists.level1.push(
+      this.importedTracklists.push(
         new ImportedTracklist(
           this.currentlyProcessingTextFileName,
           this.currentlyProcessingTextFileName,
@@ -363,7 +361,7 @@ export default {
           )
         })
 
-        this.tracklists.level1.push(
+        this.importedTracklists.push(
           new ImportedTracklist(
             playlistId,
             playlistName,
@@ -376,7 +374,7 @@ export default {
       })
     },
     deleteTracklist (tracklist) {
-      this.tracklists.level2.splice(this.tracklists.level2.indexOf(tracklist), 1)
+      this.generatedTracklists.splice(this.generatedTracklists.indexOf(tracklist), 1)
     },
     handleAPIError (err) {
       console.log(err)
