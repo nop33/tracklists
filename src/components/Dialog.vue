@@ -15,6 +15,7 @@
             label="Search track"
             clear-icon="mdi-close-circle-outline"
             flat hide-details clearable
+            prepend-icon="mdi-magnify"
           ></v-text-field>
         </div>
       </v-sheet>

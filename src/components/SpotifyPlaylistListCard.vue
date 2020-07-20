@@ -6,6 +6,7 @@
         label="Search Spotify playlist"
         dark flat solo-inverted hide-details clearable
         clear-icon="mdi-close-circle-outline"
+        prepend-icon="mdi-magnify"
       ></v-text-field>
     </v-sheet>
     <v-card-text class="spotify-playlist-list">
