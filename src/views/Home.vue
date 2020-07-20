@@ -303,7 +303,7 @@ export default {
           clearInterval(checkForspotifyAccessToken)
           const receivedState = localStorage.getItem('spotifyReceivedState')
           if (receivedState === null || receivedState !== this.state) {
-            alert('Spotify says "Computer says no". Refresh the page and try to login again =)')
+            this.$store.dispatch('pushNotification', 'Spotify says no. Refresh the page and try to login again =)')
           } else {
             this.canAccessSpotifyAPI = true
           }
@@ -425,10 +425,11 @@ export default {
     handleAPIError (err) {
       console.log(err)
       if (err.response && err.response.status === 401) {
-        // this.snackbarText = 'I lost the Spotify connection, care logging in again please? Thanks!'
-        // this.$store.dispatch('toggleSnackBar', true)
+        this.$store.dispatch('pushNotification', 'Please login on Spotify again, sorry!')
         localStorage.removeItem('spotifyAccessToken')
         this.canAccessSpotifyAPI = false
+      } else {
+        this.$store.dispatch('pushNotification', err.response.data.error.message)
       }
     },
     resetSelectedImportMethod () {
