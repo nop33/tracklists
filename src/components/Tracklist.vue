@@ -148,6 +148,10 @@ export default {
 </script>
 
 <style lang="scss">
+.v-list-item:hover {
+  cursor: pointer;
+}
+
 .v-list-item__title.tracklist__title {
   white-space: normal;
 }
