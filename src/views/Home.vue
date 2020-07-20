@@ -164,6 +164,11 @@ export default {
       if (!newValue && this.selectedImportMethod !== null) {
         this.resetSelectedImportMethod() // TODO: Need to delay this until dialog transition has finished
       }
+    },
+    importedTracklists () {
+      if (this.importedTracklists.length <= 2) {
+        this.$store.dispatch('setTracklistToCompare', this.importedTracklists[this.importedTracklists.length - 1])
+      }
     }
   },
   computed: {
@@ -321,6 +326,7 @@ export default {
       this.rekordboxFileReader.readAsText(file)
     },
     processITunesPlaylistFile (file) {
+      const playlistName = `${this.currentlyProcessingTextFileName} (iTunes)`
       const tracks = []
       const lines = file.split(/[\r\n]+/)
       lines.shift() // remove first line with headers
@@ -342,8 +348,8 @@ export default {
 
       this.importedTracklists.push(
         new ImportedTracklist(
-          this.currentlyProcessingTextFileName,
-          this.currentlyProcessingTextFileName,
+          playlistName,
+          playlistName,
           contentTypes.ITUNES,
           tracks
         )
@@ -351,6 +357,7 @@ export default {
       this.currentlyProcessingTextFileName = ''
     },
     processRekordboxPlaylistFile (file) {
+      const playlistName = `${this.currentlyProcessingTextFileName} (Rekordbox)`
       const tracks = []
       const lines = file.split(/[\r\n]+/)
       lines.shift() // remove first line with headers
@@ -371,8 +378,8 @@ export default {
       })
       this.importedTracklists.push(
         new ImportedTracklist(
-          this.currentlyProcessingTextFileName,
-          this.currentlyProcessingTextFileName,
+          playlistName,
+          playlistName,
           contentTypes.REKORDBOX,
           tracks
         )
@@ -411,10 +418,6 @@ export default {
 
         const tracklist = new ImportedTracklist(playlistId, playlistName, contentTypes.SPOTIFY, tracks)
         this.importedTracklists.push(tracklist)
-
-        if (this.importedTracklists.length <= 2) {
-          this.$store.dispatch('setTracklistToCompare', tracklist)
-        }
       }).catch(err => {
         this.handleAPIError(err)
       })
