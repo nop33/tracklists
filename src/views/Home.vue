@@ -110,7 +110,7 @@
         </v-col>
       </v-row>
     </v-container>
-    <SnackBar :text="snackBarText" />
+    <v-snackbars :messages.sync="notifications"></v-snackbars>
   </div>
 </template>
 
@@ -120,7 +120,7 @@ import { mapState } from 'vuex'
 import SpotifyService from '@/services/SpotifyService'
 import ImportPlaylistButton from '@/components/ImportPlaylistButton.vue'
 import SpotifyPlaylistListCard from '@/components/SpotifyPlaylistListCard.vue'
-import SnackBar from '@/components/SnackBar.vue'
+import VSnackbars from 'v-snackbars'
 import ComparisonRow from '@/components/ComparisonRow.vue'
 import TracklistsCard from '@/components/TracklistsCard.vue'
 import Dialog from '@/components/Dialog.vue'
@@ -133,7 +133,7 @@ export default {
   components: {
     ImportPlaylistButton,
     SpotifyPlaylistListCard,
-    SnackBar,
+    VSnackbars,
     ComparisonRow,
     TracklistsCard,
     Dialog
@@ -173,7 +173,8 @@ export default {
         'selectedTracklistToCompareRight',
         'selectedImportMethod',
         'spotifyPlaylistWithTracksToDownload',
-        'spotifyPlaylistWithTracksToBuy'
+        'spotifyPlaylistWithTracksToBuy',
+        'notifications'
       ]
     ),
     spotifyAuthUrl () {
@@ -192,6 +193,14 @@ export default {
       set (value) {
         this.importerDialog = value >= 0
         this.$store.dispatch('setSelectedImportMethod', value)
+      }
+    },
+    notifications: {
+      get () {
+        return this.$store.state.notifications
+      },
+      set (value) {
+        this.$store.dispatch('setNotifications', value)
       }
     },
     atLeastOneSpotifyPlaylistWasImported () {

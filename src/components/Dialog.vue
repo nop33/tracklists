@@ -79,7 +79,6 @@
         </template>
       </v-data-table>
     </v-card>
-    <v-snackbars :messages.sync="messages" color="green" bottom></v-snackbars>
   </v-dialog>
 </template>
 
@@ -89,13 +88,8 @@ import { mapState } from 'vuex'
 import SpotifyService from '@/services/SpotifyService'
 import { contentTypes, origins } from '@/utils/constants'
 
-import VSnackbars from 'v-snackbars'
-
 export default {
   props: ['spotifyImportedPlaylists'],
-  components: {
-    VSnackbars
-  },
   data: () => {
     return {
       dialog: false,
@@ -106,8 +100,7 @@ export default {
         { text: '', value: 'actions', sortable: false }
       ],
       componentKey: 0,
-      page: 0,
-      messages: []
+      page: 0
     }
   },
   computed: {
@@ -143,8 +136,7 @@ export default {
     addToSpotifyPlaylist (track, playlist) {
       if (playlist.id === 'liked') {
         SpotifyService.addTracksToLiked([track.id]).then(response => {
-          this.messages.push(`"${track.name}" added in Liked!`)
-          debugger
+          this.$store.dispatch('pushNotification', `"${track.name}" added in Liked!`)
           playlist.tracks.push(track)
           this.tracklistInDialog.splice(this.tracklistInDialog.indexOf(track), 1)
         })
@@ -152,7 +144,7 @@ export default {
         SpotifyService.addTracksToPlaylist(playlist, [track.uri]).then(response => {
           if (response.status === 201 && response.data.snapshot_id) {
             // this.componentKey += 1
-            this.messages.push(`"${track.name}" added in "${playlist.name}"!`)
+            this.$store.dispatch('pushNotification', `"${track.name}" added in "${playlist.name}"!`)
             if (playlist.origin === origins.IMPORTED) {
               playlist.tracks.push(track)
             } else if (playlist.origin === origins.GENERATED && this.tracklistInDialog.origin === origins.GENERATED) {

@@ -12,7 +12,8 @@ export default new Vuex.Store({
     selectedImportMethod: null,
     showDialog: false,
     tracklistInDialog: null,
-    isSnackBarVisible: false
+    isSnackBarVisible: false,
+    notifications: []
   },
   mutations: {
     SET_SPOTIFY_TO_DOWNLOAD_PLAYLIST (state, spotifyPlaylist) {
@@ -46,6 +47,12 @@ export default new Vuex.Store({
     },
     TOGGLE_SNACKBAR (state, value) {
       state.isSnackBarVisible = value
+    },
+    PUSH_NOTIFICATION (state, text) {
+      state.notifications.push(text)
+    },
+    SET_NOTIFICATIONS (state, messages) {
+      state.notifications = messages
     }
   },
   actions: {
@@ -72,6 +79,12 @@ export default new Vuex.Store({
     },
     toggleSnackBar ({ commit }, value) {
       commit('TOGGLE_SNACKBAR', value)
+    },
+    pushNotification ({ commit }, text) {
+      commit('PUSH_NOTIFICATION', text)
+    },
+    setNotifications ({ commit }, messages) {
+      commit('SET_NOTIFICATIONS', messages)
     }
   },
   modules: {

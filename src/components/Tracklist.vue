@@ -88,8 +88,10 @@ export default {
   ],
   computed: {
     ...mapState([
-      'spotifyPlaylistWithTracksToDownload',
-      'spotifyPlaylistWithTracksToBuy'
+      // 'spotifyPlaylistWithTracksToDownload',
+      // 'spotifyPlaylistWithTracksToBuy'
+      'selectedTracklistToCompareLeft',
+      'selectedTracklistToCompareRight'
     ]),
     chipColor () {
       const colorMap = {
@@ -107,13 +109,13 @@ export default {
     },
     isGeneratedTracklist () {
       return this.tracklist.origin === origins.GENERATED
-    },
-    toDownloadIconColor () {
-      return this.spotifyPlaylistWithTracksToDownload === this.tracklist ? 'green' : ''
-    },
-    toBuyIconColor () {
-      return this.spotifyPlaylistWithTracksToBuy === this.tracklist ? 'green' : ''
     }
+    // toDownloadIconColor () {
+    //   return this.spotifyPlaylistWithTracksToDownload === this.tracklist ? 'green' : ''
+    // },
+    // toBuyIconColor () {
+    //   return this.spotifyPlaylistWithTracksToBuy === this.tracklist ? 'green' : ''
+    // }
   },
   methods: {
     setAsTracksToDownload () {
@@ -123,7 +125,12 @@ export default {
       this.$store.dispatch('setSpotifyToBuyPlaylist', this.tracklist)
     },
     selectTracklist () {
-      this.$store.dispatch('setTracklistToCompare', this.tracklist)
+      if (this.selectedTracklistToCompareLeft !== this.tracklist &&
+         this.selectedTracklistToCompareRight !== this.tracklist) {
+        this.$store.dispatch('setTracklistToCompare', this.tracklist)
+      } else {
+        this.$store.dispatch('pushNotification', `"${this.tracklist.name}" is already set for comparison`)
+      }
     },
     deleteTracklist () {
       if (this.isComparisonTracklist) {
