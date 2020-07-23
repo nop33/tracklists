@@ -79,25 +79,6 @@
               </v-list-item>
             </v-list>
           </v-menu>
-          <!-- <v-btn
-            small
-            :loading="item.loadingAddingToDownloadPlaylist"
-            @click="addToDownloadSpotifyPlaylist(item)"
-            :color="item.hasBeenAddedToDownloadPlaylist ? 'green' : ''"
-            class="mr-2"
-          >
-            <v-icon small left>fab fa-spotify</v-icon>
-            to download
-          </v-btn>
-          <v-btn
-            small
-            :loading="item.loadingAddingToBuyPlaylist"
-            @click="addToBuySpotifyPlaylist(item)"
-            :color="item.hasBeenAddedToBuyPlaylist ? 'green' : ''"
-          >
-            <v-icon small left>fab fa-spotify</v-icon>
-            to buy
-          </v-btn> -->
         </template>
       </v-data-table>
     </v-card>
@@ -207,26 +188,6 @@ export default {
         return playlist !== this.tracklistInDialog && !playlist.tracks.some(tr => tr.id === track.id)
       })
     }
-    // addToDownloadSpotifyPlaylist (track) {
-    //   track.loadingAddingToDownloadPlaylist = true
-    //   SpotifyService.addTracksToPlaylist(this.spotifyPlaylistWithTracksToDownload, [track.uri]).then(response => {
-    //     if (response.status === 201 && response.data.snapshot_id) {
-    //       track.hasBeenAddedToDownloadPlaylist = true
-    //       track.loadingAddingToDownloadPlaylist = false
-    //       this.componentKey += 1
-    //     }
-    //   })
-    // },
-    // addToBuySpotifyPlaylist (track) {
-    //   track.loadingAddingToBuyPlaylist = true
-    //   SpotifyService.addTracksToPlaylist(this.spotifyPlaylistIdWithTracksToBuy, [track.uri]).then(response => {
-    //     if (response.status === 201 && response.data.snapshot_id) {
-    //       track.hasBeenAddedToBuyPlaylist = true
-    //       track.loadingAddingToBuyPlaylist = false
-    //       this.componentKey += 1
-    //     }
-    //   })
-    // }
   }
 }
 </script>
