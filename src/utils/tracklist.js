@@ -23,9 +23,14 @@ class ImportedTracklist extends TracklistBase {
 }
 
 class GeneratedTracklist extends TracklistBase {
-  constructor (id, name, contentType, tracks = []) {
+  parentLeft = null
+  parentRight = null
+
+  constructor (id, name, contentType, tracks = [], parentLeft, parentRight) {
     super(id, name, contentType, tracks)
     this.origin = origins.GENERATED
+    this.parentLeft = parentLeft
+    this.parentRight = parentRight
   }
 }
 

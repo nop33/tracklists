@@ -273,7 +273,9 @@ export default {
           `Both in "${this.selectedTracklistToCompareLeft.name}" and "${this.selectedTracklistToCompareRight.name}"`,
           `Both in "${this.selectedTracklistToCompareLeft.name}" and "${this.selectedTracklistToCompareRight.name}"`,
           'mixed',
-          sameTracks
+          sameTracks,
+          this.selectedTracklistToCompareLeft,
+          this.selectedTracklistToCompareRight
         )
       )
       this.generatedTracklists.push(
@@ -281,7 +283,9 @@ export default {
           `Only in "${this.selectedTracklistToCompareLeft.name}" and not in "${this.selectedTracklistToCompareRight.name}"`,
           `Only in "${this.selectedTracklistToCompareLeft.name}" and not in "${this.selectedTracklistToCompareRight.name}"`,
           this.selectedTracklistToCompareLeft.contentType,
-          onlyLeftSideTracks
+          onlyLeftSideTracks,
+          this.selectedTracklistToCompareLeft,
+          this.selectedTracklistToCompareRight
         )
       )
       this.generatedTracklists.push(
@@ -289,7 +293,9 @@ export default {
           `Only in "${this.selectedTracklistToCompareRight.name}" and not in "${this.selectedTracklistToCompareLeft.name}"`,
           `Only in "${this.selectedTracklistToCompareRight.name}" and not in "${this.selectedTracklistToCompareLeft.name}"`,
           this.selectedTracklistToCompareRight.contentType,
-          onlyRightSideTracks
+          onlyRightSideTracks,
+          this.selectedTracklistToCompareLeft,
+          this.selectedTracklistToCompareRight
         )
       )
 
@@ -418,6 +424,8 @@ export default {
       } catch (err) {
         this.handleAPIError(err)
       }
+
+      this.recalculateGeneratedPlaylists(playlist)
     },
     async getSpotifyPlaylistTracks (playlistId, totalTracks) {
       const tracks = []
@@ -453,6 +461,52 @@ export default {
       })
 
       return tracks
+    },
+    recalculateGeneratedPlaylists (playlistThatWasModified) {
+      const updatedGeneratedTracklists = []
+      const playlistIdPairsToRecompute = []
+
+      this.generatedTracklists.forEach(generatedTracklist => {
+        if (generatedTracklist.parentLeft.id === playlistThatWasModified.id ||
+            generatedTracklist.parentRight.id === playlistThatWasModified.id) {
+          updatedGeneratedTracklists.push(generatedTracklist)
+          if (!playlistIdPairsToRecompute.some(pair => {
+            return pair.every(id => id === generatedTracklist.parentLeft.id || id === generatedTracklist.parentRight.id)
+          })) {
+            playlistIdPairsToRecompute.push([generatedTracklist.parentLeft.id, generatedTracklist.parentRight.id])
+          }
+        }
+      })
+
+      // Remove from generated
+      updatedGeneratedTracklists.forEach(tracklist => {
+        this.generatedTracklists.splice(this.generatedTracklists.indexOf(tracklist), 1)
+      })
+
+      // Make new comparison
+      playlistIdPairsToRecompute.forEach(pair => {
+        if (this.selectedTracklistToCompareLeft) {
+          this.$store.dispatch('unsetTracklistToCompare', this.selectedTracklistToCompareLeft)
+        }
+        if (this.selectedTracklistToCompareRight) {
+          this.$store.dispatch('unsetTracklistToCompare', this.selectedTracklistToCompareRight)
+        }
+
+        const leftPlaylist = this.importedTracklists.find(tracklist => tracklist.id === pair[0]) ||
+                             this.generatedTracklists.find(tracklist => tracklist.id === pair[0])
+
+        const rightPlaylist = this.importedTracklists.find(tracklist => tracklist.id === pair[1]) ||
+                             this.generatedTracklists.find(tracklist => tracklist.id === pair[1])
+
+        this.$store.dispatch('setTracklistToCompare', leftPlaylist)
+        this.$store.dispatch('setTracklistToCompare', rightPlaylist)
+        this.compare()
+      })
+
+      // Repeat process for deeper levels
+      updatedGeneratedTracklists.forEach(tracklist => {
+        this.recalculateGeneratedPlaylists(tracklist)
+      })
     },
     deleteTracklist (tracklist) {
       this.generatedTracklists.splice(this.generatedTracklists.indexOf(tracklist), 1)
