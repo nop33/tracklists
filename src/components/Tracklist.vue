@@ -19,26 +19,6 @@
             </v-btn>
           </template>
           <v-list>
-            <!-- <v-list-item
-              link
-              v-if="!isComparisonTracklist && isSpotifyImportedTracklist"
-              @click="setAsTracksToDownload()"
-            >
-              <v-list-item-title>
-                <v-icon left>mdi-download</v-icon>
-                Select as playlist with tracks to download
-              </v-list-item-title>
-            </v-list-item>
-            <v-list-item
-              link
-              v-if="!isComparisonTracklist && isSpotifyImportedTracklist"
-              @click="setAsTracksToBuy()"
-            >
-              <v-list-item-title>
-                <v-icon left>mdi-currency-usd</v-icon>
-                Select as playlist with tracks to buy
-              </v-list-item-title>
-            </v-list-item> -->
             <v-list-item
               link
               v-if="isComparisonTracklist || isGeneratedTracklist"
@@ -88,8 +68,6 @@ export default {
   ],
   computed: {
     ...mapState([
-      // 'spotifyPlaylistWithTracksToDownload',
-      // 'spotifyPlaylistWithTracksToBuy'
       'selectedTracklistToCompareLeft',
       'selectedTracklistToCompareRight'
     ]),
@@ -110,12 +88,6 @@ export default {
     isGeneratedTracklist () {
       return this.tracklist.origin === origins.GENERATED
     }
-    // toDownloadIconColor () {
-    //   return this.spotifyPlaylistWithTracksToDownload === this.tracklist ? 'green' : ''
-    // },
-    // toBuyIconColor () {
-    //   return this.spotifyPlaylistWithTracksToBuy === this.tracklist ? 'green' : ''
-    // }
   },
   methods: {
     setAsTracksToDownload () {
