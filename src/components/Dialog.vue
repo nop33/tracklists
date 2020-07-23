@@ -146,11 +146,12 @@ export default {
       win.focus()
     },
     async addToSpotifyPlaylist (tracks, playlist) {
+      const removedLocalTracks = tracks.filter(track => !track.uri.startsWith('spotify:local'))
       this.$store.dispatch('setOverlay', true)
       const limit = playlist.id === 'liked' ? 50 : 100
       const offset = 0
-      this.$store.dispatch('setOverlayTotalProgress', tracks.length)
-      const numberOfTracksAdded = await this.addTracksChunkToSpotifyPlaylist(playlist, tracks, offset, limit)
+      this.$store.dispatch('setOverlayTotalProgress', removedLocalTracks.length)
+      const numberOfTracksAdded = await this.addTracksChunkToSpotifyPlaylist(playlist, removedLocalTracks, offset, limit)
       this.$store.dispatch('pushNotification', `${numberOfTracksAdded} tracks added!`)
     },
     async addTracksChunkToSpotifyPlaylist (playlist, allTracks, offset, limit) {
