@@ -6,6 +6,10 @@ class SpotifyService extends BaseService {
     return this.GET(api.my.playlists, params)
   }
 
+  static getPlaylist (playlistId) {
+    return this.GET(api.playlist(playlistId))
+  }
+
   static getPlaylistTracks (playlistId, params) {
     return playlistId === 'liked' ? this.GET(api.my.tracks, params) : this.GET(api.playlistTracks(playlistId), params)
   }

@@ -70,7 +70,7 @@
                 link
                 v-for="spotifyPlaylist in spotifyPlaylistsToAddTrack([item])"
                 :key="spotifyPlaylist.id"
-                @click="addToSpotifyPlaylist(item, spotifyPlaylist)"
+                @click="addToSpotifyPlaylist([item], spotifyPlaylist)"
               >
                 <v-list-item-title>
                   <v-icon left>fab fa-spotify</v-icon>
@@ -92,7 +92,11 @@ import SpotifyService from '@/services/SpotifyService'
 import { contentTypes } from '@/utils/constants'
 
 export default {
-  props: ['spotifyImportedPlaylists', 'apiErrorCallback'],
+  props: [
+    'spotifyImportedPlaylists',
+    'apiErrorCallback',
+    'reloadPlaylistTracksFromApi'
+  ],
   data: () => {
     return {
       dialog: false,
@@ -146,13 +150,22 @@ export default {
       win.focus()
     },
     async addToSpotifyPlaylist (tracks, playlist) {
-      const removedLocalTracks = tracks.filter(track => !track.uri.startsWith('spotify:local'))
+      const cleanedFromLocalTracks = tracks.filter(track => !track.uri.startsWith('spotify:local'))
+      if (cleanedFromLocalTracks.length === 0) {
+        this.$store.dispatch('pushNotification', 'There are no valid tracks to add...')
+        return
+      }
       this.$store.dispatch('setOverlay', true)
       const limit = playlist.id === 'liked' ? 50 : 100
       const offset = 0
-      this.$store.dispatch('setOverlayTotalProgress', removedLocalTracks.length)
-      const numberOfTracksAdded = await this.addTracksChunkToSpotifyPlaylist(playlist, removedLocalTracks, offset, limit)
-      this.$store.dispatch('pushNotification', `${numberOfTracksAdded} tracks added!`)
+      this.$store.dispatch('setOverlayTotalProgress', cleanedFromLocalTracks.length)
+      const numberOfTracksAdded = await this.addTracksChunkToSpotifyPlaylist(playlist, cleanedFromLocalTracks, offset, limit)
+      if (numberOfTracksAdded > 0) {
+        this.reloadPlaylistTracksFromApi(playlist)
+        this.$store.dispatch('pushNotification', `${numberOfTracksAdded} tracks added!`)
+      } else {
+        this.$store.dispatch('pushNotification', 'No tracks were added...')
+      }
     },
     async addTracksChunkToSpotifyPlaylist (playlist, allTracks, offset, limit) {
       const tracksChunk = allTracks.slice(offset, offset + limit)

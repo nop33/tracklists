@@ -22,7 +22,7 @@
       </v-row>
       <v-dialog v-model="importerDialog" transition="dialog-bottom-transition" class="mx-auto" max-width="50vw">
         <SpotifyPlaylistListCard
-          :playlistImportCallback="getSpotifyPlaylistTracks"
+          :playlistImportCallback="importSpotifyPlaylist"
           :playlistSelectedCallback="resetSelectedImportMethod"
           :apiErrorCallback="handleAPIError"
           v-if="canAccessSpotifyAPI"
@@ -76,7 +76,11 @@
       </v-row>
       <v-row>
         <v-col sm="6">
-          <Dialog :spotifyImportedPlaylists="spotifyImportedPlaylists" :apiErrorCallback="handleAPIError" />
+          <Dialog
+            :spotifyImportedPlaylists="spotifyImportedPlaylists"
+            :apiErrorCallback="handleAPIError"
+            :reloadPlaylistTracksFromApi="reloadPlaylistTracksFromApi"
+          />
         </v-col>
       </v-row>
     </v-container>
@@ -394,7 +398,21 @@ export default {
       )
       this.currentlyProcessingTextFileName = ''
     },
-    getSpotifyPlaylistTracks (playlistName, playlistId, totalTracks) {
+    async importSpotifyPlaylist (playlistName, playlistId, totalTracks) {
+      const tracks = await this.getSpotifyPlaylistTracks(playlistId, totalTracks)
+      const tracklist = new ImportedTracklist(playlistId, playlistName, contentTypes.SPOTIFY, tracks)
+      this.importedTracklists.push(tracklist)
+    },
+    async reloadPlaylistTracksFromApi (playlist) {
+      try {
+        const result = await SpotifyService.getPlaylist(playlist.id)
+        const totalTracks = result.data.tracks.total
+        playlist.tracks = await this.getSpotifyPlaylistTracks(playlist.id, totalTracks)
+      } catch (err) {
+        this.handleAPIError(err)
+      }
+    },
+    async getSpotifyPlaylistTracks (playlistId, totalTracks) {
       const tracks = []
       const promisesArray = []
       const limit = playlistId === 'liked' ? 50 : 100
@@ -405,7 +423,7 @@ export default {
         offset += limit
       }
 
-      Promise.all(promisesArray).then(responses => {
+      await Promise.all(promisesArray).then(responses => {
         responses.forEach(response => {
           tracks.push(
             ...response.data.items.map(item => {
@@ -423,12 +441,11 @@ export default {
             })
           )
         })
-
-        const tracklist = new ImportedTracklist(playlistId, playlistName, contentTypes.SPOTIFY, tracks)
-        this.importedTracklists.push(tracklist)
       }).catch(err => {
         this.handleAPIError(err)
       })
+
+      return tracks
     },
     deleteTracklist (tracklist) {
       this.generatedTracklists.splice(this.generatedTracklists.indexOf(tracklist), 1)

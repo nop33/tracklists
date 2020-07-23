@@ -3,5 +3,6 @@ export default {
     tracks: '/me/tracks',
     playlists: '/me/playlists'
   },
+  playlist: (playlistId) => `/playlists/${playlistId}`,
   playlistTracks: (playlistId) => `/playlists/${playlistId}/tracks`
 }
