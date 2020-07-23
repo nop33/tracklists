@@ -290,10 +290,10 @@ export default {
         )
       )
 
-      this.selectedTracklistToCompareLeft.forEach(track => {
+      this.selectedTracklistToCompareLeft.tracks.forEach(track => {
         track.match = undefined
       })
-      this.selectedTracklistToCompareRight.forEach(track => {
+      this.selectedTracklistToCompareRight.tracks.forEach(track => {
         track.match = undefined
       })
     },
