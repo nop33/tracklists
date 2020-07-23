@@ -11,7 +11,9 @@ class SpotifyService extends BaseService {
   }
 
   static getPlaylistTracks (playlistId, params) {
-    return playlistId === 'liked' ? this.GET(api.my.tracks, params) : this.GET(api.playlistTracks(playlistId), params)
+    return playlistId === 'liked'
+      ? this.GET(api.my.tracks, params)
+      : this.GET(api.playlistTracks(playlistId), params)
   }
 
   static addTracksToPlaylist (playlist, urisOfTracksToAdd) {

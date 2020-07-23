@@ -409,8 +409,11 @@ export default {
     },
     async reloadPlaylistTracksFromApi (playlist) {
       try {
-        const result = await SpotifyService.getPlaylist(playlist.id)
-        const totalTracks = result.data.tracks.total
+        const result = playlist.id === 'liked'
+          ? await SpotifyService.getPlaylistTracks('liked', { limit: 1, offset: 0 })
+          : await SpotifyService.getPlaylist(playlist.id)
+        const totalTracks = result.data.total || result.data.tracks.total
+
         playlist.tracks = await this.getSpotifyPlaylistTracks(playlist.id, totalTracks)
       } catch (err) {
         this.handleAPIError(err)
@@ -456,6 +459,7 @@ export default {
     },
     handleAPIError (err) {
       console.log(err)
+      this.$store.dispatch('setOverlay', false)
       if (err.response && err.response.status === 401) {
         this.$store.dispatch('pushNotification', 'Please login on Spotify again, sorry!')
         localStorage.removeItem('spotifyAccessToken')
