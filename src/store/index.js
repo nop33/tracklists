@@ -74,6 +74,10 @@ export default new Vuex.Store({
     },
     INCREASE_OVERLAY_CURRENT_PROGRESS (state, value) {
       state.overlay.progress.current += value
+    },
+    RESET_OVERLAY_PROGRESS (state) {
+      state.overlay.progress.total = 0
+      state.overlay.progress.current = 0
     }
   },
   actions: {
@@ -115,6 +119,9 @@ export default new Vuex.Store({
     },
     increaseOverlayCurrentProgress ({ commit }, value) {
       commit('INCREASE_OVERLAY_CURRENT_PROGRESS', value)
+    },
+    resetOverlayProgress ({ commit }) {
+      commit('RESET_OVERLAY_PROGRESS')
     }
   },
   modules: {

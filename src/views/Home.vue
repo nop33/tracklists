@@ -214,6 +214,9 @@ export default {
         return this.$store.state.overlay.isOpen
       },
       set (value) {
+        if (!value) {
+          this.$store.dispatch('resetOverlayProgress')
+        }
         this.$store.dispatch('setOverlay', value)
       }
     },
