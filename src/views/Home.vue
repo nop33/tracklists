@@ -106,11 +106,11 @@
       </v-row>
       <v-row>
         <v-col sm="6">
-          <Dialog :spotifyImportedPlaylists="spotifyImportedPlaylists" />
+          <Dialog :spotifyImportedPlaylists="spotifyImportedPlaylists" :apiErrorCallback="handleAPIError" />
         </v-col>
       </v-row>
     </v-container>
-    <v-snackbars :messages.sync="notifications"></v-snackbars>
+    <v-snackbars :messages.sync="notifications" :timeout="3000"></v-snackbars>
   </div>
 </template>
 
