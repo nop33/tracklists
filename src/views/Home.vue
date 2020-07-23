@@ -80,7 +80,7 @@
         </v-col>
       </v-row>
     </v-container>
-    <v-snackbars :messages.sync="notifications" :timeout="3000"></v-snackbars>
+    <v-snackbars :messages.sync="notifications"></v-snackbars>
     <v-overlay :value="isOverlayOpen" color="white" z-index="300">
       <v-progress-circular
         :rotate="-90"
