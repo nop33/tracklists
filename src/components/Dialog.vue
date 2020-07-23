@@ -104,9 +104,7 @@ export default {
       ],
       componentKey: 0,
       page: 0,
-      progressTotal: 0,
-      progressCurrent: 0,
-      progress: false
+      addedTracksToPlaylistResult: 0
     }
   },
   computed: {
@@ -136,9 +134,6 @@ export default {
       if (!newValue) {
         this.$store.dispatch('toggleDialog')
       }
-    },
-    progressCurrent: function (newValue) {
-      console.log('progressCurrent', newValue)
     }
   },
   methods: {
@@ -151,34 +146,31 @@ export default {
       win.focus()
     },
     async addToSpotifyPlaylist (tracks, playlist) {
+      this.$store.dispatch('setOverlay', true)
       const limit = playlist.id === 'liked' ? 50 : 100
       const offset = 0
-      this.progressTotal = tracks.length
-      this.addTracksChunkToSpotifyPlaylist(playlist, tracks, offset, limit)
+      this.$store.dispatch('setOverlayTotalProgress', tracks.length)
+      const numberOfTracksAdded = await this.addTracksChunkToSpotifyPlaylist(playlist, tracks, offset, limit)
+      this.$store.dispatch('pushNotification', `${numberOfTracksAdded} tracks added!`)
     },
     async addTracksChunkToSpotifyPlaylist (playlist, allTracks, offset, limit) {
       const tracksChunk = allTracks.slice(offset, offset + limit)
+      let response = null
+      let result = 0
       try {
-        if (playlist.id === 'liked') {
-          const response = await SpotifyService.addTracksToLiked(tracksChunk.map(track => track.id))
-          if (response.status === 200) {
-            this.$store.dispatch('pushNotification', `${tracksChunk.length} tracks added in Liked!`)
-          }
-          offset += limit
-          if (offset < allTracks.length) {
-            this.addTracksChunkToSpotifyPlaylist(playlist, allTracks, offset, limit)
-          }
-        } else {
-          const response = await SpotifyService.addTracksToPlaylist(playlist, tracksChunk.map(track => track.uri))
-          if (response.status === 201 && response.data.snapshot_id) {
-            this.$store.dispatch('pushNotification', `${tracksChunk.length} tracks added in "${playlist.name}"!`)
-          }
-          offset += limit
-          if (offset < allTracks.length) {
-            this.addTracksChunkToSpotifyPlaylist(playlist, allTracks, offset, limit)
-          }
+        response = playlist.id === 'liked'
+          ? await SpotifyService.addTracksToLiked(tracksChunk.map(track => track.id))
+          : await SpotifyService.addTracksToPlaylist(playlist, tracksChunk.map(track => track.uri))
+        if (response.status === 200 || (response.status === 201 && response.data.snapshot_id)) {
+          this.$store.dispatch('increaseOverlayCurrentProgress', tracksChunk.length)
         }
-        this.progressCurrent += tracksChunk.length
+
+        offset += limit
+        if (offset < allTracks.length) {
+          result = await this.addTracksChunkToSpotifyPlaylist(playlist, allTracks, offset, limit)
+        }
+
+        return result + tracksChunk.length
       } catch (err) {
         this.apiErrorCallback(err)
       }

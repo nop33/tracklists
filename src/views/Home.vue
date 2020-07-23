@@ -111,11 +111,22 @@
       </v-row>
     </v-container>
     <v-snackbars :messages.sync="notifications" :timeout="3000"></v-snackbars>
+    <v-overlay :value="isOverlayOpen" color="white" z-index="300">
+      <v-progress-circular
+        :rotate="-90"
+        :size="100"
+        :width="15"
+        :value="progressValue"
+        color="green"
+      >
+        {{ progressValue }}
+      </v-progress-circular>
+    </v-overlay>
   </div>
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 
 import SpotifyService from '@/services/SpotifyService'
 import ImportPlaylistButton from '@/components/ImportPlaylistButton.vue'
@@ -169,6 +180,13 @@ export default {
       if (this.importedTracklists.length <= 2) {
         this.$store.dispatch('setTracklistToCompare', this.importedTracklists[this.importedTracklists.length - 1])
       }
+    },
+    progressValue (newValue) {
+      if (newValue === 100) {
+        setTimeout(() => {
+          this.isOverlayOpen = false
+        }, 1000)
+      }
     }
   },
   computed: {
@@ -179,7 +197,16 @@ export default {
         'selectedImportMethod',
         'spotifyPlaylistWithTracksToDownload',
         'spotifyPlaylistWithTracksToBuy',
-        'notifications'
+        'notifications',
+        'progressCurrent',
+        'progressTotal'
+      ]
+    ),
+    ...mapGetters(
+      [
+        'isOverlayOpen',
+        'overlayTotalProgress',
+        'overlayCurrentProgress'
       ]
     ),
     spotifyAuthUrl () {
@@ -208,6 +235,14 @@ export default {
         this.$store.dispatch('setNotifications', value)
       }
     },
+    isOverlayOpen: {
+      get () {
+        return this.$store.state.overlay.isOpen
+      },
+      set (value) {
+        this.$store.dispatch('setOverlay', value)
+      }
+    },
     atLeastOneSpotifyPlaylistWasImported () {
       return this.importedTracklists.some(tracklist => tracklist.contentType === contentTypes.SPOTIFY)
     },
@@ -219,6 +254,9 @@ export default {
     },
     spotifyImportedPlaylists () {
       return this.importedTracklists.filter(tracklist => tracklist.contentType === contentTypes.SPOTIFY)
+    },
+    progressValue () {
+      return this.overlayTotalProgress ? Math.floor((this.overlayCurrentProgress / this.overlayTotalProgress) * 100) : 0
     }
   },
   created () {

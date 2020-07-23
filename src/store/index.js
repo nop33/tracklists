@@ -13,7 +13,19 @@ export default new Vuex.Store({
     showDialog: false,
     tracklistInDialog: null,
     isSnackBarVisible: false,
-    notifications: []
+    notifications: [],
+    overlay: {
+      isOpen: false,
+      progress: {
+        current: 0,
+        total: 0
+      }
+    }
+  },
+  getters: {
+    isOverlayOpen: state => state.overlay.isOpen,
+    overlayTotalProgress: state => state.overlay.progress.total,
+    overlayCurrentProgress: state => state.overlay.progress.current
   },
   mutations: {
     SET_SPOTIFY_TO_DOWNLOAD_PLAYLIST (state, spotifyPlaylist) {
@@ -53,6 +65,15 @@ export default new Vuex.Store({
     },
     SET_NOTIFICATIONS (state, messages) {
       state.notifications = messages
+    },
+    SET_OVERLAY (state, value) {
+      state.overlay.isOpen = value
+    },
+    SET_OVERLAY_TOTAL_PROGRESS (state, value) {
+      state.overlay.progress.total = value
+    },
+    INCREASE_OVERLAY_CURRENT_PROGRESS (state, value) {
+      state.overlay.progress.current += value
     }
   },
   actions: {
@@ -85,6 +106,15 @@ export default new Vuex.Store({
     },
     setNotifications ({ commit }, messages) {
       commit('SET_NOTIFICATIONS', messages)
+    },
+    setOverlay ({ commit }, value) {
+      commit('SET_OVERLAY', value)
+    },
+    setOverlayTotalProgress ({ commit }, value) {
+      commit('SET_OVERLAY_TOTAL_PROGRESS', value)
+    },
+    increaseOverlayCurrentProgress ({ commit }, value) {
+      commit('INCREASE_OVERLAY_CURRENT_PROGRESS', value)
     }
   },
   modules: {
