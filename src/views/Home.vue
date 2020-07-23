@@ -51,36 +51,6 @@
           </v-card-text>
         </v-card>
       </v-dialog>
-
-      <!-- <v-row>
-        <v-col> -->
-          <!-- <v-slide-x-transition>
-            <v-row v-if="atLeastOneSpotifyPlaylistWasImported">
-              <v-col>
-                <TracklistsCard
-                  :tracklist="spotifyPlaylistWithTracksToDownload"
-                  cardTitle="To download"
-                  placeholderText="Once you select a Spotify playlist with tracks to download, it will appear here"
-                  placeholderIcon="mdi-download"
-                  type="spotifyPlaylistWithTracksToDownload"
-                />
-              </v-col>
-              <v-col>
-                <TracklistsCard
-                  :tracklist="spotifyPlaylistWithTracksToBuy"
-                  cardTitle="To buy"
-                  placeholderText="Once you select a Spotify playlist with tracks to buy, it will appear here"
-                  placeholderIcon="mdi-currency-usd"
-                  type="spotifyPlaylistWithTracksToDownload"
-                />
-              </v-col>
-            </v-row>
-          </v-slide-x-transition> -->
-        <!-- </v-col>
-        <v-col>
-
-        </v-col>
-      </v-row> -->
       <v-row>
         <v-col>
           <v-slide-x-transition>
