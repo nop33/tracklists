@@ -19,8 +19,16 @@
           ></v-text-field>
           <v-menu rounded="b-xl" offset-y>
             <template v-slot:activator="{ attrs, on }">
-              <v-btn v-bind="attrs" v-on="on" text class="grey--text">
-                Add all to playlist
+              <v-btn
+                v-bind="attrs"
+                v-on="on"
+                text
+                class="grey--text"
+                outlined
+                :disabled="!tracklistInDialog || !isSpotifyTracklist || spotifyPlaylistsToAddListOfTracks.length === 0"
+              >
+                <v-icon left>mdi-plus</v-icon>
+                to playlist
                 <v-icon right>mdi-chevron-down</v-icon>
               </v-btn>
             </template>
@@ -30,10 +38,11 @@
                 v-for="spotifyPlaylist in spotifyPlaylistsToAddListOfTracks"
                 :key="spotifyPlaylist.id"
                 @click="addToSpotifyPlaylist(tracksToAddToPlaylist(spotifyPlaylist), spotifyPlaylist)"
+                :disabled="tracksToAddToPlaylist(spotifyPlaylist).length === 0"
               >
                 <v-list-item-title>
                   <v-icon left>fab fa-spotify</v-icon>
-                  {{ spotifyPlaylist.name }} ({{ tracksToAddToPlaylist(spotifyPlaylist).length }})
+                  {{ spotifyPlaylist.name }} (+{{ tracksToAddToPlaylist(spotifyPlaylist).length }})
                 </v-list-item-title>
               </v-list-item>
             </v-list>
@@ -58,7 +67,7 @@
             MuzOnly
           </v-btn>
 
-          <v-menu rounded="b-xl" offset-y v-if="isSpotifyTrack && spotifyPlaylistsToAddTrack([item]).length > 0">
+          <v-menu rounded="b-xl" offset-y v-if="isSpotifyTracklist && spotifyPlaylistsToAddTrack([item]).length > 0">
             <template v-slot:activator="{ attrs, on }">
               <v-btn v-bind="attrs" v-on="on" text class="grey--text">
                 Add to playlist
@@ -121,7 +130,7 @@ export default {
     dialogTitle () {
       return this.tracklistInDialog ? this.tracklistInDialog.name : ''
     },
-    isSpotifyTrack () {
+    isSpotifyTracklist () {
       return this.tracklistInDialog.contentType === contentTypes.SPOTIFY
     },
     spotifyPlaylistsToAddListOfTracks () {

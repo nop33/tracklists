@@ -267,12 +267,15 @@ export default {
           onlyRightSideTracks.push(rightSideTrack)
         }
       })
+      const isSpotify = this.selectedTracklistToCompareLeft.contentType === contentTypes.SPOTIFY ||
+                        this.selectedTracklistToCompareRight.contentType === contentTypes.SPOTIFY
+      const matchesTracklistContentType = isSpotify ? contentTypes.SPOTIFY : 'mixed'
 
       this.generatedTracklists.push(
         new GeneratedTracklist(
           `Both in "${this.selectedTracklistToCompareLeft.name}" and "${this.selectedTracklistToCompareRight.name}"`,
           `Both in "${this.selectedTracklistToCompareLeft.name}" and "${this.selectedTracklistToCompareRight.name}"`,
-          'mixed',
+          matchesTracklistContentType,
           sameTracks,
           this.selectedTracklistToCompareLeft,
           this.selectedTracklistToCompareRight
