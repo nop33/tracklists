@@ -65,8 +65,8 @@ export default {
     }
   },
   created () {
-    this.getSpotifyPlaylists()
     this.getSpotifyTotalLikedTracksNumber()
+    this.getSpotifyPlaylists()
   },
   methods: {
     importSpotifyLikedTracks () {

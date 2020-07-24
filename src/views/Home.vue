@@ -515,7 +515,10 @@ export default {
       console.log(err)
       this.$store.dispatch('setOverlay', false)
       if (err.response && err.response.status === 401) {
-        this.$store.dispatch('pushNotification', 'Please login on Spotify again, sorry!')
+        // to improve
+        if (!this.$store.state.notifications.includes('Please login on Spotify again, sorry!')) {
+          this.$store.dispatch('pushNotification', 'Please login on Spotify again, sorry!')
+        }
         localStorage.removeItem('spotifyAccessToken')
         this.canAccessSpotifyAPI = false
       } else {
