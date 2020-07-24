@@ -123,9 +123,7 @@ export default {
   computed: {
     ...mapState([
       'tracklistInDialog',
-      'showDialog',
-      'spotifyPlaylistWithTracksToDownload',
-      'spotifyPlaylistIdWithTracksToBuy'
+      'showDialog'
     ]),
     dialogTitle () {
       return this.tracklistInDialog ? this.tracklistInDialog.name : ''

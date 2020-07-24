@@ -5,8 +5,12 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    spotifyPlaylistWithTracksToDownload: null,
-    spotifyPlaylistWithTracksToBuy: null,
+    tracklists: {
+      imported: []
+    },
+    api: {
+      hasSpotifyAccessToken: false
+    },
     selectedTracklistToCompareLeft: null,
     selectedTracklistToCompareRight: null,
     selectedImportMethod: null,
@@ -25,14 +29,13 @@ export default new Vuex.Store({
   getters: {
     isOverlayOpen: state => state.overlay.isOpen,
     overlayTotalProgress: state => state.overlay.progress.total,
-    overlayCurrentProgress: state => state.overlay.progress.current
+    overlayCurrentProgress: state => state.overlay.progress.current,
+    hasSpotifyAccessToken: state => state.api.hasSpotifyAccessToken,
+    importedTracklists: state => state.tracklists.imported
   },
   mutations: {
-    SET_SPOTIFY_TO_DOWNLOAD_PLAYLIST (state, spotifyPlaylist) {
-      state.spotifyPlaylistWithTracksToDownload = spotifyPlaylist
-    },
-    SET_SPOTIFY_TO_BUY_PLAYLIST (state, spotifyPlaylist) {
-      state.spotifyPlaylistWithTracksToBuy = spotifyPlaylist
+    ADD_IMPORTED_TRACKLIST (state, tracklist) {
+      this.state.tracklists.imported.push(tracklist)
     },
     SET_TRACKLIST_TO_COMPARE (state, tracklist) {
       if (!state.selectedTracklistToCompareLeft) {
@@ -78,14 +81,18 @@ export default new Vuex.Store({
     RESET_OVERLAY_PROGRESS (state) {
       state.overlay.progress.total = 0
       state.overlay.progress.current = 0
+    },
+    // api
+    TOGGLE_SPOTIFY_ACCESS_TOKEN_FLAG (state, toggle) {
+      state.api.hasSpotifyAccessToken = toggle
     }
   },
   actions: {
-    setSpotifyToDownloadPlaylist ({ commit }, spotifyPlaylist) {
-      commit('SET_SPOTIFY_TO_DOWNLOAD_PLAYLIST', spotifyPlaylist)
-    },
-    setSpotifyToBuyPlaylist ({ commit }, spotifyPlaylist) {
-      commit('SET_SPOTIFY_TO_BUY_PLAYLIST', spotifyPlaylist)
+    addImportedTracklist ({ state, commit }, tracklist) {
+      commit('ADD_IMPORTED_TRACKLIST', tracklist)
+      if (state.tracklists.imported.length <= 2) {
+        commit('SET_TRACKLIST_TO_COMPARE', tracklist)
+      }
     },
     setTracklistToCompare ({ commit }, tracklist) {
       commit('SET_TRACKLIST_TO_COMPARE', tracklist)
@@ -101,6 +108,9 @@ export default new Vuex.Store({
     },
     setSelectedImportMethod ({ commit }, value) {
       commit('SET_SELECTED_IMPORT_METHOD', value)
+    },
+    resetSelectedImportMethod ({ commit }) {
+      commit('SET_SELECTED_IMPORT_METHOD', null)
     },
     toggleSnackBar ({ commit }, value) {
       commit('TOGGLE_SNACKBAR', value)
@@ -122,6 +132,10 @@ export default new Vuex.Store({
     },
     resetOverlayProgress ({ commit }) {
       commit('RESET_OVERLAY_PROGRESS')
+    },
+    // api
+    toggleSpotifyAccessTokenFlag ({ commit }, toggle) {
+      commit('TOGGLE_SPOTIFY_ACCESS_TOKEN_FLAG', toggle)
     }
   },
   modules: {
