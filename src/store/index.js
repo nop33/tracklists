@@ -21,6 +21,7 @@ export default new Vuex.Store({
     overlay: {
       isOpen: false,
       progress: {
+        isIndeterminate: false,
         current: 0,
         total: 0
       }
@@ -28,12 +29,17 @@ export default new Vuex.Store({
   },
   getters: {
     isOverlayOpen: state => state.overlay.isOpen,
-    overlayTotalProgress: state => state.overlay.progress.total,
-    overlayCurrentProgress: state => state.overlay.progress.current,
+    overlayProgressTotal: state => state.overlay.progress.total,
+    overlayProgressCurrent: state => state.overlay.progress.current,
+    overlayProgressIsIndeterminate: state => state.overlay.progress.isIndeterminate,
     hasSpotifyAccessToken: state => state.api.hasSpotifyAccessToken,
     importedTracklists: state => state.tracklists.imported
   },
   mutations: {
+    TOGGLE_LOADER (state) {
+      state.overlay.isOpen = !state.overlay.isOpen
+      state.overlay.progress.isIndeterminate = state.overlay.isOpen
+    },
     ADD_IMPORTED_TRACKLIST (state, tracklist) {
       this.state.tracklists.imported.push(tracklist)
     },
@@ -88,6 +94,9 @@ export default new Vuex.Store({
     }
   },
   actions: {
+    toggleLoader ({ commit }) {
+      commit('TOGGLE_LOADER')
+    },
     addImportedTracklist ({ state, commit }, tracklist) {
       commit('ADD_IMPORTED_TRACKLIST', tracklist)
       if (state.tracklists.imported.length <= 2) {

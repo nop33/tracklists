@@ -112,9 +112,11 @@ export default {
   },
   methods: {
     async importSpotifyPlaylist (playlistName, playlistId, totalTracks) {
+      this.$store.dispatch('toggleLoader')
       const tracks = await this.getSpotifyPlaylistTracks(playlistId, totalTracks)
       const tracklist = new ImportedTracklist(playlistId, playlistName, contentTypes.SPOTIFY, tracks)
       this.$store.dispatch('addImportedTracklist', tracklist)
+      this.$store.dispatch('toggleLoader')
     },
     readITunesFile (file) {
       this.$store.dispatch('resetSelectedImportMethod')

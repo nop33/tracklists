@@ -54,6 +54,14 @@
     <v-snackbars :messages.sync="notifications"></v-snackbars>
     <v-overlay :value="isOverlayOpen" color="white" z-index="300">
       <v-progress-circular
+        v-show="overlayProgressIsIndeterminate"
+        :size="100"
+        :width="15"
+        indeterminate
+        color="primary"
+      />
+      <v-progress-circular
+        v-show="!overlayProgressIsIndeterminate"
         :rotate="-90"
         :size="100"
         :width="15"
@@ -108,9 +116,10 @@ export default {
     ...mapGetters(
       [
         'isOverlayOpen',
-        'overlayTotalProgress',
-        'overlayCurrentProgress',
-        'importedTracklists'
+        'overlayProgressTotal',
+        'overlayProgressCurrent',
+        'importedTracklists',
+        'overlayProgressIsIndeterminate'
       ]
     ),
     notifications: {
@@ -145,7 +154,7 @@ export default {
       return this.importedTracklists.filter(tracklist => tracklist.contentType === contentTypes.SPOTIFY)
     },
     progressValue () {
-      return this.overlayTotalProgress ? Math.floor((this.overlayCurrentProgress / this.overlayTotalProgress) * 100) : 0
+      return this.overlayProgressTotal ? Math.floor((this.overlayProgressCurrent / this.overlayProgressTotal) * 100) : 0
     }
   },
   watch: {
