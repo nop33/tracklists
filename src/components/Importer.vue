@@ -124,11 +124,14 @@ export default {
       this.iTunesFileReader.readAsText(file)
     },
     readRekordboxFile (file) {
+      this.$store.dispatch('toggleLoader')
       this.$store.dispatch('resetSelectedImportMethod')
       this.currentlyProcessingTextFileName = file.name.split('.')[0]
       this.rekordboxFileReader.readAsText(file)
+      this.$store.dispatch('toggleLoader')
     },
     processITunesPlaylistFile (file) {
+      this.$store.dispatch('toggleLoader')
       const playlistName = `${this.currentlyProcessingTextFileName} (iTunes)`
       const tracks = []
       const lines = file.split(/[\r\n]+/)
@@ -157,8 +160,10 @@ export default {
       )
       this.$store.dispatch('addImportedTracklist', tracklist)
       this.currentlyProcessingTextFileName = ''
+      this.$store.dispatch('toggleLoader')
     },
     processRekordboxPlaylistFile (file) {
+      this.$store.dispatch('toggleLoader')
       const playlistName = `${this.currentlyProcessingTextFileName} (Rekordbox)`
       const tracks = []
       const lines = file.split(/[\r\n]+/)
@@ -187,6 +192,7 @@ export default {
       )
       this.$store.dispatch('addImportedTracklist', tracklist)
       this.currentlyProcessingTextFileName = ''
+      this.$store.dispatch('toggleLoader')
     }
   }
 }

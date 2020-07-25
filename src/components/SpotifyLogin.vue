@@ -31,7 +31,6 @@ export default {
 
       const checkForSpotifyAccessToken = setInterval(() => {
         if (localStorage.getItem('spotifyAccessToken')) {
-          debugger
           clearInterval(checkForSpotifyAccessToken)
           const receivedState = localStorage.getItem('spotifyReceivedState')
           if (receivedState === null || receivedState !== this.state) {
