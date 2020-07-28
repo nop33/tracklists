@@ -1,6 +1,6 @@
 <template>
   <v-hover v-slot:default="{ hover }">
-    <v-list-item @click="openDialog()" :color="hover ? 'grey lighten-5' : ''">
+    <v-list-item @click="openDialog()" :class="{'grey lighten-5': hover, 'success lighten-5': highlight}">
       <v-list-item-content>
         <v-list-item-title class="tracklist__title text-subtitle-1">
           {{ tracklist.name }}
@@ -66,6 +66,11 @@ export default {
     'type',
     'deleteTracklistCallback'
   ],
+  data: () => {
+    return {
+      highlight: false
+    }
+  },
   computed: {
     ...mapState([
       'selectedTracklistToCompareLeft',
@@ -88,6 +93,14 @@ export default {
     isGeneratedTracklist () {
       return this.tracklist.origin === origins.GENERATED
     }
+  },
+  created () {
+    setTimeout(() => {
+      this.highlight = true
+    }, 200)
+    setTimeout(() => {
+      this.highlight = false
+    }, 700)
   },
   methods: {
     setAsTracksToDownload () {
@@ -120,6 +133,10 @@ export default {
 </script>
 
 <style lang="scss">
+.v-list-item {
+  transition: background-color 0.5s;
+}
+
 .v-list-item:hover {
   cursor: pointer;
 }
