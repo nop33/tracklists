@@ -17,20 +17,32 @@
       <v-card v-if="importMethodSelected == 1 || importMethodSelected == 2">
         <v-card-title></v-card-title>
         <v-card-text>
-          <v-file-input
-            v-show="importMethodSelected == 1"
-            label="Upload iTunes playlist file"
-            @change="readITunesFile"
-            prepend-icon="fas fa-file-alt"
-          >
-          </v-file-input>
-          <v-file-input
-            v-show="importMethodSelected == 2"
-            label="Upload rekordbox playlist file"
-            @change="readRekordboxFile"
-            prepend-icon="fas fa-file-alt"
-          >
-          </v-file-input>
+          <div v-show="importMethodSelected == 1">
+            <div class="d-flex align-center flex-column">
+              <input v-show="false" ref="iTunesFileUploader" type="file" @change="readITunesFile" />
+              <v-btn class="primary" @click="$refs.iTunesFileUploader.click()">Upload iTunes file</v-btn>
+              <v-img
+                alt="iTunes guide"
+                class="shrink mt-5"
+                contain
+                :src="require('../assets/itunes-guide.jpg')"
+                transition="scale-transition"
+              />
+            </div>
+          </div>
+          <div v-show="importMethodSelected == 2">
+            <div class="d-flex align-center flex-column">
+              <input v-show="false" ref="rekordboxFileUploader" type="file" @change="readRekordboxFile" />
+              <v-btn class="primary" @click="$refs.rekordboxFileUploader.click()">Upload Rekordbox file</v-btn>
+              <v-img
+                alt="Rekordbox guide"
+                class="shrink mt-5"
+                contain
+                :src="require('../assets/rekordbox-guide.jpg')"
+                transition="scale-transition"
+              />
+            </div>
+          </div>
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -118,17 +130,21 @@ export default {
       this.$store.dispatch('addImportedTracklist', tracklist)
       this.$store.dispatch('toggleLoader')
     },
-    readITunesFile (file) {
-      this.$store.dispatch('resetSelectedImportMethod')
-      this.currentlyProcessingTextFileName = file.name.split('.')[0]
-      this.iTunesFileReader.readAsText(file)
+    readITunesFile (event) {
+      const file = event.target.files[0]
+      if (file) {
+        this.$store.dispatch('resetSelectedImportMethod')
+        this.currentlyProcessingTextFileName = file.name.split('.')[0]
+        this.iTunesFileReader.readAsText(file)
+      }
     },
-    readRekordboxFile (file) {
-      this.$store.dispatch('toggleLoader')
-      this.$store.dispatch('resetSelectedImportMethod')
-      this.currentlyProcessingTextFileName = file.name.split('.')[0]
-      this.rekordboxFileReader.readAsText(file)
-      this.$store.dispatch('toggleLoader')
+    readRekordboxFile (event) {
+      const file = event.target.files[0]
+      if (file) {
+        this.$store.dispatch('resetSelectedImportMethod')
+        this.currentlyProcessingTextFileName = file.name.split('.')[0]
+        this.rekordboxFileReader.readAsText(file)
+      }
     },
     processITunesPlaylistFile (file) {
       this.$store.dispatch('toggleLoader')
