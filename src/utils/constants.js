@@ -13,8 +13,15 @@ const tracklistTypes = {
   TO_COMPARE: 'toCompare'
 }
 
+const icons = {
+  SPOTIFY: 'fab fa-spotify',
+  ITUNES: 'fab fa-itunes',
+  REKORDBOX: 'fas fa-headphones'
+}
+
 export {
   contentTypes,
   origins,
-  tracklistTypes
+  tracklistTypes,
+  icons
 }

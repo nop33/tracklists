@@ -2,9 +2,9 @@
   <div class="d-flex align-center flex-column">
     <h2 class="text-h4 mb-5">Import playlist from</h2>
     <v-btn-toggle v-model="importMethodSelected">
-      <ImportPlaylistButton text="Spotify" icon="fab fa-spotify" color="green" />
-      <ImportPlaylistButton text="iTunes" icon="fab fa-itunes" color="blue" />
-      <ImportPlaylistButton text="Rekordbox" icon="fas fa-headphones" color="black" />
+      <ImportPlaylistButton text="Spotify" :icon="spotifyIcon" color="green" />
+      <ImportPlaylistButton text="iTunes" :icon="iTunesIcon" color="blue" />
+      <ImportPlaylistButton text="Rekordbox" :icon="rekordboxIcon" color="black" />
     </v-btn-toggle>
     <v-dialog v-model="importerDialog" transition="dialog-bottom-transition" class="mx-auto" max-width="50vw">
       <SpotifyLogin v-if="importMethodSelected == 0 && !hasSpotifyAccessToken" />
@@ -53,7 +53,7 @@
 import { mapState, mapGetters } from 'vuex'
 
 import { ImportedTracklist } from '@/utils/tracklist'
-import { contentTypes } from '@/utils/constants'
+import { contentTypes, icons } from '@/utils/constants'
 import { cleanTrackName, removeFeaturedArtistFromName } from '@/utils/utils'
 
 import ImportPlaylistButton from '@/components/ImportPlaylistButton.vue'
@@ -97,6 +97,15 @@ export default {
         this.importerDialog = value >= 0
         this.$store.dispatch('setSelectedImportMethod', value)
       }
+    },
+    spotifyIcon () {
+      return icons.SPOTIFY
+    },
+    iTunesIcon () {
+      return icons.ITUNES
+    },
+    rekordboxIcon () {
+      return icons.REKORDBOX
     }
   },
   watch: {
@@ -148,7 +157,7 @@ export default {
     },
     processITunesPlaylistFile (file) {
       this.$store.dispatch('toggleLoader')
-      const playlistName = `${this.currentlyProcessingTextFileName} (iTunes)`
+      const playlistName = this.currentlyProcessingTextFileName
       const tracks = []
       const lines = file.split(/[\r\n]+/)
       lines.shift() // remove first line with headers
@@ -180,7 +189,7 @@ export default {
     },
     processRekordboxPlaylistFile (file) {
       this.$store.dispatch('toggleLoader')
-      const playlistName = `${this.currentlyProcessingTextFileName} (Rekordbox)`
+      const playlistName = this.currentlyProcessingTextFileName
       const tracks = []
       const lines = file.split(/[\r\n]+/)
       lines.shift() // remove first line with headers
