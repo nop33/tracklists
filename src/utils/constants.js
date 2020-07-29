@@ -1,7 +1,7 @@
 const contentTypes = {
-  SPOTIFY: 'spotify',
-  ITUNES: 'itunes',
-  REKORDBOX: 'rekordbox'
+  SPOTIFY: 'SPOTIFY',
+  ITUNES: 'ITUNES',
+  REKORDBOX: 'REKORDBOX'
 }
 
 const origins = {
@@ -19,9 +19,16 @@ const icons = {
   REKORDBOX: 'fas fa-headphones'
 }
 
+const iconColors = {
+  SPOTIFY: 'green',
+  ITUNES: 'blue',
+  REKORDBOX: 'black'
+}
+
 export {
   contentTypes,
   origins,
   tracklistTypes,
-  icons
+  icons,
+  iconColors
 }

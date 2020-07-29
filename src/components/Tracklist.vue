@@ -6,7 +6,7 @@
       </v-list-item-icon>
       <v-list-item-content>
         <v-list-item-title class="tracklist__title text-subtitle-1">{{ tracklist.name }}</v-list-item-title>
-        <v-list-item-subtitle>{{ tracklist.contentType }} • {{ tracklist.tracks.length }} tracks</v-list-item-subtitle>
+        <v-list-item-subtitle>{{ tracklist.tracks.length }} tracks</v-list-item-subtitle>
       </v-list-item-content>
       <v-list-item-action class="flex-row align-center">
 
@@ -57,7 +57,7 @@
 
 <script>
 import { mapState } from 'vuex'
-import { contentTypes, origins, tracklistTypes, icons } from '@/utils/constants'
+import { contentTypes, origins, tracklistTypes, icons, iconColors } from '@/utils/constants'
 
 export default {
   props: [
@@ -76,20 +76,10 @@ export default {
       'selectedTracklistToCompareRight'
     ]),
     iconColor () {
-      const colorMap = {
-        [contentTypes.ITUNES]: 'blue',
-        [contentTypes.REKORDBOX]: 'black',
-        [contentTypes.SPOTIFY]: 'green'
-      }
-      return colorMap[this.tracklist.contentType]
+      return iconColors[this.tracklist.contentType]
     },
     tracklistIcon () {
-      const iconMap = {
-        [contentTypes.ITUNES]: icons.ITUNES,
-        [contentTypes.REKORDBOX]: icons.REKORDBOX,
-        [contentTypes.SPOTIFY]: icons.SPOTIFY
-      }
-      return iconMap[this.tracklist.contentType]
+      return icons[this.tracklist.contentType]
     },
     isComparisonTracklist () {
       return this.$props.type === tracklistTypes.TO_COMPARE

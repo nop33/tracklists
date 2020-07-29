@@ -19,16 +19,9 @@
           ></v-text-field>
           <v-menu rounded="b-xl" offset-y>
             <template v-slot:activator="{ attrs, on }">
-              <v-btn
-                v-bind="attrs"
-                v-on="on"
-                text
-                class="grey--text"
-                outlined
-                :disabled="!tracklistInDialog || !isSpotifyTracklist || spotifyPlaylistsToAddListOfTracks.length === 0"
-              >
+              <v-btn v-bind="attrs" v-on="on" class="primary" :disabled="isAddAllToPlaylistMenuDisabled">
                 <v-icon left>mdi-plus</v-icon>
-                to playlist
+                Add all to playlist
                 <v-icon right>mdi-chevron-down</v-icon>
               </v-btn>
             </template>
@@ -41,7 +34,7 @@
                 :disabled="tracksToAddToPlaylist(spotifyPlaylist).length === 0"
               >
                 <v-list-item-title>
-                  <v-icon left>fab fa-spotify</v-icon>
+                  <v-icon left :color="spotifyIconColor">{{ spotifyIcon }}</v-icon>
                   {{ spotifyPlaylist.name }} (+{{ tracksToAddToPlaylist(spotifyPlaylist).length }})
                 </v-list-item-title>
               </v-list-item>
@@ -67,9 +60,9 @@
             MuzOnly
           </v-btn>
 
-          <v-menu rounded="b-xl" offset-y v-if="isSpotifyTracklist && spotifyPlaylistsToAddTrack([item]).length > 0">
+          <v-menu rounded="b-xl" offset-y>
             <template v-slot:activator="{ attrs, on }">
-              <v-btn v-bind="attrs" v-on="on" text class="grey--text">
+              <v-btn v-bind="attrs" v-on="on" text class="grey--text" :disabled="isAddTrackToPlaylistMenuDisabled(item)">
                 Add to playlist
                 <v-icon right>mdi-chevron-down</v-icon>
               </v-btn>
@@ -77,12 +70,12 @@
             <v-list>
               <v-list-item
                 link
-                v-for="spotifyPlaylist in spotifyPlaylistsToAddTrack([item])"
+                v-for="spotifyPlaylist in spotifyPlaylistsToAddTrack(item)"
                 :key="spotifyPlaylist.id"
                 @click="addToSpotifyPlaylist([item], spotifyPlaylist)"
               >
                 <v-list-item-title>
-                  <v-icon left>fab fa-spotify</v-icon>
+                  <v-icon left :color="spotifyIconColor">{{ spotifyIcon }}</v-icon>
                   {{ spotifyPlaylist.name }}
                 </v-list-item-title>
               </v-list-item>
@@ -98,7 +91,7 @@
 import { mapState } from 'vuex'
 
 import SpotifyService from '@/services/SpotifyService'
-import { contentTypes } from '@/utils/constants'
+import { contentTypes, icons, iconColors } from '@/utils/constants'
 
 export default {
   props: [
@@ -135,6 +128,15 @@ export default {
       return this.tracklistInDialog
         ? this.spotifyImportedPlaylists.filter(playlist => playlist.id !== this.tracklistInDialog.id)
         : []
+    },
+    spotifyIcon () {
+      return icons.SPOTIFY
+    },
+    spotifyIconColor () {
+      return iconColors[contentTypes.SPOTIFY]
+    },
+    isAddAllToPlaylistMenuDisabled () {
+      return !this.tracklistInDialog || !this.isSpotifyTracklist || this.spotifyPlaylistsToAddListOfTracks.length === 0
     }
   },
   watch: {
@@ -200,6 +202,9 @@ export default {
       return this.spotifyImportedPlaylists.filter(playlist => {
         return playlist !== this.tracklistInDialog && !playlist.tracks.some(tr => tr.id === track.id)
       })
+    },
+    isAddTrackToPlaylistMenuDisabled (track) {
+      return !this.isSpotifyTracklist || this.spotifyPlaylistsToAddTrack(track).length === 0
     }
   }
 }
