@@ -92,6 +92,7 @@ import { mapState } from 'vuex'
 
 import SpotifyService from '@/services/SpotifyService'
 import { contentTypes, icons, iconColors } from '@/utils/constants'
+import { areTracksTheSame } from '@/utils/utils'
 
 export default {
   props: [
@@ -151,7 +152,7 @@ export default {
   },
   methods: {
     tracksToAddToPlaylist (playlist) {
-      return this.tracklistInDialog.tracks.filter(track => !playlist.tracks.some(tr => tr.id === track.id))
+      return this.tracklistInDialog.tracks.filter(track => !playlist.tracks.some(tr => areTracksTheSame(tr, track)))
     },
     openMuzonlyTab (track) {
       const url = `https://srv.muzonly2.com/#/search?text=${track.name} ${track.artists.join(' ')}`
@@ -200,7 +201,7 @@ export default {
     },
     spotifyPlaylistsToAddTrack (track) {
       return this.spotifyImportedPlaylists.filter(playlist => {
-        return playlist !== this.tracklistInDialog && !playlist.tracks.some(tr => tr.id === track.id)
+        return playlist !== this.tracklistInDialog && !playlist.tracks.some(tr => areTracksTheSame(tr, track))
       })
     },
     isAddTrackToPlaylistMenuDisabled (track) {

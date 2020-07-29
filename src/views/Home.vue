@@ -77,7 +77,7 @@
 <script>
 import { mapState, mapGetters } from 'vuex'
 
-import { cleanTrackName, removeFeaturedArtistFromName } from '@/utils/utils'
+import { cleanTrackName, removeFeaturedArtistFromName, areTracksTheSame } from '@/utils/utils'
 import { GeneratedTracklist } from '@/utils/tracklist'
 import { contentTypes } from '@/utils/constants'
 
@@ -235,17 +235,12 @@ export default {
       let i = 0
       while (i < this.selectedTracklistToCompareRight.tracks.length) {
         const rightSideTrack = this.selectedTracklistToCompareRight.tracks[i]
-        if (leftSideTrack.id === rightSideTrack.id || (leftSideTrack.name === rightSideTrack.name &&
-            atLeastOneSpotifyArtistIsIncludedInITunesArtistString(leftSideTrack, rightSideTrack))) {
+        if (areTracksTheSame(leftSideTrack, rightSideTrack)) {
           // count duplicate track in right side if rightSideTrack.match is not undefined
           leftSideTrack.match = rightSideTrack.id
           rightSideTrack.match = leftSideTrack.id
         }
         i++
-      }
-
-      function atLeastOneSpotifyArtistIsIncludedInITunesArtistString (leftSideTrack, rightSideTrack) {
-        return leftSideTrack.artists.some(leftSideTrackArtist => rightSideTrack.artists.includes(leftSideTrackArtist))
       }
     },
     async reloadPlaylistTracksFromApi (playlist) {

@@ -54,8 +54,25 @@ function generateRandomString (length) {
   return text
 }
 
+function areTracksTheSame (track1, track2) {
+  return (tracksHaveSameId() || (tracksHaveSameName() && tracksHaveAtLeastOneCommonArtist()))
+
+  function tracksHaveSameId () {
+    return track1.id === track2.id
+  }
+
+  function tracksHaveSameName () {
+    return track1.name === track2.name
+  }
+
+  function tracksHaveAtLeastOneCommonArtist () {
+    return track1.artists.some(track1Artist => track2.artists.includes(track1Artist))
+  }
+}
+
 export {
   cleanTrackName,
   removeFeaturedArtistFromName,
-  generateRandomString
+  generateRandomString,
+  areTracksTheSame
 }
