@@ -116,7 +116,7 @@ export default {
 
 <style lang="scss">
 .spotify-playlist-list {
-  max-height: 500px;
+  max-height: 100%;
   overflow-x: auto;
 }
 </style>

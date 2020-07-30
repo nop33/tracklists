@@ -91,13 +91,13 @@ export default {
       return this.tracklist.origin === origins.GENERATED
     }
   },
+  watch: {
+    'tracklist.tracks' () {
+      this.blink()
+    }
+  },
   created () {
-    setTimeout(() => {
-      this.highlight = true
-    }, 200)
-    setTimeout(() => {
-      this.highlight = false
-    }, 700)
+    this.blink()
   },
   methods: {
     setAsTracksToDownload () {
@@ -124,6 +124,14 @@ export default {
     openDialog () {
       this.$store.dispatch('toggleDialog')
       this.$store.dispatch('setTracklistToShowTracks', this.tracklist)
+    },
+    blink () {
+      setTimeout(() => {
+        this.highlight = true
+      }, 200)
+      setTimeout(() => {
+        this.highlight = false
+      }, 700)
     }
   }
 }

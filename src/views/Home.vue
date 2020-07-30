@@ -44,7 +44,6 @@
       <v-row>
         <v-col sm="6">
           <Dialog
-            :spotifyImportedPlaylists="spotifyImportedPlaylists"
             :apiErrorCallback="handleAPIError"
             :reloadPlaylistTracksFromApi="reloadPlaylistTracksFromApi"
           />
@@ -149,9 +148,6 @@ export default {
     },
     atLeastTwoPlaylistsWereImported () {
       return this.importedTracklists.length > 1
-    },
-    spotifyImportedPlaylists () {
-      return this.importedTracklists.filter(tracklist => tracklist.contentType === contentTypes.SPOTIFY)
     },
     progressValue () {
       return this.overlayProgressTotal ? Math.floor((this.overlayProgressCurrent / this.overlayProgressTotal) * 100) : 0

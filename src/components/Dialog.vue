@@ -1,86 +1,103 @@
 <template>
-  <v-dialog v-model="dialog" transition="dialog-bottom-transition">
+  <v-dialog v-model="dialog" transition="dialog-bottom-transition" content-class="my-dialog">
     <v-card>
       <v-toolbar v-if="dialogTitle" color="grey lighten-4" flat>
-        <v-toolbar-title>{{ dialogTitle }}</v-toolbar-title>
+        <v-toolbar-title class="d-flex align-center">
+          <v-icon left v-text="tracklistIcon" :color="iconColor"></v-icon>
+          {{ dialogTitle }}
+        </v-toolbar-title>
         <v-spacer></v-spacer>
         <v-btn icon @click="dialog = false">
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </v-toolbar>
       <v-sheet class="pa-4">
-        <div class="d-flex">
-          <v-text-field
-            v-model="tracklistSearchInput"
-            label="Search track"
-            clear-icon="mdi-close-circle-outline"
-            flat hide-details clearable
-            prepend-icon="mdi-magnify"
-          ></v-text-field>
-          <v-menu rounded="b-xl" offset-y>
-            <template v-slot:activator="{ attrs, on }">
-              <v-btn v-bind="attrs" v-on="on" class="primary" :disabled="isAddAllToPlaylistMenuDisabled">
-                <v-icon left>mdi-plus</v-icon>
-                Add all to playlist
-                <v-icon right>mdi-chevron-down</v-icon>
-              </v-btn>
+        <div class="d-flex align-center">
+          <v-menu rounded="b-xl" offset-y v-if="isSpotifyTracklist">
+            <template v-slot:activator="{ on: menu, attrs }">
+              <v-tooltip right>
+                <template v-slot:activator="{ on: tooltip }">
+                  <v-btn
+                    class="mr-2"
+                    fab
+                    outlined
+                    small
+                    color="primary"
+                    v-bind="attrs"
+                    v-on="{ ...tooltip, ...menu }"
+                    :disabled="isAddSelectedTracksToPlaylistMenuDisabled"
+                  >
+                    <v-icon>mdi-plus</v-icon>
+                  </v-btn>
+                </template>
+                <span>Add {{ selectedTracks.length }} tracks to playlist</span>
+              </v-tooltip>
             </template>
             <v-list>
               <v-list-item
                 link
                 v-for="spotifyPlaylist in spotifyPlaylistsToAddListOfTracks"
                 :key="spotifyPlaylist.id"
-                @click="addToSpotifyPlaylist(tracksToAddToPlaylist(spotifyPlaylist), spotifyPlaylist)"
-                :disabled="tracksToAddToPlaylist(spotifyPlaylist).length === 0"
+                @click="addSelectedTracksToSpotifyPlaylist(spotifyPlaylist)"
+                :disabled="selectedTracksToAddToPlaylist(spotifyPlaylist).length === 0"
               >
                 <v-list-item-title>
                   <v-icon left :color="spotifyIconColor">{{ spotifyIcon }}</v-icon>
-                  {{ spotifyPlaylist.name }} (+{{ tracksToAddToPlaylist(spotifyPlaylist).length }})
+                  {{ spotifyPlaylist.name }} (+{{ selectedTracksToAddToPlaylist(spotifyPlaylist).length }})
                 </v-list-item-title>
               </v-list-item>
             </v-list>
           </v-menu>
+
+          <v-tooltip right>
+            <template v-slot:activator="{ on }">
+              <v-btn
+                fab
+                outlined
+                small
+                v-on="on"
+                @click="toggleExpansion"
+              >
+                <v-icon>mdi-unfold-more-horizontal</v-icon>
+              </v-btn>
+            </template>
+            <span>{{ expansionTooltipContent }}</span>
+          </v-tooltip>
+
+          <v-spacer/>
+
+          <v-text-field
+            v-model="tracklistSearchInput"
+            dense
+            label="Search"
+            clear-icon="mdi-close"
+            clearable
+            append-icon="mdi-magnify"
+            class="flex-grow-0"
+          ></v-text-field>
         </div>
       </v-sheet>
+      <v-sheet class="px-4 pb-4 text-caption">
+        Displaying {{ itemsPerPage }} out of {{ totalNumberOfTracks }} tracks
+      </v-sheet>
       <v-data-table
+        fixed-header
+        height="60vh"
         v-if="tracklistInDialog"
         :headers="headers"
         :items="tracklistInDialog.tracks"
-        :items-per-page="10"
+        :items-per-page="itemsPerPage"
         :key="componentKey"
         :search="tracklistSearchInput"
         :page.sync="page"
+        v-model="selectedTracks"
+        show-select
       >
         <template v-slot:item.artists="{ item }">
           {{ item.artists.join(', ')}}
         </template>
         <template v-slot:item.actions="{ item }">
-          <v-btn small @click="openMuzonlyTab(item)" class="mr-2">
-            <v-icon small left>mdi-open-in-new</v-icon>
-            MuzOnly
-          </v-btn>
-
-          <v-menu rounded="b-xl" offset-y>
-            <template v-slot:activator="{ attrs, on }">
-              <v-btn v-bind="attrs" v-on="on" text class="grey--text" :disabled="isAddTrackToPlaylistMenuDisabled(item)">
-                Add to playlist
-                <v-icon right>mdi-chevron-down</v-icon>
-              </v-btn>
-            </template>
-            <v-list>
-              <v-list-item
-                link
-                v-for="spotifyPlaylist in spotifyPlaylistsToAddTrack(item)"
-                :key="spotifyPlaylist.id"
-                @click="addToSpotifyPlaylist([item], spotifyPlaylist)"
-              >
-                <v-list-item-title>
-                  <v-icon left :color="spotifyIconColor">{{ spotifyIcon }}</v-icon>
-                  {{ spotifyPlaylist.name }}
-                </v-list-item-title>
-              </v-list-item>
-            </v-list>
-          </v-menu>
+          <DialogTableRowActions :track="item"/>
         </template>
       </v-data-table>
     </v-card>
@@ -88,15 +105,20 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 
-import SpotifyService from '@/services/SpotifyService'
 import { contentTypes, icons, iconColors } from '@/utils/constants'
 import { areTracksTheSame } from '@/utils/utils'
 
+import SpotifyService from '@/services/SpotifyService'
+
+import DialogTableRowActions from '@/components/DialogTableRowActions.vue'
+
 export default {
+  components: {
+    DialogTableRowActions
+  },
   props: [
-    'spotifyImportedPlaylists',
     'apiErrorCallback',
     'reloadPlaylistTracksFromApi'
   ],
@@ -105,13 +127,17 @@ export default {
       dialog: false,
       tracklistSearchInput: null,
       headers: [
-        { text: 'Track name', value: 'name' },
-        { text: 'Track artists', value: 'artists' },
-        { text: '', value: 'actions', sortable: false }
+        { text: 'Track name', value: 'name', width: '33%' },
+        { text: 'Track artists', value: 'artists', width: '33%' },
+        { text: '', value: 'actions', sortable: false, width: '33%' }
       ],
+      selectedTracks: [],
       componentKey: 0,
       page: 0,
-      addedTracksToPlaylistResult: 0
+      addedTracksToPlaylistResult: 0,
+      itemsPerPage: 10,
+      defaultItemsPerPage: 10,
+      showScrollToTop: false
     }
   },
   computed: {
@@ -119,11 +145,17 @@ export default {
       'tracklistInDialog',
       'showDialog'
     ]),
+    ...mapGetters([
+      'importedTracklists'
+    ]),
+    spotifyImportedPlaylists () {
+      return this.importedTracklists.filter(tracklist => tracklist.contentType === contentTypes.SPOTIFY)
+    },
     dialogTitle () {
       return this.tracklistInDialog ? this.tracklistInDialog.name : ''
     },
     isSpotifyTracklist () {
-      return this.tracklistInDialog.contentType === contentTypes.SPOTIFY
+      return this.tracklistInDialog && this.tracklistInDialog.contentType === contentTypes.SPOTIFY
     },
     spotifyPlaylistsToAddListOfTracks () {
       return this.tracklistInDialog
@@ -136,8 +168,23 @@ export default {
     spotifyIconColor () {
       return iconColors[contentTypes.SPOTIFY]
     },
-    isAddAllToPlaylistMenuDisabled () {
-      return !this.tracklistInDialog || !this.isSpotifyTracklist || this.spotifyPlaylistsToAddListOfTracks.length === 0
+    isAddSelectedTracksToPlaylistMenuDisabled () {
+      return !this.tracklistInDialog || !this.isSpotifyTracklist || this.spotifyPlaylistsToAddListOfTracks.length === 0 || this.selectedTracks.length === 0
+    },
+    expansionTooltipContent () {
+      if (this.tracklistInDialog) {
+        return this.itemsPerPage > this.defaultItemsPerPage ? 'Switch to pagination' : `See all ${this.totalNumberOfTracks} tracks`
+      }
+      return ''
+    },
+    totalNumberOfTracks () {
+      return this.tracklistInDialog ? this.tracklistInDialog.tracks.length : 0
+    },
+    iconColor () {
+      return this.tracklistInDialog ? iconColors[this.tracklistInDialog.contentType] : ''
+    },
+    tracklistIcon () {
+      return this.tracklistInDialog ? icons[this.tracklistInDialog.contentType] : ''
     }
   },
   watch: {
@@ -147,19 +194,19 @@ export default {
     dialog: function (newValue, oldValue) {
       if (!newValue) {
         this.$store.dispatch('toggleDialog')
+        this.selectedTracks = []
       }
     }
   },
   methods: {
-    tracksToAddToPlaylist (playlist) {
-      return this.tracklistInDialog.tracks.filter(track => !playlist.tracks.some(tr => areTracksTheSame(tr, track)))
+    toggleExpansion () {
+      this.itemsPerPage = this.itemsPerPage > this.defaultItemsPerPage ? this.defaultItemsPerPage : this.tracklistInDialog.tracks.length
     },
-    openMuzonlyTab (track) {
-      const url = `https://srv.muzonly2.com/#/search?text=${track.name} ${track.artists.join(' ')}`
-      var win = window.open(encodeURI(url), '_blank')
-      win.focus()
+    selectedTracksToAddToPlaylist (playlist) {
+      return this.selectedTracks.filter(track => !playlist.tracks.some(tr => areTracksTheSame(tr, track)))
     },
-    async addToSpotifyPlaylist (tracks, playlist) {
+    async addSelectedTracksToSpotifyPlaylist (playlist) {
+      const tracks = this.selectedTracksToAddToPlaylist(playlist)
       const cleanedFromLocalTracks = tracks.filter(track => !track.uri.startsWith('spotify:local'))
       if (cleanedFromLocalTracks.length === 0) {
         this.$store.dispatch('pushNotification', 'There are no valid tracks to add...')
@@ -176,6 +223,7 @@ export default {
       } else {
         this.$store.dispatch('pushNotification', 'No tracks were added...')
       }
+      this.dialog = false
     },
     async addTracksChunkToSpotifyPlaylist (playlist, allTracks, offset, limit) {
       const tracksChunk = allTracks.slice(offset, offset + limit)
@@ -198,21 +246,22 @@ export default {
       } catch (err) {
         this.apiErrorCallback(err)
       }
-    },
-    spotifyPlaylistsToAddTrack (track) {
-      return this.spotifyImportedPlaylists.filter(playlist => {
-        return playlist !== this.tracklistInDialog && !playlist.tracks.some(tr => areTracksTheSame(tr, track))
-      })
-    },
-    isAddTrackToPlaylistMenuDisabled (track) {
-      return !this.isSpotifyTracklist || this.spotifyPlaylistsToAddTrack(track).length === 0
     }
   }
 }
 </script>
 
 <style lang="scss">
-.v-data-table tbody {
-  text-transform: capitalize;
+.my-dialog {
+  height: 90%;
+  position: relative;
+
+  .v-card {
+    height: 100%;
+  }
+
+  .v-data-table tbody {
+    text-transform: capitalize;
+  }
 }
 </style>
