@@ -57,9 +57,9 @@
                 outlined
                 small
                 v-on="on"
-                @click="toggleExpansion"
+                @click="showAllTracks = !showAllTracks"
               >
-                <v-icon>mdi-unfold-more-horizontal</v-icon>
+                <v-icon>{{ showAllTracks ? 'mdi-unfold-less-horizontal' : 'mdi-unfold-more-horizontal' }}</v-icon>
               </v-btn>
             </template>
             <span>{{ expansionTooltipContent }}</span>
@@ -138,7 +138,7 @@ export default {
       addedTracksToPlaylistResult: 0,
       itemsPerPage: 10,
       defaultItemsPerPage: 10,
-      showScrollToTop: false
+      showAllTracks: false
     }
   },
   computed: {
@@ -189,20 +189,20 @@ export default {
     }
   },
   watch: {
-    showDialog: function (newValue) {
+    showDialog (newValue) {
       this.dialog = newValue
     },
-    dialog: function (newValue, oldValue) {
+    dialog (newValue, oldValue) {
       if (!newValue) {
         this.$store.dispatch('toggleDialog')
         this.selectedTracks = []
       }
+    },
+    showAllTracks (newValue) {
+      this.itemsPerPage = newValue ? this.tracklistInDialog.tracks.length : this.defaultItemsPerPage
     }
   },
   methods: {
-    toggleExpansion () {
-      this.itemsPerPage = this.itemsPerPage > this.defaultItemsPerPage ? this.defaultItemsPerPage : this.tracklistInDialog.tracks.length
-    },
     selectedTracksToAddToPlaylist (playlist) {
       return this.selectedTracks.filter(track => !playlist.tracks.some(tr => areTracksTheSame(tr, track)))
     },
