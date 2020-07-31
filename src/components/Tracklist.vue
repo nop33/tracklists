@@ -9,7 +9,6 @@
         <v-list-item-subtitle>{{ tracklist.tracks.length }} tracks</v-list-item-subtitle>
       </v-list-item-content>
       <v-list-item-action class="flex-row align-center">
-
         <v-menu rounded="b-xl" offset-y>
           <template v-slot:activator="{ attrs, on }">
             <v-btn v-bind="attrs" v-on="on" text class="grey--text">
@@ -32,6 +31,7 @@
               link
               v-if="!isComparisonTracklist"
               @click="selectTracklist()"
+              :disabled="importedTracklists.length < 2"
             >
               <v-list-item-title>
                 <v-icon left>mdi-selection-ellipse-arrow-inside</v-icon>
@@ -56,7 +56,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 import { contentTypes, origins, tracklistTypes, icons, iconColors } from '@/utils/constants'
 
 export default {
@@ -74,6 +74,9 @@ export default {
     ...mapState([
       'selectedTracklistToCompareLeft',
       'selectedTracklistToCompareRight'
+    ]),
+    ...mapGetters([
+      'importedTracklists'
     ]),
     iconColor () {
       return iconColors[this.tracklist.contentType]
