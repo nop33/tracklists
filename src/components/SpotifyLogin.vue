@@ -10,7 +10,9 @@ export default {
     return {
       clientId: 'e5d07ddf1fe64a6cbcd2d14ac0aac87b',
       scope: 'playlist-read-private playlist-modify-private user-library-read user-library-modify',
-      redirectUri: 'http://localhost:8080/spotify-auth-callback',
+      redirectUri: (process.env.NODE_ENV === 'production'
+        ? 'https://tracklists.netlify.app/spotify-auth-callback/'
+        : 'http://localhost:8080/spotify-auth-callback/'),
       state: generateRandomString(16)
     }
   },
