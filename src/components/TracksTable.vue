@@ -34,6 +34,7 @@
               </v-tooltip>
             </template>
             <v-list>
+              <span class="px-4 py-2 d-flex text-subtitle-1 grey--text text--darken-2">Imported playlists:</span>
               <v-list-item
                 link
                 v-for="spotifyPlaylist in spotifyPlaylistsToAddListOfTracks"
