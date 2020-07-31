@@ -43,7 +43,7 @@
       </v-row>
       <v-row>
         <v-col sm="6">
-          <Dialog
+          <TracksTable
             :apiErrorCallback="handleAPIError"
             :reloadPlaylistTracksFromApi="reloadPlaylistTracksFromApi"
           />
@@ -84,7 +84,7 @@ import SpotifyService from '@/services/SpotifyService'
 import VSnackbars from 'v-snackbars'
 import ComparisonRow from '@/components/ComparisonRow.vue'
 import TracklistsCard from '@/components/TracklistsCard.vue'
-import Dialog from '@/components/Dialog.vue'
+import TracksTable from '@/components/TracksTable.vue'
 import Importer from '@/components/Importer.vue'
 
 export default {
@@ -92,7 +92,7 @@ export default {
     VSnackbars,
     ComparisonRow,
     TracklistsCard,
-    Dialog,
+    TracksTable,
     Importer
   },
   data: () => ({

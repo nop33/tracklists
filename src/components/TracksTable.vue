@@ -97,7 +97,7 @@
           {{ item.artists.join(', ')}}
         </template>
         <template v-slot:item.actions="{ item }">
-          <DialogTableRowActions :track="item"/>
+          <TracksTableRowActions :track="item"/>
         </template>
       </v-data-table>
     </v-card>
@@ -112,11 +112,11 @@ import { areTracksTheSame } from '@/utils/utils'
 
 import SpotifyService from '@/services/SpotifyService'
 
-import DialogTableRowActions from '@/components/DialogTableRowActions.vue'
+import TracksTableRowActions from '@/components/TracksTableRowActions.vue'
 
 export default {
   components: {
-    DialogTableRowActions
+    TracksTableRowActions
   },
   props: [
     'apiErrorCallback',
