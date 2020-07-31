@@ -77,7 +77,7 @@
 import { mapState, mapGetters } from 'vuex'
 
 import { cleanTrackName, removeFeaturedArtistFromName, areTracksTheSame } from '@/utils/utils'
-import { GeneratedTracklist } from '@/utils/tracklist'
+import { GeneratedTracklist } from '@/models/tracklists'
 import { contentTypes } from '@/utils/constants'
 
 import SpotifyService from '@/services/SpotifyService'

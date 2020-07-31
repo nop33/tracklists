@@ -32,7 +32,7 @@
 
 <script>
 import Tracklist from '@/components/Tracklist.vue'
-import { TracklistBase } from '@/utils/tracklist'
+import { TracklistBase } from '@/models/tracklists'
 
 export default {
   props: {

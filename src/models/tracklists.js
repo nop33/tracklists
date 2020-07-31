@@ -1,4 +1,4 @@
-import { origins } from './constants'
+import { origins } from '../utils/constants'
 
 class TracklistBase {
   id = ''

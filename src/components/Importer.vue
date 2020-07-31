@@ -52,7 +52,7 @@
 <script>
 import { mapState, mapGetters } from 'vuex'
 
-import { ImportedTracklist } from '@/utils/tracklist'
+import { ImportedTracklist } from '@/models/tracklists'
 import { contentTypes, icons } from '@/utils/constants'
 import { cleanTrackName, removeFeaturedArtistFromName } from '@/utils/utils'
 
