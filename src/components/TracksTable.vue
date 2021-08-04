@@ -94,10 +94,10 @@
         v-model="selectedTracks"
         show-select
       >
-        <template v-slot:item.artists="{ item }">
+        <template v-slot:[`item.artists`]="{ item }">
           {{ item.artists.join(', ')}}
         </template>
-        <template v-slot:item.actions="{ item }">
+        <template v-slot:[`item.actions`]="{ item }">
           <TracksTableRowActions :track="item"/>
         </template>
       </v-data-table>

@@ -40,15 +40,16 @@ function removeFeaturedArtistFromName (track) {
       track.name = afterFeatSubstrings.length === 1 ? trackNameParts[0] : `${trackNameParts[0]} - ${afterFeatSubstrings[1]}`
       return true
     }
+    return false
   })
   return track.name
 }
 
 function generateRandomString (length) {
-  var text = ''
-  var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+  let text = ''
+  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
 
-  for (var i = 0; i < length; i++) {
+  for (let i = 0; i < length; i++) {
     text += possible.charAt(Math.floor(Math.random() * possible.length))
   }
   return text
