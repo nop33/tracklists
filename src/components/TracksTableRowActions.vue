@@ -1,18 +1,30 @@
 <template>
-  <v-btn icon small @click="openMuzonlyTab()">
-    <v-icon small>mdi-open-in-new</v-icon>
+  <v-btn icon @click="copy()">
+    <v-icon>{{ copied ? "mdi-check-bold" : "mdi-content-copy"}}</v-icon>
   </v-btn>
 </template>
 
 <script>
 export default {
   props: ['track'],
+  data: () => ({
+    copied: false
+  }),
   methods: {
-    openMuzonlyTab () {
-      const url = `https://srv.muzonly2.com/#/search?text=${this.track.name} ${this.track.artists.join(' ')}`
-      console.log(encodeURI(url))
-      var win = window.open(encodeURI(url), '_blank')
-      win.focus()
+    async copy () {
+      const self = this
+      const text = `${this.track.name} ${this.track.artists.join(' ')}`
+      const result = await navigator.permissions.query({ name: 'clipboard-write' })
+      if (result.state !== 'granted' && result.state !== 'prompt') {
+        alert('Cannot copy, permissions are not yet granted')
+        return false
+      }
+      navigator.clipboard.writeText(text).then(() => {
+        self.copied = true
+        setTimeout(() => {
+          self.copied = false
+        }, 1000)
+      }, () => console.log('copying failed...'))
     }
   }
 }
