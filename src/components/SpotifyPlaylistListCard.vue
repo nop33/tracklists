@@ -1,6 +1,6 @@
 <template>
   <v-card class="mx-auto text-left">
-    <v-sheet class="pa-4 green lighten-2">
+    <v-sheet class="pa-4 green darken-4">
       <v-text-field
         v-model="spotifyPlaylistSearch"
         label="Search Spotify playlist"

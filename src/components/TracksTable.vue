@@ -1,7 +1,7 @@
 <template>
   <v-dialog v-model="dialog" transition="dialog-bottom-transition" content-class="my-dialog">
     <v-card>
-      <v-toolbar v-if="dialogTitle" color="grey lighten-4" flat>
+      <v-toolbar v-if="dialogTitle" color="lighten-4" flat>
         <v-toolbar-title class="d-flex align-center">
           <v-icon left v-text="tracklistIcon" :color="iconColor"></v-icon>
           {{ dialogTitle }}
@@ -34,7 +34,7 @@
               </v-tooltip>
             </template>
             <v-list>
-              <span class="px-4 py-2 d-flex text-subtitle-1 grey--text text--darken-2">Imported playlists:</span>
+              <span class="px-4 py-2 d-flex text-subtitle-1 text--darken-2">Imported playlists:</span>
               <v-list-item
                 link
                 v-for="spotifyPlaylist in spotifyPlaylistsToAddListOfTracks"

@@ -1,11 +1,11 @@
 <template>
   <v-card outlined>
-    <v-toolbar dense v-if="cardTitle" color="grey lighten-4" flat>
+    <v-toolbar dense v-if="cardTitle" color="lighten-4" flat>
       <v-toolbar-title>{{ cardTitle }}</v-toolbar-title>
     </v-toolbar>
     <v-card-text v-if="tracklists.length === 0 && !tracklist">
       <div class="font-weight-thin font-italic d-flex">
-        <v-icon left color="grey lighten-1">{{ placeholderIcon }}</v-icon>
+        <v-icon left color="lighten-1">{{ placeholderIcon }}</v-icon>
         {{ placeholderText }}
       </div>
     </v-card-text>
