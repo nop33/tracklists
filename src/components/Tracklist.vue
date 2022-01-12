@@ -1,6 +1,6 @@
 <template>
   <v-hover v-slot:default="{ hover }">
-    <v-list-item @click="openDialog()" :class="{'grey lighten-5': hover, 'success lighten-5': highlight}">
+    <v-list-item @click="openDialog()" :class="{'lighten-5': hover, 'success lighten-5': highlight}">
       <v-list-item-icon>
         <v-icon v-text="tracklistIcon" :color="iconColor"></v-icon>
       </v-list-item-icon>
@@ -11,7 +11,7 @@
       <v-list-item-action class="flex-row align-center">
         <v-menu rounded="b-xl" offset-y>
           <template v-slot:activator="{ attrs, on }">
-            <v-btn v-bind="attrs" v-on="on" text class="grey--text">
+            <v-btn v-bind="attrs" v-on="on" text class="">
               Actions
               <v-icon right>mdi-chevron-down</v-icon>
             </v-btn>
