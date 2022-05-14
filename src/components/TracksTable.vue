@@ -98,7 +98,7 @@
           {{ item.artists.join(', ')}}
         </template>
         <template v-slot:[`item.actions`]="{ item }">
-          <TracksTableRowActions :track="item"/>
+          <TracksTableRowActions :track="item" :spotifyPlaylist="spotifyPlaylist" />
         </template>
       </v-data-table>
     </v-card>
@@ -162,6 +162,9 @@ export default {
       return this.tracklistInDialog
         ? this.spotifyImportedPlaylists.filter(playlist => playlist.id !== this.tracklistInDialog.id)
         : []
+    },
+    spotifyPlaylist () {
+      return this.tracklistInDialog ? this.spotifyImportedPlaylists.find(playlist => playlist.id === this.tracklistInDialog.id) : null
     },
     spotifyIcon () {
       return icons.SPOTIFY

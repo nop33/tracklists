@@ -23,5 +23,9 @@ class SpotifyService extends BaseService {
   static addTracksToLiked (idsOfTracksToAdd) {
     return this.PUT(api.my.tracks, { ids: idsOfTracksToAdd })
   }
+
+  static removeTrackFromPlaylist (playlist, trackUri) {
+    return this.DELETE(api.playlistTracks(playlist.id), { tracks: [{ uri: trackUri }] })
+  }
 }
 export default SpotifyService

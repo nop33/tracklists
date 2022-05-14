@@ -28,6 +28,10 @@ class BaseService {
   static PUT (url, data) {
     return axiosInstance.put(url, data)
   }
+
+  static DELETE (url, data) {
+    return axiosInstance.delete(url, { data })
+  }
 }
 
 export default BaseService

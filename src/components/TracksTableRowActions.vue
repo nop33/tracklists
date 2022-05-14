@@ -1,14 +1,22 @@
 <template>
-  <v-btn icon @click="copy()">
-    <v-icon>{{ copied ? "mdi-check-bold" : "mdi-content-copy"}}</v-icon>
-  </v-btn>
+  <div>
+    <v-btn icon @click="copy()">
+      <v-icon>{{ copied ? "mdi-check-bold" : "mdi-content-copy"}}</v-icon>
+    </v-btn>
+    <v-btn v-if="spotifyPlaylist && showDeleteBtn" icon @click="removeFromPlaylist()" class="mx-10">
+      <v-icon>{{ "mdi-delete-outline" }}</v-icon>
+    </v-btn>
+  </div>
 </template>
 
 <script>
+import SpotifyService from '../services/SpotifyService'
+
 export default {
-  props: ['track'],
+  props: ['track', 'spotifyPlaylist', 'onSuccessfulRemoval'],
   data: () => ({
-    copied: false
+    copied: false,
+    showDeleteBtn: true
   }),
   methods: {
     async copy () {
@@ -25,6 +33,16 @@ export default {
           self.copied = false
         }, 1000)
       }, () => console.log('copying failed...'))
+    },
+    async removeFromPlaylist () {
+      try {
+        const response = await SpotifyService.removeTrackFromPlaylist(this.spotifyPlaylist, this.track.uri)
+        if (response.status === 200) {
+          this.showDeleteBtn = false
+        }
+      } catch (e) {
+        console.error(e)
+      }
     }
   }
 }
